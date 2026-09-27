@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tagline">ग्राहक से कमीशन तक - आपका सेतु</string>
+
+    <string name="welcome_choose_language">भाषा चुनें</string>
+    <string name="disclaimer_title">स्वतंत्र, अनौपचारिक ऐप</string>
+    <string name="disclaimer_body">एजेंट सेतु एक स्वतंत्र, अनौपचारिक ऐप है। इसे इंडिया पोस्ट, डाक विभाग, संचार मंत्रालय या इंडिया पोस्ट पेमेंट्स बैंक ने न बनाया है, न इसका समर्थन, प्रायोजन या संचालन करते हैं। यह किसी भी विभागीय सिस्टम से नहीं जुड़ता। ऐप में दी गई योजना जानकारी, ब्याज दरें और कमीशन नियम केवल निजी रिकॉर्ड और मार्गदर्शन के लिए हैं; हमेशा नवीनतम आधिकारिक आदेश और अपने डाकघर से पुष्टि करें।</string>
+    <string name="disclaimer_ack">मैंने इसे पढ़ और समझ लिया है</string>
+    <string name="action_continue">आगे बढ़ें</string>
+
+    <string name="home_title">आज</string>
+    <string name="home_placeholder">आपके फ़ॉलो-अप, देय किस्तें और मैच्योरिटी यहाँ दिखेंगी।</string>
+    <string name="home_data_private">आपका सारा डेटा इसी फ़ोन में, एन्क्रिप्टेड रहता है।</string>
+    <string name="about_version">वर्शन %1$s</string>
+</resources>

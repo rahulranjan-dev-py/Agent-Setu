@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Agent Setu</string>
+    <string name="tagline">From customer to commission - your bridge</string>
+
+    <!-- Welcome / disclaimer (text from docs/DISCLAIMER.md) -->
+    <string name="welcome_choose_language">Choose language</string>
+    <string name="language_hindi" translatable="false">हिंदी</string>
+    <string name="language_english" translatable="false">English</string>
+    <string name="disclaimer_title">Independent, unofficial app</string>
+    <string name="disclaimer_body">Agent Setu is an independent, unofficial application. It is not developed, endorsed, sponsored or operated by India Post, the Department of Posts, the Ministry of Communications or India Post Payments Bank. It does not connect to any departmental system. Scheme information, rates and commission rules in the app are for personal record-keeping and guidance only; always verify with the latest official orders and your Post Office.</string>
+    <string name="disclaimer_ack">I have read and understood this</string>
+    <string name="action_continue">Continue</string>
+
+    <!-- Home (placeholder until the core MVP screens are built) -->
+    <string name="home_title">Today</string>
+    <string name="home_placeholder">Your follow-ups, dues and maturities will appear here.</string>
+    <string name="home_data_private">All your data stays on this phone, encrypted.</string>
+    <string name="about_version">Version %1$s</string>
+</resources>

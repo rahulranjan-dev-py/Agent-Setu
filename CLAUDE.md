@@ -9,6 +9,15 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
   says "go ahead". Approval for one step does not cover the next one.
 - Develop on the branch named for the session and push there; do not open PRs unless asked.
 
+## Build and test
+
+- `./gradlew :core:test`: pure-Kotlin unit tests, including validation of `data/seed/*.json`.
+- `./gradlew :app:assembleDebug`: needs the Android SDK and Google Maven (dl.google.com). If those
+  are unreachable (as in some cloud sandboxes), build `core` alone and rely on the GitHub Actions run
+  to compile `app`.
+- Kotlin package / namespace is `app.agentsetu`; `applicationId` is a placeholder until the owner
+  picks the final package name.
+
 ## Guardrails (never break these in code, text or assets)
 
 - No departmental credentials, and no connection to or scraping of any departmental system
