@@ -1,0 +1,31 @@
+# Agent Setu: notes for Claude
+
+Unofficial, offline Android app (Kotlin, Jetpack Compose) that helps postal staff and GDS track
+customers, renewals, maturities and commission. Hindi + English. Product plan: `docs/ROADMAP.md`.
+
+## Working agreement with the owner
+
+- **Ask before each step.** Report findings or a plan first, and start work only after the owner
+  says "go ahead". Approval for one step does not cover the next one.
+- Develop on the branch named for the session and push there; do not open PRs unless asked.
+
+## Guardrails (never break these in code, text or assets)
+
+- No departmental credentials, and no connection to or scraping of any departmental system
+  (Finacle, CSI/McCamish, IPPB, UIDAI, etc.).
+- No full Aadhaar, PAN or bank/policy numbers: store at most the last 4 digits (`refLast4`).
+- No payments, and no handling of money.
+- No ads, analytics, tracking or crash SDKs. Errors go through the manual "Send error report" flow
+  (see `docs/DECISIONS.md`).
+- No India Post / DoP / IPPB logos, emblems, red-and-yellow colours, or words like "official" or
+  "authorised". The disclaimer in `docs/DISCLAIMER.md` must appear in the app.
+- Permissions: notifications only (plus "install unknown apps" only if in-app APK download is built).
+- **Never hard-code a commission or interest rate.** Rates live in the editable `CommissionRule` /
+  `InterestRate` tables, seeded from `data/seed/*.sample.json`, with `effectiveFrom` and `orderRef`.
+- Never commit a keystore, key passwords, `local.properties` or any real customer data.
+
+## Data conventions
+
+- Every entity has a UUID `id`, `createdAt`, `updatedAt` and a soft-delete `deleted` flag (sync-ready).
+- Changing a rate closes the old rule (`effectiveTo`) and inserts a new one; history is never overwritten.
+- Numbers in Indian format (1,00,000); dates DD-MM-YYYY; every UI string in both `values/` and `values-hi/`.
