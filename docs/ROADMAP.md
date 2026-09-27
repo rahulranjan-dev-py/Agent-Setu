@@ -100,8 +100,9 @@ their earnings, it waits for v1.5.
 - DPDP Act 2023: minimum data, consent note, per-customer delete, "Delete all my data", and a
   Hindi + English privacy notice on GitHub Pages ([draft](PRIVACY.md)).
 - Android developer verification for sideloaded apps: register before global enforcement in 2027.
-- Permissions: notifications only (plus "install unknown apps" if in-app APK download is added).
-  No SMS, call log or location.
+- Permissions: notifications is the only one users are asked for (plus "install unknown apps" if
+  in-app APK download is added). WorkManager adds install-time permissions without a prompt (wake
+  lock, boot completed, network state). No SMS, call log, contacts or location.
 - Scheme text written in our own words from public sources, dated, with a "rules may change" note.
 
 ## 8. Technology

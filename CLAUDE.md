@@ -28,7 +28,9 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
   (see `docs/DECISIONS.md`).
 - No India Post / DoP / IPPB logos, emblems, red-and-yellow colours, or words like "official" or
   "authorised". The disclaimer in `docs/DISCLAIMER.md` must appear in the app.
-- Permissions: notifications only (plus "install unknown apps" only if in-app APK download is built).
+- Permissions: the only one users are asked for is notifications (plus "install unknown apps" only
+  if in-app APK download is built). WorkManager's install-time permissions (wake lock, boot
+  completed, network state) are accepted; never add SMS, call log, contacts, location or storage.
 - **Never hard-code a commission or interest rate.** Rates live in the editable `CommissionRule` /
   `InterestRate` tables, seeded from `data/seed/*.sample.json`, with `effectiveFrom` and `orderRef`.
 - Never commit a keystore, key passwords, `local.properties` or any real customer data.

@@ -59,9 +59,11 @@ data class ProductEntity(
 data class LeadEntity(
     @PrimaryKey override val id: String = newId(),
     val customerId: String,
+    /** Empty for a general follow-up not yet tied to a product. */
     val productId: String,
     val stage: LeadStage,
     val nextFollowUp: LocalDate?,
+    /** Where the lead came from, or the user's note about the follow-up. */
     val source: String = "",
     val lostReason: String? = null,
     override val createdAt: Long,

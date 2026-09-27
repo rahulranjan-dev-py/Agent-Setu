@@ -2,7 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- No permissions yet. Notifications are added with the reminders feature; nothing else is ever requested. -->
+    <!--
+        The only permission the user is ever asked for: notifications, for reminders.
+        WorkManager also merges in install-time permissions the user never sees a prompt for
+        (wake lock, boot completed, network state) so daily reminders survive restarts; they give
+        no access to personal data.
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".AgentSetuApplication"

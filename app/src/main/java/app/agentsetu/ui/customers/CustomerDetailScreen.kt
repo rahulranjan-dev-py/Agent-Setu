@@ -1,8 +1,6 @@
 package app.agentsetu.ui.customers
 
-import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -22,11 +21,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -34,26 +38,32 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import app.agentsetu.R
+import app.agentsetu.core.format.IndianFormat
 import app.agentsetu.core.input.MobileNumber
 import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.db.HoldingEntity
 import app.agentsetu.data.db.ProductEntity
+import app.agentsetu.data.repo.ReminderRepository
 import app.agentsetu.ui.common.AppScaffold
+import app.agentsetu.ui.common.FormField
 import app.agentsetu.ui.common.display
 import app.agentsetu.ui.common.labelRes
 import app.agentsetu.ui.common.localized
+import app.agentsetu.ui.common.openUri
 import app.agentsetu.ui.common.rupees
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class HoldingView(val holding: HoldingEntity, val product: ProductEntity?)
 
 @HiltViewModel
 class CustomerDetailViewModel @Inject constructor(
     db: AgentSetuDatabase,
+    private val reminders: ReminderRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val customerId: String = checkNotNull(savedStateHandle["id"])
@@ -65,6 +75,13 @@ class CustomerDetailViewModel @Inject constructor(
         val byId = products.associateBy { it.id }
         holdings.map { HoldingView(it, byId[it.productId]) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Returns false for an unreadable date. */
+    fun addFollowUp(dateText: String, note: String): Boolean {
+        val date = IndianFormat.parseDate(dateText) ?: return false
+        viewModelScope.launch { reminders.addFollowUp(customerId, date, note) }
+        return true
+    }
 }
 
 @Composable
@@ -77,15 +94,8 @@ fun CustomerDetailScreen(
     val customer by viewModel.customer.collectAsStateWithLifecycle()
     val holdings by viewModel.holdings.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var addingFollowUp by remember { mutableStateOf(false) }
     val c = customer ?: return
-
-    fun open(uri: String, action: String) {
-        try {
-            context.startActivity(Intent(action, Uri.parse(uri)))
-        } catch (_: ActivityNotFoundException) {
-            // No dialler/browser on this device; nothing else to do.
-        }
-    }
 
     AppScaffold(
         title = c.name,
@@ -115,14 +125,14 @@ fun CustomerDetailScreen(
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedButton(
-                            onClick = { open(MobileNumber.dialUri(mobile), Intent.ACTION_DIAL) },
+                            onClick = { context.openUri(MobileNumber.dialUri(mobile), Intent.ACTION_DIAL) },
                             modifier = Modifier.heightIn(min = 52.dp),
                         ) {
                             Icon(Icons.Filled.Call, contentDescription = null)
                             Text(stringResource(R.string.customer_call), modifier = Modifier.padding(start = 8.dp))
                         }
                         OutlinedButton(
-                            onClick = { open(MobileNumber.whatsAppUri(mobile), Intent.ACTION_VIEW) },
+                            onClick = { context.openUri(MobileNumber.whatsAppUri(mobile)) },
                             modifier = Modifier.heightIn(min = 52.dp),
                         ) {
                             Text(stringResource(R.string.customer_whatsapp))
@@ -140,6 +150,16 @@ fun CustomerDetailScreen(
                     Text(stringResource(R.string.customer_add_business))
                 }
             }
+            item {
+                OutlinedButton(
+                    onClick = { addingFollowUp = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 52.dp),
+                ) {
+                    Text(stringResource(R.string.followup_add))
+                }
+            }
             item { Text(stringResource(R.string.customer_holdings), style = MaterialTheme.typography.titleMedium) }
             if (holdings.isEmpty()) {
                 item { Text(stringResource(R.string.customer_no_holdings), style = MaterialTheme.typography.bodyLarge) }
@@ -147,6 +167,42 @@ fun CustomerDetailScreen(
             items(holdings, key = { it.holding.id }) { view -> HoldingCard(view) }
         }
     }
+
+    if (addingFollowUp) {
+        FollowUpDialog(
+            onDismiss = { addingFollowUp = false },
+            onSave = { date, note -> if (viewModel.addFollowUp(date, note)) addingFollowUp = false },
+        )
+    }
+}
+
+@Composable
+private fun FollowUpDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
+    var date by remember { mutableStateOf(IndianFormat.date(java.time.LocalDate.now().plusDays(1))) }
+    var note by remember { mutableStateOf("") }
+    var tried by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.followup_add)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                FormField(
+                    date, { date = it }, stringResource(R.string.followup_date),
+                    error = if (tried && IndianFormat.parseDate(date) == null) stringResource(R.string.error_date) else null,
+                    supporting = stringResource(R.string.date_hint),
+                    keyboardType = KeyboardType.Number,
+                )
+                FormField(note, { note = it }, stringResource(R.string.followup_note))
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                tried = true
+                onSave(date, note)
+            }) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
 }
 
 @Composable

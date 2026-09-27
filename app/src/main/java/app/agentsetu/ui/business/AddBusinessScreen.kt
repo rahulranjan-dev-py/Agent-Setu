@@ -53,6 +53,7 @@ import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.db.HoldingEntity
 import app.agentsetu.data.db.ProductEntity
 import app.agentsetu.data.repo.CommissionRepository
+import app.agentsetu.data.repo.ReminderRepository
 import app.agentsetu.ui.common.AppScaffold
 import app.agentsetu.ui.common.FormField
 import app.agentsetu.ui.common.RadioGroup
@@ -82,6 +83,7 @@ sealed interface Preview {
 class AddBusinessViewModel @Inject constructor(
     private val db: AgentSetuDatabase,
     private val commission: CommissionRepository,
+    private val reminders: ReminderRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val customerId: String = checkNotNull(savedStateHandle["customerId"])
@@ -228,6 +230,7 @@ class AddBusinessViewModel @Inject constructor(
                 // First premium / deposit goes straight into the ledger; later ones come with reminders.
                 query()?.let { commission.recordExpected(holding.id, YearMonth.from(start), it, base) }
             }
+            reminders.regenerate()
             onSaved()
         }
     }

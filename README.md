@@ -11,10 +11,10 @@ and commission. Hindi + English. Free, no ads.
 
 ## Status
 
-Step D: first working screens. After the disclaimer and a short profile (staff type), users can add
-customers, record business with a live expected-commission preview, track commission month by month
-and mark it received, and view, change and verify rates in Settings. Reminders, calculators, scheme
-cards, app lock, backup and the update check are still to come (see `docs/ROADMAP.md`).
+Step E: reminders. The Today screen lists overdue and due premiums, RD instalments, follow-ups and
+maturities in the next 30 days, with Call / WhatsApp / Done. A daily on-phone job sends one summary
+notification. Marking a premium collected adds its expected commission to the ledger. Still to come:
+app lock, encrypted backup, error report, calculators, scheme cards and the update check.
 
 ## Build
 

@@ -32,7 +32,8 @@ class CommissionRepository @Inject constructor(
 
     /**
      * Records the expected commission for one holding and month. The rule id and rate are copied
-     * into the entry, so later rate changes never rewrite the ledger. With no (or no single) rule,
+     * into the entry, so later rate changes never rewrite the ledger. If the month already has an
+     * entry for this holding, that entry is returned unchanged. With no (or no single) rule,
      * the entry is saved as NO_RULE with no amount, and the user is asked to add or fix a rule.
      */
     suspend fun recordExpected(
@@ -41,6 +42,8 @@ class CommissionRepository @Inject constructor(
         query: CommissionQuery,
         baseAmount: BigDecimal,
     ): CommissionEntryEntity {
+        // One entry per holding per month: marking the same premium twice must not double-count.
+        db.commissionEntryDao().find(holdingId, period.toString())?.let { return it }
         val now = System.currentTimeMillis()
         val result = preview(query, baseAmount)
         val found = result as? CommissionResult.Expected

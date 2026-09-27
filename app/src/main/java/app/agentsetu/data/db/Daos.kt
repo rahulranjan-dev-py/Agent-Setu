@@ -44,6 +44,9 @@ interface ProductDao {
     @Query("SELECT * FROM product")
     fun observeAll(): Flow<List<ProductEntity>>
 
+    @Query("SELECT * FROM product")
+    suspend fun all(): List<ProductEntity>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIgnore(products: List<ProductEntity>)
 
@@ -61,6 +64,12 @@ interface LeadDao {
 
     @Query("SELECT * FROM sales_lead WHERE deleted = 0 AND stage NOT IN ('ISSUED', 'LOST') AND nextFollowUp <= :until")
     suspend fun followUpsDueBy(until: LocalDate): List<LeadEntity>
+
+    @Query("SELECT * FROM sales_lead WHERE deleted = 0 AND stage NOT IN ('ISSUED', 'LOST')")
+    suspend fun open(): List<LeadEntity>
+
+    @Query("SELECT * FROM sales_lead WHERE id = :id")
+    suspend fun get(id: String): LeadEntity?
 
     @Upsert
     suspend fun upsert(lead: LeadEntity)
@@ -124,6 +133,9 @@ interface CommissionEntryDao {
     @Query("SELECT * FROM commission_entry WHERE id = :id")
     suspend fun get(id: String): CommissionEntryEntity?
 
+    @Query("SELECT * FROM commission_entry WHERE holdingId = :holdingId AND period = :period")
+    suspend fun find(holdingId: String, period: String): CommissionEntryEntity?
+
     /** Ledger lines for one month with the customer and product names the screen shows. */
     @Query(
         "SELECT e.id, e.period, e.policyYear, e.status, e.baseAmountPaise, e.expectedPaise, e.receivedPaise, " +
@@ -143,6 +155,19 @@ interface CommissionEntryDao {
 
 @Dao
 interface ReminderDao {
+    @Query("SELECT * FROM reminder WHERE id = :id")
+    suspend fun get(id: String): ReminderEntity?
+
+    /**
+     * Open reminders up to [until] with the names the Today screen and notifications show.
+     * A reminder whose customer was deleted, or whose policy/account is no longer active, is hidden.
+     */
+    @Query(REMINDER_ROWS)
+    fun observeOpen(until: LocalDate): Flow<List<ReminderRow>>
+
+    @Query(REMINDER_ROWS)
+    suspend fun open(until: LocalDate): List<ReminderRow>
+
     @Query("SELECT * FROM reminder WHERE deleted = 0 AND done = 0 AND dueDate <= :until ORDER BY dueDate")
     fun observeOpenDueBy(until: LocalDate): Flow<List<ReminderEntity>>
 
@@ -153,6 +178,20 @@ interface ReminderDao {
     @Upsert
     suspend fun upsert(reminder: ReminderEntity)
 }
+
+private const val REMINDER_ROWS =
+    "SELECT r.id, r.type, r.subjectId, r.dueDate, c.id AS customerId, c.name AS customerName, c.mobile AS mobile, " +
+        "p.nameEn AS productNameEn, p.nameHi AS productNameHi, h.instalmentPaise AS instalmentPaise, " +
+        "h.amountPaise AS amountPaise, l.source AS note " +
+        "FROM reminder r " +
+        "LEFT JOIN holding h ON h.id = r.subjectId AND r.type != 'FOLLOW_UP' " +
+        "LEFT JOIN sales_lead l ON l.id = r.subjectId AND r.type = 'FOLLOW_UP' " +
+        "JOIN customer c ON c.id = COALESCE(h.customerId, l.customerId) " +
+        "LEFT JOIN product p ON p.id = COALESCE(h.productId, l.productId) " +
+        "WHERE r.deleted = 0 AND r.done = 0 AND r.dueDate <= :until AND c.deleted = 0 " +
+        "AND (h.id IS NULL OR (h.deleted = 0 AND h.status = 'ACTIVE')) " +
+        "AND (l.id IS NULL OR l.deleted = 0) " +
+        "ORDER BY r.dueDate, c.name COLLATE NOCASE"
 
 @Dao
 interface TargetDao {

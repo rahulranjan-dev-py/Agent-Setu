@@ -92,7 +92,12 @@ fun MainNavigation() {
         },
     ) { padding ->
         NavHost(nav, startDestination = Routes.TODAY, modifier = Modifier.padding(padding)) {
-            composable(Routes.TODAY) { HomeScreen() }
+            composable(Routes.TODAY) {
+                HomeScreen(
+                    onOpenCustomer = { nav.navigate(Routes.customer(it)) },
+                    onAddBusiness = { nav.navigate(Routes.business(it)) },
+                )
+            }
             composable(Routes.CUSTOMERS) {
                 CustomersScreen(
                     onAdd = { nav.navigate(Routes.CUSTOMER_NEW) },
