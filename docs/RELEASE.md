@@ -3,9 +3,13 @@
 How to publish a version of Agent Setu (package `in.agentsetu.app`) as a signed APK through GitHub
 Releases and the WhatsApp group. Follow every step, every time. Only the owner publishes releases.
 
-> Do all of this on **your own computer**, never an office machine (roadmap §7.1). The signing key
-> and its passwords must **never** go into this repository, WhatsApp, email or any cloud chat.
-> This repository is public.
+> Do all of this on **your own computer or your own phone**, never an office machine (roadmap §7.1).
+> The signing key and its passwords must **never** go into this repository, GitHub, WhatsApp, email
+> or any cloud chat. This repository is public.
+>
+> Two ways to release, same key either way:
+> - **Computer:** build and sign locally (sections 1–3).
+> - **Phone with Termux:** GitHub builds the unsigned release; you sign it on the phone (section 6).
 
 ## 1. One time only: create the signing key
 
@@ -94,3 +98,85 @@ Agent Setu is an independent, unofficial app - not an India Post / DoP / IPPB pr
 | "App not installed" when updating | The APK was signed with a different key, or `versionCode` did not go up. Never sign with a different key. |
 | Signing key lost | No more updates are possible for existing installs. Users must back up, uninstall and install a new build signed with a new key (and restore). This is why step 1.4 matters. |
 | Someone circulates a modified APK | Remind the group: official source only, check the fingerprint. Report it in the group. |
+
+## 6. Releasing from a phone with Termux
+
+The Android build tools do not run in Termux, so GitHub builds the app and the phone only holds the
+key and signs. The key never leaves the phone except as your offline backups.
+
+### 6.1 One time: set up Termux and create the key
+
+1. Install **Termux from F-Droid or its GitHub releases page**, not the Play Store (that version is
+   outdated and its packages fail).
+2. Install Java (for `keytool`) and the signing tool:
+
+   ```bash
+   pkg update && pkg upgrade
+   pkg install openjdk-17 apksigner unzip
+   ```
+
+3. Create the key inside Termux's private folder, which other apps cannot read:
+
+   ```bash
+   mkdir -p ~/AgentSetuKeys && cd ~/AgentSetuKeys
+   keytool -genkeypair -v -storetype PKCS12 \
+     -keystore agentsetu-release.jks \
+     -alias agentsetu -keyalg RSA -keysize 4096 -validity 10000
+   chmod 600 agentsetu-release.jks
+   ```
+
+   Enter a long password twice and **write it on paper**. Your own name is enough for the name
+   questions; press Enter for the rest and type `yes`. It can take a minute on a slow phone.
+4. Note the fingerprint (pin it in the WhatsApp group; users compare it in *Settings → About*):
+
+   ```bash
+   keytool -list -v -keystore ~/AgentSetuKeys/agentsetu-release.jks -alias agentsetu | grep SHA256
+   ```
+
+5. **Back it up twice, offline:**
+
+   ```bash
+   termux-setup-storage      # allow storage access, once
+   cp ~/AgentSetuKeys/agentsetu-release.jks ~/storage/shared/Download/
+   ```
+
+   With the Files app, move the file from *Download* to a **pen drive (OTG)**, and make a second copy
+   on another pen drive or a home computer. **Then delete it from Download**: any app with storage
+   access can read that folder. Keep the password paper with the pen drive, not on the phone.
+
+   If the phone is lost, reset, or Termux is uninstalled, `~/AgentSetuKeys` is gone. Without these
+   backups, no update can ever be released for existing users.
+
+### 6.2 Every release
+
+1. **Bump the version** on GitHub: open `app/build.gradle.kts` in the browser, tap the pencil,
+   raise `versionCode` by 1 and set `versionName`, then *Commit changes*. This starts a build.
+   (To rebuild without changes: *Actions → Build → Run workflow*, or *Re-run jobs* on an old run.)
+2. **Wait for the green tick** on *Actions → Build*, open the run, and download the artifact
+   **AgentSetu-release-unsigned** (use Chrome, logged in; the GitHub app cannot download
+   artifacts). It is kept for 30 days.
+3. **Unzip and sign** (apksigner asks for the key password; never put it in a script):
+
+   ```bash
+   cd ~/storage/shared/Download
+   unzip -o AgentSetu-release-unsigned.zip
+   apksigner sign --ks ~/AgentSetuKeys/agentsetu-release.jks --ks-key-alias agentsetu \
+     --out AgentSetu-vX.Y.Z.apk app-release-unsigned.apk
+   ```
+
+4. **Check the signature and get the checksum:**
+
+   ```bash
+   apksigner verify --print-certs AgentSetu-vX.Y.Z.apk | grep -i sha-256
+   sha256sum AgentSetu-vX.Y.Z.apk
+   ```
+
+   The certificate SHA-256 must match the fingerprint from 6.1 step 4. The `sha256sum` value goes
+   in the GitHub Release, `version.json` and the WhatsApp post.
+5. **Clean up** the unsigned files: `rm app-release-unsigned.apk AgentSetu-release-unsigned.zip`.
+6. Continue with section 3 from step 6 (test the update on two phones, GitHub Release, update
+   `release/version.json` on `main`, WhatsApp post).
+
+The unsigned artifact is safe to leave on GitHub: Android refuses to install an unsigned APK, and
+only your key can produce a copy with your fingerprint.
+

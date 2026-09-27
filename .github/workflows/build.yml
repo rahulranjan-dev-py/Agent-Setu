@@ -3,6 +3,8 @@ name: Build
 on:
   push:
   pull_request:
+  # "Run workflow" button on the Actions page: build without changing any file.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -27,14 +29,22 @@ jobs:
       - name: Debug APK
         run: ./gradlew --no-daemon :app:assembleDebug
 
-      # Unsigned: proves the minified (R8) release build still compiles. Real releases are
-      # built and signed on the owner's own computer (docs/RELEASE.md).
-      - name: Release build check (unsigned)
+      # Unsigned minified (R8) release build. The owner signs it with the release key on their own
+      # phone (Termux) or computer (docs/RELEASE.md); the key never comes to GitHub.
+      - name: Release build (unsigned)
         run: ./gradlew --no-daemon :app:assembleRelease
 
-      # Debug build only, for testers; never a release-signed APK (the keystore is never in CI).
+      # Test build for testers (installable, debug-signed).
       - uses: actions/upload-artifact@v4
         with:
           name: AgentSetu-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
+
+      # Unsigned release build: cannot be installed until the owner signs it. Never signed here.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AgentSetu-release-unsigned
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
+          retention-days: 30

@@ -16,7 +16,8 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
   are unreachable (as in some cloud sandboxes), build `core` alone and rely on the GitHub Actions run
   to compile `app`.
 - Kotlin package / namespace is `app.agentsetu`; `applicationId` is `in.agentsetu.app` (final, never
-  change it). Releases: follow `docs/RELEASE.md`; signing happens only on the owner's computer.
+  change it). Releases: follow `docs/RELEASE.md`; signing happens only on the owner's own computer or phone
+  (Termux). CI publishes debug and unsigned release APKs and must never receive the release key.
 
 ## Guardrails (never break these in code, text or assets)
 
