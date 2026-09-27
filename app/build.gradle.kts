@@ -36,6 +36,15 @@ android {
     }
 
     signingConfigs {
+        // Fixed, PUBLIC test key (committed on purpose) so every test build from GitHub can be
+        // installed over the previous one. It signs only the ".debug" test app; it can never sign
+        // or update the real app, which uses the owner's private release key.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
         if (keystoreProps.isNotEmpty()) {
             create("release") {
                 storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
