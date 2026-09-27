@@ -25,8 +25,14 @@ android {
         applicationId = "in.agentsetu.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
+
+        // Only ARM phones: every Android 8+ phone this app targets is ARM. Leaving out the x86
+        // copies of the encryption library (for emulators) saves about 10 MB.
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
 
         // Where the app reads release/version.json for the update check. Override with
         // -Pagentsetu.updateUrl=... (e.g. a GitHub Pages address if this repository is private).
@@ -74,6 +80,13 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    // Store native libraries compressed inside the APK (about 5 MB smaller to download and share on
+    // WhatsApp); Android unpacks them once at install time.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
     buildFeatures {
         compose = true
