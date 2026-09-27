@@ -9,6 +9,13 @@ and commission. Hindi + English. Free, no ads.
 > Post, the Department of Posts, the Ministry of Communications or India Post Payments Bank. It does
 > not connect to any departmental system.
 
+## Download
+
+Get the app only from **[Releases](https://github.com/rahulranjan-dev-py/Agent-Setu/releases)** or
+the official Agent Setu WhatsApp group. Each release lists the APK's SHA-256 checksum and the
+signing-key fingerprint; after installing, compare the fingerprint in *Settings → About*. A copy with
+a different fingerprint is not genuine. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+
 ## Status
 
 Step G: the MVP feature set from the roadmap is in place: customers and business with a live
@@ -39,6 +46,7 @@ must never be committed.
 | `core/` | Pure Kotlin: commission rule matching and calculation, rate revision, product catalogue, Indian number/date formatting, seed-file validation |
 | `data/seed/` | Editable sample rate tables, bundled into the APK as assets |
 | `release/version.json` | What the in-app update check reads; update it with every release |
+| `release/notes/` | Release notes (Hindi + English) to paste into each GitHub Release |
 | `docs/` | Roadmap, decisions, rate research, disclaimer, privacy notice |
 
 ## Documents
