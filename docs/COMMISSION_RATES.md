@@ -7,7 +7,7 @@
 
 Seed files (loaded on first install, then fully editable):
 
-- [`data/seed/commission_rules.sample.json`](../data/seed/commission_rules.sample.json): 19 rules
+- [`data/seed/commission_rules.sample.json`](../data/seed/commission_rules.sample.json): 21 rules
 - [`data/seed/interest_rates.sample.json`](../data/seed/interest_rates.sample.json): 12 scheme rates
 
 Every record has `isSample: true`, `verified: false`, a `confidence` level (`high` / `medium` /
@@ -66,7 +66,7 @@ not agents. The seed attaches them only to the `SAS_AGENT` and `MPKBY_AGENT` sta
 | Item | Rate | Confidence |
 |---|---|---|
 | 5-year TD opened at BO | 2% of deposit | **low** |
-| 1/2/3-year TD | reported as 0.5%–1.0% (seed uses 0.5%) | **low** |
+| 1/2/3-year TD | reported as 0.5%–1.0% (seed has one rule per term, each 0.5%) | **low** |
 | SB net accretion | 1% (excludes March deposits, includes March withdrawals) | **low** |
 
 Not payable if agency commission has already been paid on the same deposit. These figures come
@@ -116,16 +116,37 @@ The app never hard-codes a rate. On first launch it loads these files into the R
 
 ### Rule matching
 
-For a holding, the ledger picks the rule where:
-`productCode` matches, the user's `staffType` is in `staffTypes`, `policyCategory` matches (or is
-`ANY`), the premium-paying term falls in `[minPremiumTermYears, maxPremiumTermYears]` (null = open),
-`yearOfPolicy` matches (1 = procurement, 2 = any renewal year), and the transaction date falls in
-`[effectiveFrom, effectiveTo]`. If more than one rule matches, the most specific one wins. If none
-matches, the entry shows "No rule - add one", never a guessed amount.
+Product codes are shared by the product catalogue, the rules and the interest-rate table:
+`PLI`, `RPLI`, `SB`, `TD_1Y`, `TD_2Y`, `TD_3Y`, `TD_5Y`, `RD_5Y`, `MIS`, `NSC`, `KVP`, `SCSS`,
+`PPF`, `SSA`. A rule's code can also name a family: a `TD` rule covers every `TD_…` product.
+
+For a transaction, a rule applies when all of these hold:
+
+- its product code equals the product's code, or is its family (`TD` → `TD_5Y`);
+- its `policyCategory` is `ANY` or equals the policy's (`AEA` / `NON_AEA`, PLI only);
+- the user's staff type is in its `staffTypes` (a GDS BPM also gets every `GDS` rule);
+- the premium-paying term falls inside its band (open ends allowed; a banded rule needs the term);
+- `yearOfPolicy` fits: 1 = first-year premium, 2 = any renewal year, empty = not year-based;
+- the transaction date is within `effectiveFrom`–`effectiveTo`, both inclusive.
+
+If several apply, the most specific wins: exact product code, then a named policy category, then a
+term band, then a policy year. If two are still equally specific (usually two overlapping rules the
+user entered), the app shows both and asks, and never picks one silently. If none applies, the entry
+is saved as **No rule** with no amount.
+
+Each ledger entry stores the rule id and rate it used, so a later rate change never rewrites entries
+already recorded. Tests in `core/src/test` check all of this against the bundled seed, including
+that no product, staff type, category, term and year combination gives an ambiguous answer.
 
 > Data-model note: the roadmap lists a single `staffType` per rule. The seed uses a `staffTypes`
 > list so one rule can cover all PLI sales force, and adds `policyCategory`, the term band,
 > `confidence`, `verified`, `isSample` and `sourceUrls`.
+
+### App updates and sample rates
+
+On each app update the bundled seed is compared with the database. New sample rows are added.
+Sample rows the user never touched are refreshed if the bundled copy is newer, so a corrected sample
+rate reaches everyone. Rows the user edited, verified, revised or deleted are never changed.
 
 ## Sources
 

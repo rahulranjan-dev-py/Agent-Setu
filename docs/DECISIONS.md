@@ -4,6 +4,9 @@ Decisions made after roadmap v1.2. Newest first.
 
 | Date | Decision | Detail |
 |---|---|---|
+| 28-09-2026 | **Data model and commission engine (step C)** | All 10 tables from the roadmap in Room (schema version 2; version 1 existed only in pre-release debug builds and is dropped on upgrade). Money is stored as paise, rates as decimal text, dates as ISO text. Commission logic lives in `core` and is unit-tested: rule matching, amount calculation (rounded half-up to the paisa), and rate revision without losing history. Details in [COMMISSION_RATES.md](COMMISSION_RATES.md#rule-matching). |
+| 28-09-2026 | **One product code per product** | Codes (`PLI`, `TD_5Y`, …) are shared by catalogue, rules and interest rates; a rule can name a family (`TD`). PLI rules carry AEA / non-AEA in `policyCategory` instead of in the code. The BPM 1/2/3-year TD rule was split into one rule per term. |
+| 28-09-2026 | **Guardrail enforced in the data layer** | A holding cannot be created with anything but exactly 4 digits (or nothing) in `refLast4`; a full policy/account number is rejected, not trimmed. There are no columns for Aadhaar, PAN or account numbers. |
 | 27-09-2026 | **Project structure (step B)** | Two modules: `core` (pure Kotlin, testable with only a JDK) and `app` (Android). Code package `app.agentsetu` is kept separate from `applicationId`, which is a placeholder (`in.agentsetu.app`) until the final package name is chosen. Library versions are a mid-2025 set known to work together (AGP 8.9.3, Kotlin 2.1.21, Compose BOM 2025.05.01, Room 2.7.1, Hilt 2.56.2, SQLCipher 4.9.0, compile/target SDK 35); update them together once a full build can be run. |
 | 27-09-2026 | **Database key handling** | SQLCipher passphrase is random, wrapped with an AES-256-GCM key held in Android Keystore. App data is excluded from Android cloud backup and device transfer; users move data only through their own encrypted backup file. |
 | 27-09-2026 | **CI on GitHub Actions** | Every push runs `core` tests and builds a debug APK (downloadable from the run for testers). CI never holds the release keystore. |
@@ -17,4 +20,5 @@ Decisions made after roadmap v1.2. Newest first.
 |---|---|
 | Final package name (e.g. `in.agentsetu.app`) | Permanent; cannot change after first release without users reinstalling. |
 | Is this GitHub repository public or private? | The keystore, passwords and any personal notes must never be committed either way; a public repo also exposes work-in-progress. |
+| First public release needs real database migrations | From the first release, each schema change must keep users' data; the pre-release shortcut (dropping version 1) must not be reused. |
 | Verified order copies for the rates | Needed to replace sample rates and settle the PLI renewal 1% vs 2% conflict. |

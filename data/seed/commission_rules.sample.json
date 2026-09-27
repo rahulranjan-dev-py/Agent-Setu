@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedOn": "2026-09-27",
+  "generatedOn": "2026-09-28",
   "warning": "SAMPLE DATA for Agent Setu. Every value is editable in the app (Settings > Rates & rules). Collected from public websites, not from an official order copy. Verify each rate against the latest official order and record its number before relying on it.",
   "commissionRules": [
     {
       "id": "da85b4d1-fad8-5f85-8e92-25fb42803868",
       "productGroup": "PLI",
-      "productCode": "PLI_NON_AEA",
+      "productCode": "PLI",
       "policyCategory": "NON_AEA",
       "staffTypes": [
         "DEPARTMENTAL",
@@ -33,13 +33,13 @@
       "isSample": true,
       "verified": false,
       "createdAt": "2026-09-27T00:00:00Z",
-      "updatedAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
       "deleted": false
     },
     {
       "id": "68f1cd63-abb8-55be-ba51-1a02aabbc853",
       "productGroup": "PLI",
-      "productCode": "PLI_NON_AEA",
+      "productCode": "PLI",
       "policyCategory": "NON_AEA",
       "staffTypes": [
         "DEPARTMENTAL",
@@ -66,13 +66,13 @@
       "isSample": true,
       "verified": false,
       "createdAt": "2026-09-27T00:00:00Z",
-      "updatedAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
       "deleted": false
     },
     {
       "id": "9b96fb62-e421-5275-8d40-d729018386e4",
       "productGroup": "PLI",
-      "productCode": "PLI_NON_AEA",
+      "productCode": "PLI",
       "policyCategory": "NON_AEA",
       "staffTypes": [
         "DEPARTMENTAL",
@@ -99,13 +99,13 @@
       "isSample": true,
       "verified": false,
       "createdAt": "2026-09-27T00:00:00Z",
-      "updatedAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
       "deleted": false
     },
     {
       "id": "a98112ac-9226-5a78-a0a4-9c1d24309b7c",
       "productGroup": "PLI",
-      "productCode": "PLI_AEA",
+      "productCode": "PLI",
       "policyCategory": "AEA",
       "staffTypes": [
         "DEPARTMENTAL",
@@ -132,13 +132,13 @@
       "isSample": true,
       "verified": false,
       "createdAt": "2026-09-27T00:00:00Z",
-      "updatedAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
       "deleted": false
     },
     {
       "id": "d6485cdf-a6bb-52f9-9f1d-a923f0695645",
       "productGroup": "PLI",
-      "productCode": "PLI_AEA",
+      "productCode": "PLI",
       "policyCategory": "AEA",
       "staffTypes": [
         "DEPARTMENTAL",
@@ -165,13 +165,13 @@
       "isSample": true,
       "verified": false,
       "createdAt": "2026-09-27T00:00:00Z",
-      "updatedAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
       "deleted": false
     },
     {
       "id": "1e754598-e970-598c-81cc-beadfd3050ba",
       "productGroup": "PLI",
-      "productCode": "PLI_ANY",
+      "productCode": "PLI",
       "policyCategory": "ANY",
       "staffTypes": [
         "DEPARTMENTAL",
@@ -198,13 +198,13 @@
       "isSample": true,
       "verified": false,
       "createdAt": "2026-09-27T00:00:00Z",
-      "updatedAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
       "deleted": false
     },
     {
       "id": "b78791e8-bd8f-5cbb-8f71-36709818b80e",
       "productGroup": "RPLI",
-      "productCode": "RPLI_ANY",
+      "productCode": "RPLI",
       "policyCategory": "ANY",
       "staffTypes": [
         "DEPARTMENTAL",
@@ -231,13 +231,13 @@
       "isSample": true,
       "verified": false,
       "createdAt": "2026-09-27T00:00:00Z",
-      "updatedAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
       "deleted": false
     },
     {
       "id": "404727b7-19bf-5623-abee-62501751ac32",
       "productGroup": "RPLI",
-      "productCode": "RPLI_ANY",
+      "productCode": "RPLI",
       "policyCategory": "ANY",
       "staffTypes": [
         "DEPARTMENTAL",
@@ -264,7 +264,7 @@
       "isSample": true,
       "verified": false,
       "createdAt": "2026-09-27T00:00:00Z",
-      "updatedAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
       "deleted": false
     },
     {
@@ -530,7 +530,7 @@
     {
       "id": "55f1690b-8a10-5dc4-ab52-6a55586c42e7",
       "productGroup": "SAVINGS",
-      "productCode": "TD_1_2_3Y",
+      "productCode": "TD_1Y",
       "policyCategory": "ANY",
       "staffTypes": [
         "GDS_BPM"
@@ -548,11 +548,67 @@
         "https://www.gconnect.in/news/incentive-scheme-gds-branch-postmasters-dop.html"
       ],
       "confidence": "low",
-      "notes": "Reported as 0.5% to 1.0% depending on term - set the exact rate from the order.",
+      "notes": "BPM incentive on 1-year TD. Reported as 0.5% to 1.0% depending on term - set the exact rate from the order.",
       "isSample": true,
       "verified": false,
       "createdAt": "2026-09-27T00:00:00Z",
-      "updatedAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "e3deb6fa-70f8-5039-ae98-940bfb7c65e1",
+      "productGroup": "SAVINGS",
+      "productCode": "TD_2Y",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "GDS_BPM"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.5,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2021-10-18",
+      "effectiveTo": null,
+      "orderRef": "DoP incentive scheme for GDS BPMs, order dated 18.10.2021 (as amended) - VERIFY",
+      "sourceUrls": [
+        "https://www.postalstudy.in/2026/05/gds-bpm-incentive-scheme-2026-complete.html",
+        "https://www.gconnect.in/news/incentive-scheme-gds-branch-postmasters-dop.html"
+      ],
+      "confidence": "low",
+      "notes": "BPM incentive on 2-year TD. Reported as 0.5% to 1.0% depending on term - set the exact rate from the order.",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "3f2963b8-a873-544d-a715-a67c256e7cad",
+      "productGroup": "SAVINGS",
+      "productCode": "TD_3Y",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "GDS_BPM"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.5,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2021-10-18",
+      "effectiveTo": null,
+      "orderRef": "DoP incentive scheme for GDS BPMs, order dated 18.10.2021 (as amended) - VERIFY",
+      "sourceUrls": [
+        "https://www.postalstudy.in/2026/05/gds-bpm-incentive-scheme-2026-complete.html",
+        "https://www.gconnect.in/news/incentive-scheme-gds-branch-postmasters-dop.html"
+      ],
+      "confidence": "low",
+      "notes": "BPM incentive on 3-year TD. Reported as 0.5% to 1.0% depending on term - set the exact rate from the order.",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
       "deleted": false
     },
     {

@@ -11,8 +11,9 @@ and commission. Hindi + English. Free, no ads.
 
 ## Status
 
-Step B: project foundation. The app opens to a Hindi/English disclaimer screen and a placeholder
-"Today" screen, with an encrypted database underneath. No customer features yet.
+Step C: data model and commission engine. The encrypted database has all 10 tables, is filled with
+the product catalogue and sample rates on first launch, and the commission rules are matched and
+calculated by tested code. Screens are still placeholders (Welcome/disclaimer and "Today").
 
 ## Build
 
@@ -32,7 +33,7 @@ must never be committed.
 | Path | Contents |
 |---|---|
 | `app/` | Android app: Jetpack Compose UI, Hilt, Room + SQLCipher |
-| `core/` | Pure Kotlin: Indian number/date formatting, seed-file models and validation |
+| `core/` | Pure Kotlin: commission rule matching and calculation, rate revision, product catalogue, Indian number/date formatting, seed-file validation |
 | `data/seed/` | Editable sample rate tables, bundled into the APK as assets |
 | `docs/` | Roadmap, decisions, rate research, disclaimer, privacy notice |
 

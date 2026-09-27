@@ -1,7 +1,10 @@
 package app.agentsetu.core.seed
 
+import app.agentsetu.core.catalogue.DefaultProducts
+import app.agentsetu.core.catalogue.ProductCodes
 import app.agentsetu.core.model.CommissionBasis
 import app.agentsetu.core.model.Confidence
+import app.agentsetu.core.model.PolicyCategory
 import app.agentsetu.core.model.ProductGroup
 import app.agentsetu.core.model.StaffType
 import java.time.LocalDate
@@ -18,6 +21,11 @@ object SeedValidator {
             if (!isUuid(r.id)) problems += "$at: id is not a UUID"
             if (!isEnum<ProductGroup>(r.productGroup)) problems += "$at: unknown productGroup ${r.productGroup}"
             if (!isEnum<CommissionBasis>(r.basis)) problems += "$at: unknown basis ${r.basis}"
+            if (!isEnum<PolicyCategory>(r.policyCategory)) problems += "$at: unknown policyCategory ${r.policyCategory}"
+            if (DefaultProducts.all.none { ProductCodes.covers(r.productCode, it.code) }) {
+                problems += "$at: productCode matches no catalogue product"
+            }
+            if (r.yearOfPolicy != null && r.yearOfPolicy !in 1..2) problems += "$at: yearOfPolicy must be 1, 2 or null"
             if (!isEnum<Confidence>(r.confidence.uppercase())) problems += "$at: unknown confidence ${r.confidence}"
             if (r.staffTypes.isEmpty()) problems += "$at: no staffTypes"
             r.staffTypes.filterNot { isEnum<StaffType>(it) }.forEach { problems += "$at: unknown staffType $it" }
@@ -41,6 +49,7 @@ object SeedValidator {
         for (r in file.interestRates) {
             val at = "rate ${r.id} (${r.scheme})"
             if (!isUuid(r.id)) problems += "$at: id is not a UUID"
+            if (DefaultProducts.byCode(r.scheme) == null) problems += "$at: scheme is not a catalogue product code"
             if (r.rate !in 0.0..25.0) problems += "$at: interest ${r.rate}% looks wrong"
             if (!isEnum<Confidence>(r.confidence.uppercase())) problems += "$at: unknown confidence ${r.confidence}"
             problems += dateRange(at, r.effectiveFrom, r.effectiveTo)

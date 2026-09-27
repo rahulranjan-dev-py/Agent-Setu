@@ -27,8 +27,16 @@ class AppSettings @Inject constructor(
         _disclaimerAccepted.value = true
     }
 
+    /** Identifies the bundled seed last loaded, so seeding runs once per app update, not every launch. */
+    var seedMarker: String?
+        get() = prefs.getString(KEY_SEED_MARKER, null)
+        set(value) {
+            prefs.edit().putString(KEY_SEED_MARKER, value).apply()
+        }
+
     companion object {
         const val CURRENT_DISCLAIMER_VERSION = 1
+        private const val KEY_SEED_MARKER = "seed_marker"
         private const val PREFS_NAME = "app_settings"
         private const val KEY_DISCLAIMER_VERSION = "disclaimer_accepted_version"
     }

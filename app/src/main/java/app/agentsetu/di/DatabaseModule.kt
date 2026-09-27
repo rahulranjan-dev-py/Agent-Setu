@@ -26,6 +26,9 @@ object DatabaseModule {
         System.loadLibrary("sqlcipher")
         return Room.databaseBuilder(context, AgentSetuDatabase::class.java, AgentSetuDatabase.FILE_NAME)
             .openHelperFactory(SupportOpenHelperFactory(keyProvider.passphrase()))
+            // Version 1 only ever existed in pre-release debug builds. From the first public
+            // release onwards every schema change needs a real Migration: users' data must survive.
+            .fallbackToDestructiveMigrationFrom(true, 1)
             .build()
     }
 
