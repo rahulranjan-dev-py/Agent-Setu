@@ -276,6 +276,29 @@ Without the secrets, builds stay exactly as before (unsigned release).
 5. Continue with section 3 from step 6 (test on two phones, GitHub Release, `version.json`,
    WhatsApp post).
 
+### 7.4 Publishing the GitHub Release automatically
+
+With the secrets in place, GitHub can also publish the release itself (`.github/workflows/release.yml`):
+
+1. Make sure `main` has the new `versionCode` / `versionName` and a notes file
+   `release/notes/vX.Y.Z.md` (copy the previous one). Its header sets the release title
+   (`Title: …`) and whether it is a pre-release (`Pre-release: yes`); everything below the first
+   `---` line becomes the description, with `<sha256 of the APK>` and
+   `<SHA-256 fingerprint of the release key>` filled in automatically.
+2. Start it, either way:
+   - **From the phone:** *Actions → Release → Run workflow* (branch `main`). The tag `vX.Y.Z` is
+     created from the version name.
+   - **With git:** push a tag `vX.Y.Z` that points at a commit of `main`.
+3. The workflow checks that the tag matches `versionName`, that it is on `main` and that the notes
+   exist; runs the tests; builds and signs; removes the key; and publishes the release with
+   `AgentSetu-vX.Y.Z.apk` and its `.sha256` attached. The run summary shows the checksum and
+   certificate.
+4. Check the release page (fingerprint as expected), then update `release/version.json` on `main`
+   (section 3, step 8) and post in WhatsApp.
+
+A version that already has a release is refused; to redo one, delete that release and its tag on
+GitHub first.
+
 ### 7.3 To stop signing on GitHub
 
 Delete the four secrets (*Settings → Secrets and variables → Actions*). Builds go back to producing
