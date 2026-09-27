@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "generatedOn": "2026-09-29",
+  "warning": "SAMPLE DATA for Agent Setu. Every value is editable in the app (Settings > Rates & rules). Collected from public websites, not from an official order copy. Verify each rate against the latest official order and record its number before relying on it.",
+  "interestRates": [
+    {
+      "id": "00b89e22-4b72-5a98-a7bf-78cd4a41e399",
+      "scheme": "SB",
+      "rate": 4.0,
+      "compounding": "ANNUAL_CREDIT",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "Savings account",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "92fe81a4-1fbd-5f72-986a-37bec750d199",
+      "scheme": "TD_1Y",
+      "rate": 6.9,
+      "compounding": "QUARTERLY_PAID_ANNUALLY",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "0ebde8b8-c81e-5b8d-b76e-0315fecd5d0d",
+      "scheme": "TD_2Y",
+      "rate": 7.0,
+      "compounding": "QUARTERLY_PAID_ANNUALLY",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "f7b7305b-c697-5f74-8c61-d81bc79c0f31",
+      "scheme": "TD_3Y",
+      "rate": 7.1,
+      "compounding": "QUARTERLY_PAID_ANNUALLY",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "404f080e-06ee-5316-8e46-1eb50fd8d563",
+      "scheme": "TD_5Y",
+      "rate": 7.5,
+      "compounding": "QUARTERLY_PAID_ANNUALLY",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "f53a3cfd-59ad-5882-88e5-a1adfe7ea629",
+      "scheme": "RD_5Y",
+      "rate": 6.7,
+      "compounding": "QUARTERLY",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "bffbd10f-31d3-572d-9145-2cbc50701e27",
+      "scheme": "MIS",
+      "rate": 7.4,
+      "compounding": "MONTHLY_PAYOUT",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "aae00f8d-d9dc-5f1e-95b7-93b6592ba5d3",
+      "scheme": "SCSS",
+      "rate": 8.2,
+      "compounding": "QUARTERLY_PAYOUT",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "4d56f71d-3b56-5088-b421-64fce96a81a1",
+      "scheme": "NSC",
+      "rate": 7.7,
+      "compounding": "ANNUAL_REINVESTED",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "Paid at maturity",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "24f5b986-f178-55dd-97a9-fbdfc3968b29",
+      "scheme": "KVP",
+      "rate": 7.5,
+      "compounding": "ANNUAL",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "Doubles in 115 months",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "19e9c34e-1c17-5bb4-8e49-f122a5974847",
+      "scheme": "PPF",
+      "rate": 7.1,
+      "compounding": "ANNUAL",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "770a0fb7-fbad-5fdb-9cef-a39b7d4d2c8f",
+      "scheme": "SSA",
+      "rate": 8.2,
+      "compounding": "ANNUAL",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "source": "Govt small savings rates announced for Jul-Sep 2026 (Q2 FY2026-27); update each quarter",
+      "sourceUrls": [
+        "https://www.businesstoday.in/personal-finance/investment/story/govt-keeps-small-savings-interest-rates-unchanged-for-july-september-quarter-check-latest-ppf-scss-ssy-rates-540090-2026-06-30"
+      ],
+      "confidence": "high",
+      "notes": "",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-29T00:00:00Z",
+      "deleted": false
+    }
+  ]
+}

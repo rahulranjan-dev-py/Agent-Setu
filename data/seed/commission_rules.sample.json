@@ -1,0 +1,643 @@
+{
+  "schemaVersion": 1,
+  "generatedOn": "2026-09-28",
+  "warning": "SAMPLE DATA for Agent Setu. Every value is editable in the app (Settings > Rates & rules). Collected from public websites, not from an official order copy. Verify each rate against the latest official order and record its number before relying on it.",
+  "commissionRules": [
+    {
+      "id": "da85b4d1-fad8-5f85-8e92-25fb42803868",
+      "productGroup": "PLI",
+      "productCode": "PLI",
+      "policyCategory": "NON_AEA",
+      "staffTypes": [
+        "DEPARTMENTAL",
+        "GDS",
+        "DIRECT_AGENT",
+        "FIELD_OFFICER",
+        "ODE"
+      ],
+      "basis": "PERCENT_OF_PREMIUM",
+      "rate": 4.0,
+      "yearOfPolicy": 1,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": 15,
+      "effectiveFrom": "2025-04-01",
+      "effectiveTo": null,
+      "orderRef": "PLI Directorate incentive structure (PSB minutes 17.03.2025; clarification 01.04.2026) - VERIFY order no.",
+      "sourceUrls": [
+        "https://www.potoolsblog.in/2026/06/revised-incentive-structure-for-pli-and.html",
+        "https://www.postalstudy.in/2026/05/latest-pli-rpli-incentive-structure.html",
+        "https://sapostpotools.com/pli-incentive-structure-2024-agent-commission-chart-pdf/"
+      ],
+      "confidence": "medium",
+      "notes": "First-year premium, premium-paying term up to 15 years",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "68f1cd63-abb8-55be-ba51-1a02aabbc853",
+      "productGroup": "PLI",
+      "productCode": "PLI",
+      "policyCategory": "NON_AEA",
+      "staffTypes": [
+        "DEPARTMENTAL",
+        "GDS",
+        "DIRECT_AGENT",
+        "FIELD_OFFICER",
+        "ODE"
+      ],
+      "basis": "PERCENT_OF_PREMIUM",
+      "rate": 10.0,
+      "yearOfPolicy": 1,
+      "minPremiumTermYears": 16,
+      "maxPremiumTermYears": 25,
+      "effectiveFrom": "2025-04-01",
+      "effectiveTo": null,
+      "orderRef": "PLI Directorate incentive structure (PSB minutes 17.03.2025; clarification 01.04.2026) - VERIFY order no.",
+      "sourceUrls": [
+        "https://www.potoolsblog.in/2026/06/revised-incentive-structure-for-pli-and.html",
+        "https://www.postalstudy.in/2026/05/latest-pli-rpli-incentive-structure.html",
+        "https://sapostpotools.com/pli-incentive-structure-2024-agent-commission-chart-pdf/"
+      ],
+      "confidence": "medium",
+      "notes": "First-year premium, term more than 15 and up to 25 years",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "9b96fb62-e421-5275-8d40-d729018386e4",
+      "productGroup": "PLI",
+      "productCode": "PLI",
+      "policyCategory": "NON_AEA",
+      "staffTypes": [
+        "DEPARTMENTAL",
+        "GDS",
+        "DIRECT_AGENT",
+        "FIELD_OFFICER",
+        "ODE"
+      ],
+      "basis": "PERCENT_OF_PREMIUM",
+      "rate": 20.0,
+      "yearOfPolicy": 1,
+      "minPremiumTermYears": 26,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2025-04-01",
+      "effectiveTo": null,
+      "orderRef": "PLI Directorate incentive structure (PSB minutes 17.03.2025; clarification 01.04.2026) - VERIFY order no.",
+      "sourceUrls": [
+        "https://www.potoolsblog.in/2026/06/revised-incentive-structure-for-pli-and.html",
+        "https://www.postalstudy.in/2026/05/latest-pli-rpli-incentive-structure.html",
+        "https://sapostpotools.com/pli-incentive-structure-2024-agent-commission-chart-pdf/"
+      ],
+      "confidence": "medium",
+      "notes": "First-year premium, term more than 25 years",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "a98112ac-9226-5a78-a0a4-9c1d24309b7c",
+      "productGroup": "PLI",
+      "productCode": "PLI",
+      "policyCategory": "AEA",
+      "staffTypes": [
+        "DEPARTMENTAL",
+        "GDS",
+        "DIRECT_AGENT",
+        "FIELD_OFFICER",
+        "ODE"
+      ],
+      "basis": "PERCENT_OF_PREMIUM",
+      "rate": 5.0,
+      "yearOfPolicy": 1,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": 15,
+      "effectiveFrom": "2025-04-01",
+      "effectiveTo": null,
+      "orderRef": "PLI Directorate incentive structure (PSB minutes 17.03.2025; clarification 01.04.2026) - VERIFY order no.",
+      "sourceUrls": [
+        "https://www.potoolsblog.in/2026/06/revised-incentive-structure-for-pli-and.html",
+        "https://www.postalstudy.in/2026/05/latest-pli-rpli-incentive-structure.html",
+        "https://sapostpotools.com/pli-incentive-structure-2024-agent-commission-chart-pdf/"
+      ],
+      "confidence": "medium",
+      "notes": "Anticipated Endowment Assurance (and plans grouped with it by the order), term up to 15 years",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "d6485cdf-a6bb-52f9-9f1d-a923f0695645",
+      "productGroup": "PLI",
+      "productCode": "PLI",
+      "policyCategory": "AEA",
+      "staffTypes": [
+        "DEPARTMENTAL",
+        "GDS",
+        "DIRECT_AGENT",
+        "FIELD_OFFICER",
+        "ODE"
+      ],
+      "basis": "PERCENT_OF_PREMIUM",
+      "rate": 7.0,
+      "yearOfPolicy": 1,
+      "minPremiumTermYears": 16,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2025-04-01",
+      "effectiveTo": null,
+      "orderRef": "PLI Directorate incentive structure (PSB minutes 17.03.2025; clarification 01.04.2026) - VERIFY order no.",
+      "sourceUrls": [
+        "https://www.potoolsblog.in/2026/06/revised-incentive-structure-for-pli-and.html",
+        "https://www.postalstudy.in/2026/05/latest-pli-rpli-incentive-structure.html",
+        "https://sapostpotools.com/pli-incentive-structure-2024-agent-commission-chart-pdf/"
+      ],
+      "confidence": "medium",
+      "notes": "Anticipated Endowment Assurance, term more than 15 years",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "1e754598-e970-598c-81cc-beadfd3050ba",
+      "productGroup": "PLI",
+      "productCode": "PLI",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "DEPARTMENTAL",
+        "GDS",
+        "DIRECT_AGENT",
+        "FIELD_OFFICER",
+        "ODE"
+      ],
+      "basis": "PERCENT_OF_PREMIUM",
+      "rate": 1.0,
+      "yearOfPolicy": 2,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2025-04-01",
+      "effectiveTo": null,
+      "orderRef": "PLI Directorate incentive structure (PSB minutes 17.03.2025; clarification 01.04.2026) - VERIFY order no.",
+      "sourceUrls": [
+        "https://www.potoolsblog.in/2026/06/revised-incentive-structure-for-pli-and.html",
+        "https://www.postalstudy.in/2026/05/latest-pli-rpli-incentive-structure.html",
+        "https://sapostpotools.com/pli-incentive-structure-2024-agent-commission-chart-pdf/"
+      ],
+      "confidence": "low",
+      "notes": "Renewal premium (policy year 2 onwards). CONFLICT: a 31.08.2020 clarification mentions 2% for Departmental Employees on cash PLI policies; newer summaries say 1% for all sales force. Verify.",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "b78791e8-bd8f-5cbb-8f71-36709818b80e",
+      "productGroup": "RPLI",
+      "productCode": "RPLI",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "DEPARTMENTAL",
+        "GDS",
+        "DIRECT_AGENT",
+        "FIELD_OFFICER",
+        "ODE"
+      ],
+      "basis": "PERCENT_OF_PREMIUM",
+      "rate": 10.0,
+      "yearOfPolicy": 1,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2025-04-01",
+      "effectiveTo": null,
+      "orderRef": "PLI Directorate incentive structure (reconfirmed June 2026 revision) - VERIFY order no.",
+      "sourceUrls": [
+        "https://www.potoolsblog.in/2026/06/revised-incentive-structure-for-pli-and.html",
+        "https://www.postalstudy.in/2026/05/latest-pli-rpli-incentive-structure.html",
+        "https://sapostpotools.com/pli-incentive-structure-2024-agent-commission-chart-pdf/"
+      ],
+      "confidence": "high",
+      "notes": "First-year premium, all RPLI plans, all sales force",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "404727b7-19bf-5623-abee-62501751ac32",
+      "productGroup": "RPLI",
+      "productCode": "RPLI",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "DEPARTMENTAL",
+        "GDS",
+        "DIRECT_AGENT",
+        "FIELD_OFFICER",
+        "ODE"
+      ],
+      "basis": "PERCENT_OF_PREMIUM",
+      "rate": 2.5,
+      "yearOfPolicy": 2,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2025-04-01",
+      "effectiveTo": null,
+      "orderRef": "PLI Directorate incentive structure (reconfirmed June 2026 revision) - VERIFY order no.",
+      "sourceUrls": [
+        "https://www.potoolsblog.in/2026/06/revised-incentive-structure-for-pli-and.html",
+        "https://www.postalstudy.in/2026/05/latest-pli-rpli-incentive-structure.html",
+        "https://sapostpotools.com/pli-incentive-structure-2024-agent-commission-chart-pdf/"
+      ],
+      "confidence": "high",
+      "notes": "Renewal premium (policy year 2 onwards), all RPLI plans",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "56d57a25-84ca-5594-a30c-de438eee01eb",
+      "productGroup": "SAVINGS",
+      "productCode": "RD_5Y",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "SAS_AGENT",
+        "MPKBY_AGENT"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 4.0,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2011-12-01",
+      "effectiveTo": null,
+      "orderRef": "Ministry of Finance small savings agency commission (revised w.e.f. 01.12.2011) - VERIFY current notification",
+      "sourceUrls": [
+        "https://upstox.com/news/personal-finance/latest-updates/post-office-recurring-deposit-to-nsc-pomis-how-much-commission-do-small-savings-agents-get/article-186231/",
+        "https://www.potoolsblog.in/2016/10/rate-of-commission-to-small-savings.html"
+      ],
+      "confidence": "medium",
+      "notes": "Of deposit, per SAS/MPKBY agent rules - VERIFY how it is spread over instalments",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-27T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "e28c8758-0212-594a-b5d5-fb74e6ce9019",
+      "productGroup": "SAVINGS",
+      "productCode": "TD",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "SAS_AGENT",
+        "MPKBY_AGENT"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.5,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2011-12-01",
+      "effectiveTo": null,
+      "orderRef": "Ministry of Finance small savings agency commission (revised w.e.f. 01.12.2011) - VERIFY current notification",
+      "sourceUrls": [
+        "https://upstox.com/news/personal-finance/latest-updates/post-office-recurring-deposit-to-nsc-pomis-how-much-commission-do-small-savings-agents-get/article-186231/",
+        "https://www.potoolsblog.in/2016/10/rate-of-commission-to-small-savings.html"
+      ],
+      "confidence": "medium",
+      "notes": "Of deposit amount",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-27T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "1c6b25bb-a86c-56af-b2b2-210e13846160",
+      "productGroup": "SAVINGS",
+      "productCode": "MIS",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "SAS_AGENT",
+        "MPKBY_AGENT"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.5,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2011-12-01",
+      "effectiveTo": null,
+      "orderRef": "Ministry of Finance small savings agency commission (revised w.e.f. 01.12.2011) - VERIFY current notification",
+      "sourceUrls": [
+        "https://upstox.com/news/personal-finance/latest-updates/post-office-recurring-deposit-to-nsc-pomis-how-much-commission-do-small-savings-agents-get/article-186231/",
+        "https://www.potoolsblog.in/2016/10/rate-of-commission-to-small-savings.html"
+      ],
+      "confidence": "medium",
+      "notes": "Of deposit amount",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-27T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "f16c005a-c8a6-59ce-b49e-209f8f52b2cd",
+      "productGroup": "SAVINGS",
+      "productCode": "NSC",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "SAS_AGENT",
+        "MPKBY_AGENT"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.5,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2011-12-01",
+      "effectiveTo": null,
+      "orderRef": "Ministry of Finance small savings agency commission (revised w.e.f. 01.12.2011) - VERIFY current notification",
+      "sourceUrls": [
+        "https://upstox.com/news/personal-finance/latest-updates/post-office-recurring-deposit-to-nsc-pomis-how-much-commission-do-small-savings-agents-get/article-186231/",
+        "https://www.potoolsblog.in/2016/10/rate-of-commission-to-small-savings.html"
+      ],
+      "confidence": "medium",
+      "notes": "Of purchase amount",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-27T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "3ff3bb0c-e464-559e-bfb5-fe13830fedee",
+      "productGroup": "SAVINGS",
+      "productCode": "KVP",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "SAS_AGENT",
+        "MPKBY_AGENT"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.5,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2011-12-01",
+      "effectiveTo": null,
+      "orderRef": "Ministry of Finance small savings agency commission (revised w.e.f. 01.12.2011) - VERIFY current notification",
+      "sourceUrls": [
+        "https://upstox.com/news/personal-finance/latest-updates/post-office-recurring-deposit-to-nsc-pomis-how-much-commission-do-small-savings-agents-get/article-186231/",
+        "https://www.potoolsblog.in/2016/10/rate-of-commission-to-small-savings.html"
+      ],
+      "confidence": "medium",
+      "notes": "Of purchase amount",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-27T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "ec2446ae-7e44-542c-a246-f38acf67d48c",
+      "productGroup": "SAVINGS",
+      "productCode": "PPF",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "SAS_AGENT",
+        "MPKBY_AGENT"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.0,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2011-12-01",
+      "effectiveTo": null,
+      "orderRef": "Ministry of Finance small savings agency commission (revised w.e.f. 01.12.2011) - VERIFY current notification",
+      "sourceUrls": [
+        "https://upstox.com/news/personal-finance/latest-updates/post-office-recurring-deposit-to-nsc-pomis-how-much-commission-do-small-savings-agents-get/article-186231/",
+        "https://www.potoolsblog.in/2016/10/rate-of-commission-to-small-savings.html"
+      ],
+      "confidence": "medium",
+      "notes": "No agent commission since 2011",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-27T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "c27d481c-6705-523a-87c8-dd6fd0a939c0",
+      "productGroup": "SAVINGS",
+      "productCode": "SCSS",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "SAS_AGENT",
+        "MPKBY_AGENT"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.0,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2011-12-01",
+      "effectiveTo": null,
+      "orderRef": "Ministry of Finance small savings agency commission (revised w.e.f. 01.12.2011) - VERIFY current notification",
+      "sourceUrls": [
+        "https://upstox.com/news/personal-finance/latest-updates/post-office-recurring-deposit-to-nsc-pomis-how-much-commission-do-small-savings-agents-get/article-186231/",
+        "https://www.potoolsblog.in/2016/10/rate-of-commission-to-small-savings.html"
+      ],
+      "confidence": "medium",
+      "notes": "No agent commission since 2011",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-27T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "f1dbebd6-f387-5667-90d8-bcbdfd419b48",
+      "productGroup": "SAVINGS",
+      "productCode": "SSA",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "SAS_AGENT",
+        "MPKBY_AGENT"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.0,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2011-12-01",
+      "effectiveTo": null,
+      "orderRef": "Ministry of Finance small savings agency commission (revised w.e.f. 01.12.2011) - VERIFY current notification",
+      "sourceUrls": [
+        "https://upstox.com/news/personal-finance/latest-updates/post-office-recurring-deposit-to-nsc-pomis-how-much-commission-do-small-savings-agents-get/article-186231/",
+        "https://www.potoolsblog.in/2016/10/rate-of-commission-to-small-savings.html"
+      ],
+      "confidence": "medium",
+      "notes": "No agent commission",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-27T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "6515a2fc-af9f-5809-9372-9aa619a08b1b",
+      "productGroup": "SAVINGS",
+      "productCode": "TD_5Y",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "GDS_BPM"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 2.0,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2021-10-18",
+      "effectiveTo": null,
+      "orderRef": "DoP incentive scheme for GDS BPMs, order dated 18.10.2021 (as amended) - VERIFY",
+      "sourceUrls": [
+        "https://www.postalstudy.in/2026/05/gds-bpm-incentive-scheme-2026-complete.html",
+        "https://www.gconnect.in/news/incentive-scheme-gds-branch-postmasters-dop.html"
+      ],
+      "confidence": "low",
+      "notes": "BPM incentive on 5-year TD opened at the BO. Not payable if agency commission already paid on the same deposit.",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-27T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "55f1690b-8a10-5dc4-ab52-6a55586c42e7",
+      "productGroup": "SAVINGS",
+      "productCode": "TD_1Y",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "GDS_BPM"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.5,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2021-10-18",
+      "effectiveTo": null,
+      "orderRef": "DoP incentive scheme for GDS BPMs, order dated 18.10.2021 (as amended) - VERIFY",
+      "sourceUrls": [
+        "https://www.postalstudy.in/2026/05/gds-bpm-incentive-scheme-2026-complete.html",
+        "https://www.gconnect.in/news/incentive-scheme-gds-branch-postmasters-dop.html"
+      ],
+      "confidence": "low",
+      "notes": "BPM incentive on 1-year TD. Reported as 0.5% to 1.0% depending on term - set the exact rate from the order.",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "e3deb6fa-70f8-5039-ae98-940bfb7c65e1",
+      "productGroup": "SAVINGS",
+      "productCode": "TD_2Y",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "GDS_BPM"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.5,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2021-10-18",
+      "effectiveTo": null,
+      "orderRef": "DoP incentive scheme for GDS BPMs, order dated 18.10.2021 (as amended) - VERIFY",
+      "sourceUrls": [
+        "https://www.postalstudy.in/2026/05/gds-bpm-incentive-scheme-2026-complete.html",
+        "https://www.gconnect.in/news/incentive-scheme-gds-branch-postmasters-dop.html"
+      ],
+      "confidence": "low",
+      "notes": "BPM incentive on 2-year TD. Reported as 0.5% to 1.0% depending on term - set the exact rate from the order.",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "3f2963b8-a873-544d-a715-a67c256e7cad",
+      "productGroup": "SAVINGS",
+      "productCode": "TD_3Y",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "GDS_BPM"
+      ],
+      "basis": "PERCENT_OF_DEPOSIT",
+      "rate": 0.5,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2021-10-18",
+      "effectiveTo": null,
+      "orderRef": "DoP incentive scheme for GDS BPMs, order dated 18.10.2021 (as amended) - VERIFY",
+      "sourceUrls": [
+        "https://www.postalstudy.in/2026/05/gds-bpm-incentive-scheme-2026-complete.html",
+        "https://www.gconnect.in/news/incentive-scheme-gds-branch-postmasters-dop.html"
+      ],
+      "confidence": "low",
+      "notes": "BPM incentive on 3-year TD. Reported as 0.5% to 1.0% depending on term - set the exact rate from the order.",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-28T00:00:00Z",
+      "deleted": false
+    },
+    {
+      "id": "fd5fcb55-4d74-5798-b1f4-f62f6fe54b84",
+      "productGroup": "SAVINGS",
+      "productCode": "SB",
+      "policyCategory": "ANY",
+      "staffTypes": [
+        "GDS_BPM"
+      ],
+      "basis": "PERCENT_OF_NET_ACCRETION",
+      "rate": 1.0,
+      "yearOfPolicy": null,
+      "minPremiumTermYears": null,
+      "maxPremiumTermYears": null,
+      "effectiveFrom": "2021-10-18",
+      "effectiveTo": null,
+      "orderRef": "DoP incentive scheme for GDS BPMs, order dated 18.10.2021 (as amended) - VERIFY",
+      "sourceUrls": [
+        "https://www.postalstudy.in/2026/05/gds-bpm-incentive-scheme-2026-complete.html",
+        "https://www.gconnect.in/news/incentive-scheme-gds-branch-postmasters-dop.html"
+      ],
+      "confidence": "low",
+      "notes": "1% of net accretion in SB accounts (excludes March deposits, includes March withdrawals); minimum conditions apply.",
+      "isSample": true,
+      "verified": false,
+      "createdAt": "2026-09-27T00:00:00Z",
+      "updatedAt": "2026-09-27T00:00:00Z",
+      "deleted": false
+    }
+  ]
+}
