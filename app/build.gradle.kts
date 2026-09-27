@@ -27,6 +27,12 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+
+        // Where the app reads release/version.json for the update check. Override with
+        // -Pagentsetu.updateUrl=... (e.g. a GitHub Pages address if this repository is private).
+        val updateUrl = (project.findProperty("agentsetu.updateUrl") as String?)
+            ?: "https://raw.githubusercontent.com/rahulranjan-dev-py/Agent-Setu/main/release/version.json"
+        buildConfigField("String", "UPDATE_URL", "\"$updateUrl\"")
     }
 
     signingConfigs {

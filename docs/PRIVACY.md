@@ -26,7 +26,9 @@ to check for a new version.
 - *Error report:* when you tap "Send error report", the app shows you the report first. It contains
   the app version, Android version, phone model and the technical error. It contains **no customer
   data**. You choose whether and how to send it.
-- *Update check:* the app reads a public `version.json` file from GitHub. No personal data is sent.
+- *Update check:* about once a day the app reads a public `version.json` file from GitHub. This is
+  the app's only internet use; nothing about you, your phone or your customers is sent.
+- *Scheme cards and calculator results:* images you choose to share; they contain no customer data.
 
 **5. Your customers' data.** You are responsible for having your customers' consent to record
 their details and contact them. The app asks you to confirm consent when you add a customer.

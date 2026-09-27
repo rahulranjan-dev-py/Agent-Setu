@@ -91,7 +91,9 @@ custom products.
 | PPF | 7.1% | | SSA | 8.2% |
 
 The Government reviews these every quarter. Rates for **Oct–Dec 2026 are due about 30 Sep 2026**, so
-refresh the seed before the first release.
+refresh the seed before the first release. The sample rows are open-ended (no end date) so the
+calculators always have a rate; users update them in *Tools → Interest rates*, and the app warns when
+the newest rate is more than 3 months old.
 
 ## 6. How rates stay editable
 

@@ -31,8 +31,11 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
 - Permissions: the only one users are asked for is notifications (plus "install unknown apps" only
   if in-app APK download is built). Install-time permissions from libraries are accepted
   (WorkManager: wake lock, boot completed, network state; androidx.biometric: use biometric /
-  fingerprint); never add SMS, call log, contacts, location or storage. Files go through the
+  fingerprint). INTERNET is used only by `UpdateChecker` to read the public `release/version.json`;
+  no other network call may be added, and no user data may ever be sent. Never add SMS, call log,
+  contacts, location or storage. Files go through the
   system file picker or share sheet, never storage permissions.
+- Scheme cards and calculators never contain a rate: they read the user's `InterestRate` table.
 - **Never hard-code a commission or interest rate.** Rates live in the editable `CommissionRule` /
   `InterestRate` tables, seeded from `data/seed/*.sample.json`, with `effectiveFrom` and `orderRef`.
 - Never commit a keystore, key passwords, `local.properties` or any real customer data.

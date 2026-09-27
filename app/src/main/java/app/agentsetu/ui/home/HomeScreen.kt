@@ -55,6 +55,8 @@ import app.agentsetu.data.db.ReminderRow
 import app.agentsetu.data.repo.MaturityOutcome
 import app.agentsetu.data.repo.ReminderRepository
 import app.agentsetu.data.settings.AppSettings
+import app.agentsetu.update.UpdateChecker
+import app.agentsetu.ui.common.UpdateBanner
 import app.agentsetu.reminders.ReminderNotifier
 import app.agentsetu.ui.common.AppScaffold
 import app.agentsetu.ui.common.FormField
@@ -87,7 +89,11 @@ class HomeViewModel @Inject constructor(
     db: AgentSetuDatabase,
     private val reminders: ReminderRepository,
     settings: AppSettings,
+    updates: UpdateChecker,
 ) : ViewModel() {
+    /** Last known update status; checked in the background at most once a day. */
+    val update = updates.status
+
     val today: LocalDate = LocalDate.now()
 
     /** Nudge to back up when there is data and no backup in the last 30 days. */
@@ -113,6 +119,7 @@ class HomeViewModel @Inject constructor(
     init {
         // Opening the app also brings reminders up to date, in case the daily job was held back.
         viewModelScope.launch { reminders.regenerate(today) }
+        viewModelScope.launch { updates.check(force = false) }
     }
 
     private companion object {
@@ -139,6 +146,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val backupDue by viewModel.backupDue.collectAsStateWithLifecycle()
+    val update by viewModel.update.collectAsStateWithLifecycle()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val totals by viewModel.monthTotals.collectAsStateWithLifecycle()
     var acting by remember { mutableStateOf<ReminderRow?>(null) }
@@ -152,6 +160,7 @@ fun HomeScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            item { UpdateBanner(update) }
             item { NotificationPermissionCard() }
             if (backupDue) item { BackupNudge(onBackup) }
             item { MonthCard(totals.expectedPaise, totals.receivedPaise) }

@@ -8,8 +8,11 @@
         (wake lock, boot completed, network state) so daily reminders survive restarts, and
         androidx.biometric (use biometric / fingerprint) for the optional fingerprint unlock.
         None of them gives access to personal data.
+        INTERNET (install-time, no prompt) is used for one thing only: reading the public
+        release/version.json for the update check. No user data is ever sent.
     -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".AgentSetuApplication"

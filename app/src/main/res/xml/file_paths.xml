@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Only the app's private backup folder can be shared, and only when the user taps Share. -->
+<!-- Only these private cache folders can be shared, and only when the user taps Share. -->
 <paths>
     <cache-path name="backups" path="backups/" />
+    <cache-path name="share" path="share/" />
 </paths>

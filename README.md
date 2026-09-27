@@ -11,11 +11,11 @@ and commission. Hindi + English. Free, no ads.
 
 ## Status
 
-Step F: data safety. Optional PIN / fingerprint lock, password-protected backup and restore, a
-manual error report the user reviews before sharing, delete-a-customer and delete-all-my-data.
-Earlier steps: customers, business with live commission preview, month-wise ledger, editable rates,
-reminders with a daily notification. Still to come for the MVP: calculators, scheme cards and the
-update check.
+Step G: the MVP feature set from the roadmap is in place: customers and business with a live
+commission preview, month-wise ledger, editable commission and interest rates, reminders with a
+daily notification, TD/RD/MIS calculators, Hindi/English scheme cards shared as images, PIN lock,
+encrypted backup, manual error report, and an update check. Next: pilot preparation (final package
+name, signing key, release checklist) and testing on real phones.
 
 ## Build
 
@@ -37,6 +37,7 @@ must never be committed.
 | `app/` | Android app: Jetpack Compose UI, Hilt, Room + SQLCipher |
 | `core/` | Pure Kotlin: commission rule matching and calculation, rate revision, product catalogue, Indian number/date formatting, seed-file validation |
 | `data/seed/` | Editable sample rate tables, bundled into the APK as assets |
+| `release/version.json` | What the in-app update check reads; update it with every release |
 | `docs/` | Roadmap, decisions, rate research, disclaimer, privacy notice |
 
 ## Documents

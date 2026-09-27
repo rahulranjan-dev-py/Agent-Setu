@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -42,6 +43,13 @@ import app.agentsetu.ui.rates.RuleEditScreen
 import app.agentsetu.ui.lock.PinSetupScreen
 import app.agentsetu.ui.settings.ErrorReportScreen
 import app.agentsetu.ui.settings.SettingsScreen
+import app.agentsetu.ui.tools.CalcKind
+import app.agentsetu.ui.tools.CalculatorScreen
+import app.agentsetu.ui.tools.InterestRateEditScreen
+import app.agentsetu.ui.tools.InterestRatesScreen
+import app.agentsetu.ui.tools.SchemeDetailScreen
+import app.agentsetu.ui.tools.SchemeListScreen
+import app.agentsetu.ui.tools.ToolsScreen
 
 private object Routes {
     const val TODAY = "today"
@@ -55,6 +63,12 @@ private object Routes {
     const val PROFILE = "profile"
     const val RATES = "rates"
     const val RULE = "rule/{id}"
+    const val TOOLS = "tools"
+    const val CALC = "calc/{kind}"
+    const val SCHEMES = "schemes"
+    const val SCHEME = "scheme/{code}"
+    const val INTEREST_RATES = "interest-rates"
+    const val INTEREST_RATE = "interest-rate/{id}"
     const val APP_LOCK = "app-lock"
     const val BACKUP = "backup"
     const val ERROR_REPORT = "error-report"
@@ -63,6 +77,9 @@ private object Routes {
     fun customerEdit(id: String) = "customer-edit/$id"
     fun business(customerId: String) = "business/$customerId"
     fun rule(id: String) = "rule/$id"
+    fun calc(kind: CalcKind) = "calc/${kind.name}"
+    fun scheme(code: String) = "scheme/$code"
+    fun interestRate(id: String) = "interest-rate/$id"
 }
 
 private data class Tab(val route: String, @StringRes val label: Int, val icon: ImageVector)
@@ -71,6 +88,7 @@ private val tabs = listOf(
     Tab(Routes.TODAY, R.string.nav_today, Icons.Filled.Home),
     Tab(Routes.CUSTOMERS, R.string.nav_customers, Icons.Filled.Person),
     Tab(Routes.COMMISSION, R.string.nav_commission, Icons.Filled.DateRange),
+    Tab(Routes.TOOLS, R.string.nav_tools, Icons.Filled.Build),
     Tab(Routes.SETTINGS, R.string.nav_settings, Icons.Filled.Settings),
 )
 
@@ -114,6 +132,28 @@ fun MainNavigation() {
                 )
             }
             composable(Routes.COMMISSION) { CommissionScreen() }
+            composable(Routes.TOOLS) {
+                ToolsScreen(
+                    onCalculator = { nav.navigate(Routes.calc(it)) },
+                    onSchemes = { nav.navigate(Routes.SCHEMES) },
+                    onRates = { nav.navigate(Routes.INTEREST_RATES) },
+                )
+            }
+            composable(Routes.CALC, arguments = listOf(navArgument("kind") { type = NavType.StringType })) {
+                CalculatorScreen(onBack = { nav.popBackStack() })
+            }
+            composable(Routes.SCHEMES) {
+                SchemeListScreen(onBack = { nav.popBackStack() }, onOpen = { nav.navigate(Routes.scheme(it)) })
+            }
+            composable(Routes.SCHEME, arguments = listOf(navArgument("code") { type = NavType.StringType })) {
+                SchemeDetailScreen(onBack = { nav.popBackStack() })
+            }
+            composable(Routes.INTEREST_RATES) {
+                InterestRatesScreen(onBack = { nav.popBackStack() }, onEdit = { nav.navigate(Routes.interestRate(it)) })
+            }
+            composable(Routes.INTEREST_RATE, arguments = listOf(navArgument("id") { type = NavType.StringType })) {
+                InterestRateEditScreen(onBack = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
+            }
             composable(Routes.SETTINGS) {
                 SettingsScreen(
                     onProfile = { nav.navigate(Routes.PROFILE) },
