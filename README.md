@@ -11,9 +11,10 @@ and commission. Hindi + English. Free, no ads.
 
 ## Status
 
-Step C: data model and commission engine. The encrypted database has all 10 tables, is filled with
-the product catalogue and sample rates on first launch, and the commission rules are matched and
-calculated by tested code. Screens are still placeholders (Welcome/disclaimer and "Today").
+Step D: first working screens. After the disclaimer and a short profile (staff type), users can add
+customers, record business with a live expected-commission preview, track commission month by month
+and mark it received, and view, change and verify rates in Settings. Reminders, calculators, scheme
+cards, app lock, backup and the update check are still to come (see `docs/ROADMAP.md`).
 
 ## Build
 
