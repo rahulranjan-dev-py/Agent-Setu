@@ -69,6 +69,22 @@ On Windows use forward slashes: `storeFile=C:/AgentSetuKeys/agentsetu-release.jk
 | 9 | Post in WhatsApp | In the admin-only announcement group: the APK file, version, SHA-256, short Hindi changelog and the disclaimer (template below). |
 | 10 | Keep the old APK | Keep the previous release attached on GitHub, in case someone needs to reinstall it. |
 
+### Creating the GitHub Release (in the browser, works on a phone)
+
+1. Write the notes first: copy `release/notes/v1.0.0.md` to `release/notes/vX.Y.Z.md`, update it and
+   `CHANGELOG.md`, and commit to `main`.
+2. Open **github.com/rahulranjan-dev-py/Agent-Setu/releases** → **Draft a new release** (on a phone,
+   Chrome in "Desktop site" mode is easier).
+3. **Choose a tag** → type `vX.Y.Z` → *Create new tag on publish*; target `main`.
+4. **Release title:** `Agent Setu X.Y.Z` (for the pilot: `Agent Setu 1.0.0 (pilot)`).
+5. **Description:** paste the part of `release/notes/vX.Y.Z.md` below the line, with the file's
+   SHA-256 and the signing-key fingerprint filled in.
+6. **Attach binaries:** upload the signed `AgentSetu-vX.Y.Z.apk`. Never attach the unsigned or debug
+   APK, and never the keystore.
+7. For the pilot, tick **Set as a pre-release**; for general releases, **Set as the latest release**.
+8. **Publish release.** Then update `release/version.json` on `main` (step 8 above) so the app tells
+   users about it.
+
 ## 4. WhatsApp release post (template)
 
 ```
