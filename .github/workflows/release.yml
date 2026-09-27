@@ -1,0 +1,118 @@
+name: Release
+
+# Publishes a GitHub Release: builds the app, signs it with the release-key secrets, and attaches
+# the APK and its checksum with the notes from release/notes/v<version>.md. Two ways to start it
+# (docs/RELEASE.md section 7.3):
+#  - Actions -> Release -> Run workflow on main: the tag v<versionName> is created for you;
+#  - pushing a tag like v1.0.0 that points at a commit of main.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the tag, version and notes
+        run: |
+          VERSION=$(grep -m1 'versionName = ' app/build.gradle.kts | sed -E 's/.*"(.*)".*/\1/')
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+              echo "::error::Run the Release workflow on main"; exit 1
+            fi
+            TAG="v$VERSION"
+            echo "TAG_OPTION=--target $GITHUB_SHA" >> "$GITHUB_ENV"
+          else
+            TAG="$GITHUB_REF_NAME"
+            echo "TAG_OPTION=--verify-tag" >> "$GITHUB_ENV"
+          fi
+          if [ "$TAG" != "v$VERSION" ]; then
+            echo "::error::Tag $TAG does not match versionName $VERSION in app/build.gradle.kts"; exit 1
+          fi
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag $TAG is not on main; releases are made only from main"; exit 1
+          fi
+          if [ ! -f "release/notes/$TAG.md" ]; then
+            echo "::error::Missing release/notes/$TAG.md"; exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit tests
+        run: ./gradlew --no-daemon :core:test :app:testDebugUnitTest
+
+      - name: Load release key from secrets
+        env:
+          KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::Release-key secrets are missing (docs/RELEASE.md section 7.1)"; exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/release.jks"
+          {
+            echo "storeFile=$RUNNER_TEMP/release.jks"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=${KEY_ALIAS:-agentsetu}"
+            echo "keyPassword=${KEY_PASSWORD:-$STORE_PASSWORD}"
+          } > keystore.properties
+
+      - name: Signed release APK
+        run: ./gradlew --no-daemon :app:assembleRelease
+
+      - name: Remove release key from the runner
+        if: always()
+        run: rm -f keystore.properties "$RUNNER_TEMP/release.jks"
+
+      - name: Checksum, certificate and notes
+        run: |
+          mkdir -p out
+          APK="AgentSetu-$TAG.apk"
+          cp app/build/outputs/apk/release/app-release.apk "out/$APK"
+          (cd out && sha256sum "$APK" > "$APK.sha256")
+          SHA=$(cut -d' ' -f1 "out/$APK.sha256")
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          CERT_HEX=$("$APKSIGNER" verify --print-certs "out/$APK" | grep -m1 'certificate SHA-256 digest' | awk '{print $NF}')
+          if [ -z "$CERT_HEX" ]; then echo "::error::APK is not signed"; exit 1; fi
+          CERT=$(echo "$CERT_HEX" | tr 'a-f' 'A-F' | sed 's/../&:/g; s/:$//')
+          NOTES="release/notes/$TAG.md"
+          TITLE=$(grep -m1 '^Title:' "$NOTES" | sed 's/^Title: *//')
+          echo "TITLE=${TITLE:-Agent Setu $VERSION}" >> "$GITHUB_ENV"
+          if grep -q '^Pre-release: yes' "$NOTES"; then echo "PRERELEASE=--prerelease" >> "$GITHUB_ENV"; fi
+          # Everything after the first '---' line, with the checksum and fingerprint filled in.
+          awk 'f {print} /^---$/ && !f {f=1}' "$NOTES" \
+            | sed -e "s|<sha256 of the APK>|$SHA|" -e "s|<SHA-256 fingerprint of the release key>|$CERT|" \
+            > out/notes.md
+          {
+            echo "### $APK"
+            echo '```'
+            echo "SHA-256 of the file: $SHA"
+            echo "Signing certificate: $CERT"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$TAG" "out/AgentSetu-$TAG.apk" "out/AgentSetu-$TAG.apk.sha256" \
+            $TAG_OPTION --title "$TITLE" --notes-file out/notes.md $PRERELEASE
