@@ -6,7 +6,13 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
-## 1.0.0 (versionCode 1) - first pilot release, not yet published
+## 1.0.1 (versionCode 2) - smaller download
+
+- APK about 7 MB instead of about 22 MB: only the ARM copies of the database-encryption library
+  (every Android 8+ phone is ARM), stored compressed. No feature changes; installs over 1.0.0 with
+  data kept.
+
+## 1.0.0 (versionCode 1) - first pilot release, published 27-09-2026 (pre-release)
 
 First version for the pilot group. Everything the roadmap lists for the MVP:
 
