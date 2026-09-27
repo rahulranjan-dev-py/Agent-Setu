@@ -27,6 +27,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.agentsetu.R
+import androidx.hilt.navigation.compose.hiltViewModel
+import app.agentsetu.ui.AgentSetuRootLock
+import app.agentsetu.ui.backup.BackupScreen
 import app.agentsetu.ui.business.AddBusinessScreen
 import app.agentsetu.ui.commission.CommissionScreen
 import app.agentsetu.ui.customers.CustomerDetailScreen
@@ -36,6 +39,8 @@ import app.agentsetu.ui.home.HomeScreen
 import app.agentsetu.ui.profile.ProfileScreen
 import app.agentsetu.ui.rates.RatesScreen
 import app.agentsetu.ui.rates.RuleEditScreen
+import app.agentsetu.ui.lock.PinSetupScreen
+import app.agentsetu.ui.settings.ErrorReportScreen
 import app.agentsetu.ui.settings.SettingsScreen
 
 private object Routes {
@@ -50,6 +55,9 @@ private object Routes {
     const val PROFILE = "profile"
     const val RATES = "rates"
     const val RULE = "rule/{id}"
+    const val APP_LOCK = "app-lock"
+    const val BACKUP = "backup"
+    const val ERROR_REPORT = "error-report"
 
     fun customer(id: String) = "customer/$id"
     fun customerEdit(id: String) = "customer-edit/$id"
@@ -96,6 +104,7 @@ fun MainNavigation() {
                 HomeScreen(
                     onOpenCustomer = { nav.navigate(Routes.customer(it)) },
                     onAddBusiness = { nav.navigate(Routes.business(it)) },
+                    onBackup = { nav.navigate(Routes.BACKUP) },
                 )
             }
             composable(Routes.CUSTOMERS) {
@@ -109,6 +118,9 @@ fun MainNavigation() {
                 SettingsScreen(
                     onProfile = { nav.navigate(Routes.PROFILE) },
                     onRates = { nav.navigate(Routes.RATES) },
+                    onAppLock = { nav.navigate(Routes.APP_LOCK) },
+                    onBackup = { nav.navigate(Routes.BACKUP) },
+                    onErrorReport = { nav.navigate(Routes.ERROR_REPORT) },
                 )
             }
             composable(Routes.CUSTOMER_NEW) {
@@ -117,6 +129,7 @@ fun MainNavigation() {
                     onSaved = { id ->
                         nav.navigate(Routes.customer(id)) { popUpTo(Routes.CUSTOMERS) }
                     },
+                    onDeleted = { nav.popBackStack() },
                 )
             }
             composable(Routes.CUSTOMER, arguments = listOf(navArgument("id") { type = NavType.StringType })) {
@@ -127,7 +140,11 @@ fun MainNavigation() {
                 )
             }
             composable(Routes.CUSTOMER_EDIT, arguments = listOf(navArgument("id") { type = NavType.StringType })) {
-                CustomerEditScreen(onBack = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
+                CustomerEditScreen(
+                    onBack = { nav.popBackStack() },
+                    onSaved = { nav.popBackStack() },
+                    onDeleted = { nav.popBackStack(Routes.CUSTOMERS, inclusive = false) },
+                )
             }
             composable(Routes.BUSINESS, arguments = listOf(navArgument("customerId") { type = NavType.StringType })) {
                 AddBusinessScreen(onBack = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
@@ -138,6 +155,12 @@ fun MainNavigation() {
             composable(Routes.RATES) {
                 RatesScreen(onBack = { nav.popBackStack() }, onEdit = { nav.navigate(Routes.rule(it)) })
             }
+            composable(Routes.APP_LOCK) {
+                val lock = hiltViewModel<AgentSetuRootLock>().appLock
+                PinSetupScreen(appLock = lock, onDone = { nav.popBackStack() }, onSkip = null, onBack = { nav.popBackStack() })
+            }
+            composable(Routes.BACKUP) { BackupScreen(onBack = { nav.popBackStack() }) }
+            composable(Routes.ERROR_REPORT) { ErrorReportScreen(onBack = { nav.popBackStack() }) }
             composable(Routes.RULE, arguments = listOf(navArgument("id") { type = NavType.StringType })) {
                 RuleEditScreen(onBack = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
             }

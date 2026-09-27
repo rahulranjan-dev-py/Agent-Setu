@@ -17,7 +17,7 @@ import androidx.room.TypeConverters
         TargetEntity::class,
         InterestRateEntity::class,
     ],
-    version = 2,
+    version = AgentSetuDatabase.VERSION,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -32,8 +32,10 @@ abstract class AgentSetuDatabase : RoomDatabase() {
     abstract fun reminderDao(): ReminderDao
     abstract fun targetDao(): TargetDao
     abstract fun interestRateDao(): InterestRateDao
+    abstract fun backupDao(): BackupDao
 
     companion object {
         const val FILE_NAME = "agentsetu.db"
+        const val VERSION = 2
     }
 }

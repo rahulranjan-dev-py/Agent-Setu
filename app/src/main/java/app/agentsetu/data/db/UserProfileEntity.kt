@@ -4,8 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import app.agentsetu.core.model.StaffType
 import java.util.UUID
+import kotlinx.serialization.Serializable
 
 /** Single row per install: who the user is, used to pick the commission rules that apply to them. */
+@Serializable
 @Entity(tableName = "user_profile")
 data class UserProfileEntity(
     @PrimaryKey override val id: String = UUID.randomUUID().toString(),

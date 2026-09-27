@@ -11,10 +11,11 @@ and commission. Hindi + English. Free, no ads.
 
 ## Status
 
-Step E: reminders. The Today screen lists overdue and due premiums, RD instalments, follow-ups and
-maturities in the next 30 days, with Call / WhatsApp / Done. A daily on-phone job sends one summary
-notification. Marking a premium collected adds its expected commission to the ledger. Still to come:
-app lock, encrypted backup, error report, calculators, scheme cards and the update check.
+Step F: data safety. Optional PIN / fingerprint lock, password-protected backup and restore, a
+manual error report the user reviews before sharing, delete-a-customer and delete-all-my-data.
+Earlier steps: customers, business with live commission preview, month-wise ledger, editable rates,
+reminders with a daily notification. Still to come for the MVP: calculators, scheme cards and the
+update check.
 
 ## Build
 

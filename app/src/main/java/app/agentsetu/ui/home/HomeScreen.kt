@@ -54,6 +54,7 @@ import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.db.ReminderRow
 import app.agentsetu.data.repo.MaturityOutcome
 import app.agentsetu.data.repo.ReminderRepository
+import app.agentsetu.data.settings.AppSettings
 import app.agentsetu.reminders.ReminderNotifier
 import app.agentsetu.ui.common.AppScaffold
 import app.agentsetu.ui.common.FormField
@@ -85,8 +86,14 @@ data class TodaySections(
 class HomeViewModel @Inject constructor(
     db: AgentSetuDatabase,
     private val reminders: ReminderRepository,
+    settings: AppSettings,
 ) : ViewModel() {
     val today: LocalDate = LocalDate.now()
+
+    /** Nudge to back up when there is data and no backup in the last 30 days. */
+    val backupDue = db.customerDao().observeCount()
+        .map { count -> count > 0 && System.currentTimeMillis() - settings.lastBackupAt > BACKUP_INTERVAL_MS }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     val sections = db.reminderDao().observeOpen(reminders.horizon(today))
         .map { rows ->
@@ -108,6 +115,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { reminders.regenerate(today) }
     }
 
+    private companion object {
+        const val BACKUP_INTERVAL_MS = 30L * 24 * 60 * 60 * 1000
+    }
+
     fun collected(id: String) = viewModelScope.launch { reminders.markCollected(id) }
     fun dismiss(id: String) = viewModelScope.launch { reminders.markDone(id) }
     fun maturity(id: String, outcome: MaturityOutcome) = viewModelScope.launch { reminders.maturityHandled(id, outcome) }
@@ -124,8 +135,10 @@ class HomeViewModel @Inject constructor(
 fun HomeScreen(
     onOpenCustomer: (String) -> Unit,
     onAddBusiness: (String) -> Unit,
+    onBackup: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    val backupDue by viewModel.backupDue.collectAsStateWithLifecycle()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val totals by viewModel.monthTotals.collectAsStateWithLifecycle()
     var acting by remember { mutableStateOf<ReminderRow?>(null) }
@@ -140,6 +153,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item { NotificationPermissionCard() }
+            if (backupDue) item { BackupNudge(onBackup) }
             item { MonthCard(totals.expectedPaise, totals.receivedPaise) }
             if (sections.isEmpty) {
                 item { Text(stringResource(R.string.reminders_empty), style = MaterialTheme.typography.bodyLarge) }
@@ -234,6 +248,17 @@ private fun ReminderCard(row: ReminderRow, today: LocalDate, onOpenCustomer: (St
                     Text(stringResource(R.string.action_done))
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun BackupNudge(onBackup: () -> Unit) {
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.backup_nudge_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.backup_nudge_body), style = MaterialTheme.typography.bodyMedium)
+            Button(onClick = onBackup) { Text(stringResource(R.string.settings_backup)) }
         }
     }
 }

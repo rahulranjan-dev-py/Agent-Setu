@@ -29,11 +29,21 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
 - No India Post / DoP / IPPB logos, emblems, red-and-yellow colours, or words like "official" or
   "authorised". The disclaimer in `docs/DISCLAIMER.md` must appear in the app.
 - Permissions: the only one users are asked for is notifications (plus "install unknown apps" only
-  if in-app APK download is built). WorkManager's install-time permissions (wake lock, boot
-  completed, network state) are accepted; never add SMS, call log, contacts, location or storage.
+  if in-app APK download is built). Install-time permissions from libraries are accepted
+  (WorkManager: wake lock, boot completed, network state; androidx.biometric: use biometric /
+  fingerprint); never add SMS, call log, contacts, location or storage. Files go through the
+  system file picker or share sheet, never storage permissions.
 - **Never hard-code a commission or interest rate.** Rates live in the editable `CommissionRule` /
   `InterestRate` tables, seeded from `data/seed/*.sample.json`, with `effectiveFrom` and `orderRef`.
 - Never commit a keystore, key passwords, `local.properties` or any real customer data.
+
+## Security conventions
+
+- Only a salted PBKDF2 hash of the app PIN is stored (`core/security/PinHasher`).
+- Backup files: AES-256-GCM with a PBKDF2 key from the user's password; header authenticated
+  (`core/backup/BackupCrypto`). Never add a way to open a backup without its password.
+- Error reports are built on the phone, masked for long digit runs, shown to the user, and sent
+  only through the share sheet.
 
 ## Data conventions
 

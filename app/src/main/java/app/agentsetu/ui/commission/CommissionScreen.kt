@@ -179,7 +179,9 @@ private fun TotalLine(label: String, value: String) {
 private fun LedgerItem(row: LedgerRow, onClick: () -> Unit) {
     val product = localized(row.productNameEn, row.productNameHi)
     ListItem(
-        headlineContent = { Text(row.customerName, style = MaterialTheme.typography.titleMedium) },
+        headlineContent = {
+            Text(row.customerName.ifBlank { stringResource(R.string.customer_deleted) }, style = MaterialTheme.typography.titleMedium)
+        },
         supportingContent = {
             Text(row.policyYear?.let { stringResource(R.string.commission_line_detail, product, it) } ?: product)
         },
@@ -211,7 +213,7 @@ private fun ReceivedDialog(row: LedgerRow, onDismiss: () -> Unit, onSave: (Strin
         title = { Text(stringResource(R.string.commission_mark_received)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(row.customerName, style = MaterialTheme.typography.bodyLarge)
+                Text(row.customerName.ifBlank { stringResource(R.string.customer_deleted) }, style = MaterialTheme.typography.bodyLarge)
                 FormField(
                     amount, { amount = it }, stringResource(R.string.commission_received_amount),
                     error = if (tried && AmountInput.parse(amount) == null) stringResource(R.string.error_amount) else null,

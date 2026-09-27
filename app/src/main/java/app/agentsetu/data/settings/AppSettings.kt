@@ -34,8 +34,16 @@ class AppSettings @Inject constructor(
             prefs.edit().putString(KEY_SEED_MARKER, value).apply()
         }
 
+    /** When the user last saved or shared a backup file (epoch millis, 0 = never). */
+    var lastBackupAt: Long
+        get() = prefs.getLong(KEY_LAST_BACKUP, 0)
+        set(value) {
+            prefs.edit().putLong(KEY_LAST_BACKUP, value).apply()
+        }
+
     companion object {
         const val CURRENT_DISCLAIMER_VERSION = 1
+        private const val KEY_LAST_BACKUP = "last_backup_at"
         private const val KEY_SEED_MARKER = "seed_marker"
         private const val PREFS_NAME = "app_settings"
         private const val KEY_DISCLAIMER_VERSION = "disclaimer_accepted_version"

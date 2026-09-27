@@ -1,8 +1,11 @@
+@file:UseSerializers(LocalDateIsoSerializer::class)
+
 package app.agentsetu.data.db
 
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import app.agentsetu.core.backup.LocalDateIsoSerializer
 import app.agentsetu.core.model.CommissionBasis
 import app.agentsetu.core.model.CommissionStatus
 import app.agentsetu.core.model.Confidence
@@ -15,6 +18,8 @@ import app.agentsetu.core.model.ReminderType
 import app.agentsetu.core.model.RefLast4
 import java.time.LocalDate
 import java.util.UUID
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 
 // Conventions for every table (see CLAUDE.md):
 //  - UUID `id`, epoch-millis `createdAt` / `updatedAt`, soft-delete `deleted`;
@@ -25,6 +30,7 @@ import java.util.UUID
 private fun newId() = UUID.randomUUID().toString()
 
 /** No Aadhaar, PAN or account numbers - by design there is no column for them. */
+@Serializable
 @Entity(tableName = "customer", indices = [Index("village"), Index("name")])
 data class CustomerEntity(
     @PrimaryKey override val id: String = newId(),
@@ -40,6 +46,7 @@ data class CustomerEntity(
     override val deleted: Boolean = false,
 ) : SyncEntity
 
+@Serializable
 @Entity(tableName = "product", indices = [Index(value = ["code"], unique = true)])
 data class ProductEntity(
     @PrimaryKey override val id: String = newId(),
@@ -55,6 +62,7 @@ data class ProductEntity(
     override val deleted: Boolean = false,
 ) : SyncEntity
 
+@Serializable
 @Entity(tableName = "sales_lead", indices = [Index("customerId"), Index("nextFollowUp"), Index("stage")])
 data class LeadEntity(
     @PrimaryKey override val id: String = newId(),
@@ -72,6 +80,7 @@ data class LeadEntity(
 ) : SyncEntity
 
 /** One row per policy or account the user services. */
+@Serializable
 @Entity(tableName = "holding", indices = [Index("customerId"), Index("productId"), Index("maturityDate")])
 data class HoldingEntity(
     @PrimaryKey override val id: String = newId(),
@@ -100,6 +109,7 @@ data class HoldingEntity(
 }
 
 /** Editable, dated rate rule. Never hard-coded; seeded from data/seed and revised via RuleRevision. */
+@Serializable
 @Entity(tableName = "commission_rule", indices = [Index("productCode"), Index("effectiveFrom")])
 data class CommissionRuleEntity(
     @PrimaryKey override val id: String = newId(),
@@ -130,6 +140,7 @@ data class CommissionRuleEntity(
  * One expected (and later received) commission for a holding and period. The rule id and rate used
  * are copied in, so editing a rule later never changes what was already recorded.
  */
+@Serializable
 @Entity(
     tableName = "commission_entry",
     // One entry per holding per month. (Not including nullable policyYear: SQLite treats NULLs as distinct.)
@@ -159,6 +170,7 @@ data class CommissionEntryEntity(
  * FOLLOW_UP and a holding id for every other type (one non-null column, because SQLite unique
  * indexes treat NULLs as distinct and would let duplicates through).
  */
+@Serializable
 @Entity(
     tableName = "reminder",
     indices = [Index("dueDate"), Index(value = ["type", "subjectId", "dueDate"], unique = true)],
@@ -175,6 +187,7 @@ data class ReminderEntity(
 ) : SyncEntity
 
 /** Achieved value is computed from holdings when shown, so it is not stored. */
+@Serializable
 @Entity(tableName = "target", indices = [Index(value = ["month", "productGroup"], unique = true)])
 data class TargetEntity(
     @PrimaryKey override val id: String = newId(),
@@ -188,6 +201,7 @@ data class TargetEntity(
 ) : SyncEntity
 
 /** Editable, dated interest rate per scheme; feeds the calculators. Updated quarterly by the user. */
+@Serializable
 @Entity(tableName = "interest_rate", indices = [Index("scheme"), Index("effectiveFrom")])
 data class InterestRateEntity(
     @PrimaryKey override val id: String = newId(),

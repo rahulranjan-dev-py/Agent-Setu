@@ -8,12 +8,17 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,6 +32,7 @@ import app.agentsetu.R
 import app.agentsetu.core.input.MobileNumber
 import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.db.CustomerEntity
+import app.agentsetu.data.repo.CustomerRepository
 import app.agentsetu.ui.common.AppScaffold
 import app.agentsetu.ui.common.CheckRow
 import app.agentsetu.ui.common.FormField
@@ -37,6 +43,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class CustomerEditViewModel @Inject constructor(
     private val db: AgentSetuDatabase,
+    private val customers: CustomerRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val customerId: String? = savedStateHandle["id"]
@@ -70,6 +77,14 @@ class CustomerEditViewModel @Inject constructor(
         }
     }
 
+    fun delete(onDeleted: () -> Unit) {
+        val id = customerId ?: return
+        viewModelScope.launch {
+            customers.delete(id)
+            onDeleted()
+        }
+    }
+
     fun save(onSaved: (String) -> Unit) {
         showErrors = true
         if (nameMissing || mobileInvalid || consentMissing) return
@@ -99,8 +114,14 @@ class CustomerEditViewModel @Inject constructor(
 }
 
 @Composable
-fun CustomerEditScreen(onBack: () -> Unit, onSaved: (String) -> Unit, viewModel: CustomerEditViewModel = hiltViewModel()) {
+fun CustomerEditScreen(
+    onBack: () -> Unit,
+    onSaved: (String) -> Unit,
+    onDeleted: () -> Unit,
+    viewModel: CustomerEditViewModel = hiltViewModel(),
+) {
     val vm = viewModel
+    var confirmDelete by remember { mutableStateOf(false) }
     val required = stringResource(R.string.error_required)
     AppScaffold(
         title = stringResource(if (vm.isNew) R.string.customer_add else R.string.customer_edit),
@@ -146,6 +167,31 @@ fun CustomerEditScreen(onBack: () -> Unit, onSaved: (String) -> Unit, viewModel:
             ) {
                 Text(stringResource(R.string.action_save))
             }
+            if (!vm.isNew) {
+                OutlinedButton(
+                    onClick = { confirmDelete = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(R.string.customer_delete)) }
+            }
         }
+    }
+
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text(stringResource(R.string.customer_delete)) },
+            text = { Text(stringResource(R.string.customer_delete_body)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        confirmDelete = false
+                        vm.delete(onDeleted)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(R.string.customer_delete)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 }

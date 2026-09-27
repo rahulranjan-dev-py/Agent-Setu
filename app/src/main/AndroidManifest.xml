@@ -4,9 +4,10 @@
 
     <!--
         The only permission the user is ever asked for: notifications, for reminders.
-        WorkManager also merges in install-time permissions the user never sees a prompt for
-        (wake lock, boot completed, network state) so daily reminders survive restarts; they give
-        no access to personal data.
+        Libraries merge in install-time permissions the user never sees a prompt for: WorkManager
+        (wake lock, boot completed, network state) so daily reminders survive restarts, and
+        androidx.biometric (use biometric / fingerprint) for the optional fingerprint unlock.
+        None of them gives access to personal data.
     -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -32,6 +33,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Lets the share sheet read the backup file the user chose to share; nothing else is exposed. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <!-- Stores the chosen app language on Android 12 and below (AppCompat per-app locales). -->
         <service

@@ -31,12 +31,16 @@ to check for a new version.
 **5. Your customers' data.** You are responsible for having your customers' consent to record
 their details and contact them. The app asks you to confirm consent when you add a customer.
 
-**6. Your choices.** You can edit or delete any customer, and use **Settings → Delete all my data**
+**6. Your choices.** You can edit or delete any customer (their details are wiped at once; commission
+you already earned stays in your ledger without the name), and use **Settings → Delete all my data**
 to erase everything. Uninstalling the app also deletes its data. Backup files you saved elsewhere
-must be deleted by you.
+must be deleted by you. You can lock the app with a PIN (and fingerprint); only a scrambled form of
+the PIN is kept.
 
-**7. Permissions.** Notifications (for reminders). No SMS, call-log, contacts (unless you choose to
-import in a later version) or location permissions.
+**7. Permissions.** Notifications (for reminders) is the only one you are asked for. The app also
+has fingerprint access (only if you turn on fingerprint unlock) and background-scheduling
+permissions for daily reminders; none of these reads your personal data. No SMS, call-log, contacts
+(unless you choose to import in a later version), location or storage permissions.
 
 **8. Changes.** Changes to this notice will be announced in the release notes and in the app.
 
@@ -65,11 +69,15 @@ import in a later version) or location permissions.
 **5. आपके ग्राहकों का डेटा।** ग्राहकों का विवरण दर्ज करने और उनसे संपर्क करने के लिए उनकी सहमति
 लेना आपकी ज़िम्मेदारी है। ग्राहक जोड़ते समय ऐप आपसे सहमति की पुष्टि करवाता है।
 
-**6. आपके विकल्प।** आप किसी भी ग्राहक को बदल या हटा सकते हैं, और **सेटिंग्स → मेरा पूरा डेटा हटाएँ**
-से सब कुछ मिटा सकते हैं। ऐप अनइंस्टॉल करने से भी उसका डेटा मिट जाता है। कहीं और सेव की गई बैकअप
-फ़ाइलें आपको खुद हटानी होंगी।
+**6. आपके विकल्प।** आप किसी भी ग्राहक को बदल या हटा सकते हैं (उसका विवरण तुरंत मिट जाता है; आपका
+कमाया कमीशन बिना नाम के लेजर में रहता है), और **सेटिंग्स → मेरा सारा डेटा हटाएँ** से सब कुछ मिटा
+सकते हैं। ऐप अनइंस्टॉल करने से भी उसका डेटा मिट जाता है। कहीं और सेव की गई बैकअप फ़ाइलें आपको खुद
+हटानी होंगी। आप ऐप को PIN (और फ़िंगरप्रिंट) से लॉक कर सकते हैं; PIN केवल बदले हुए (हैश) रूप में रखा
+जाता है।
 
-**7. अनुमतियाँ।** नोटिफ़िकेशन (रिमाइंडर के लिए)। SMS, कॉल-लॉग, कॉन्टैक्ट्स (जब तक आप बाद के वर्शन
-में इम्पोर्ट न चुनें) या लोकेशन की अनुमति नहीं।
+**7. अनुमतियाँ।** केवल नोटिफ़िकेशन (रिमाइंडर के लिए) की अनुमति माँगी जाती है। फ़िंगरप्रिंट (केवल अगर
+आप फ़िंगरप्रिंट से खोलना चालू करें) और रोज़ के रिमाइंडर के लिए बैकग्राउंड शेड्यूलिंग की अनुमतियाँ भी
+हैं; इनमें से कोई भी आपका निजी डेटा नहीं पढ़ती। SMS, कॉल-लॉग, कॉन्टैक्ट्स (जब तक आप बाद के वर्शन में
+इम्पोर्ट न चुनें), लोकेशन या स्टोरेज की अनुमति नहीं।
 
 **8. बदलाव।** इस सूचना में बदलाव की जानकारी रिलीज़ नोट्स और ऐप में दी जाएगी।

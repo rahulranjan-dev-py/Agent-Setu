@@ -71,6 +71,9 @@ interface LeadDao {
     @Query("SELECT * FROM sales_lead WHERE id = :id")
     suspend fun get(id: String): LeadEntity?
 
+    @Query("UPDATE sales_lead SET deleted = 1, updatedAt = :now WHERE customerId = :customerId")
+    suspend fun softDeleteForCustomer(customerId: String, now: Long)
+
     @Upsert
     suspend fun upsert(lead: LeadEntity)
 }
@@ -91,6 +94,9 @@ interface HoldingDao {
 
     @Query("SELECT * FROM holding WHERE id = :id")
     suspend fun get(id: String): HoldingEntity?
+
+    @Query("UPDATE holding SET deleted = 1, updatedAt = :now WHERE customerId = :customerId")
+    suspend fun softDeleteForCustomer(customerId: String, now: Long)
 
     @Upsert
     suspend fun upsert(holding: HoldingEntity)
@@ -157,6 +163,14 @@ interface CommissionEntryDao {
 interface ReminderDao {
     @Query("SELECT * FROM reminder WHERE id = :id")
     suspend fun get(id: String): ReminderEntity?
+
+    /** Run before the customer's holdings and leads are soft-deleted (it looks them up). */
+    @Query(
+        "UPDATE reminder SET deleted = 1, updatedAt = :now WHERE " +
+            "subjectId IN (SELECT id FROM holding WHERE customerId = :customerId) OR " +
+            "subjectId IN (SELECT id FROM sales_lead WHERE customerId = :customerId)",
+    )
+    suspend fun softDeleteForCustomer(customerId: String, now: Long)
 
     /**
      * Open reminders up to [until] with the names the Today screen and notifications show.
