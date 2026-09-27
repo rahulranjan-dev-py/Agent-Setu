@@ -2,7 +2,7 @@ name: Release
 
 # Publishes a GitHub Release: builds the app, signs it with the release-key secrets, and attaches
 # the APK and its checksum with the notes from release/notes/v<version>.md. Two ways to start it
-# (docs/RELEASE.md section 7.4):
+# (docs/RELEASE.md section 7.3):
 #  - Actions -> Release -> Run workflow on main: the tag v<versionName> is created for you;
 #  - pushing a tag like v1.0.0 that points at a commit of main.
 on:

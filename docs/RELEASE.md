@@ -276,7 +276,7 @@ Without the secrets, builds stay exactly as before (unsigned release).
 5. Continue with section 3 from step 6 (test on two phones, GitHub Release, `version.json`,
    WhatsApp post).
 
-### 7.4 Publishing the GitHub Release automatically
+### 7.3 Publishing the GitHub Release automatically
 
 With the secrets in place, GitHub can also publish the release itself (`.github/workflows/release.yml`):
 
@@ -299,7 +299,7 @@ With the secrets in place, GitHub can also publish the release itself (`.github/
 A version that already has a release is refused; to redo one, delete that release and its tag on
 GitHub first.
 
-### 7.3 To stop signing on GitHub
+### 7.4 To stop signing on GitHub
 
 Delete the four secrets (*Settings → Secrets and variables → Actions*). Builds go back to producing
 the unsigned release for signing in Termux.
