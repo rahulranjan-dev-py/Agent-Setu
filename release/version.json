@@ -1,10 +1,10 @@
 {
-  "latestVersionCode": 1,
-  "latestVersionName": "1.0.0",
+  "latestVersionCode": 2,
+  "latestVersionName": "1.0.1",
   "downloadUrl": "https://github.com/rahulranjan-dev-py/Agent-Setu/releases",
   "sha256": "",
   "minSupportedVersionCode": 0,
   "releasedOn": "",
-  "changelogEn": "Pre-release test build. Not yet published.",
-  "changelogHi": "प्री-रिलीज़ टेस्ट बिल्ड। अभी प्रकाशित नहीं।"
+  "changelogEn": "Smaller download: about 7 MB instead of 22 MB. No feature changes; install over 1.0.0, your data stays.",
+  "changelogHi": "छोटा डाउनलोड: लगभग 22 MB की जगह 7 MB। सुविधाओं में कोई बदलाव नहीं; 1.0.0 के ऊपर इंस्टॉल करें, आपका डेटा बना रहेगा।"
 }
