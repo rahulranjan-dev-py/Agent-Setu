@@ -16,6 +16,8 @@ local.properties
 keystore.properties
 *.jks
 *.keystore
+# Exception: the public test key for ".debug" builds (see app/build.gradle.kts). Not a release key.
+!app/debug.keystore
 *.p12
 
 # Release APKs are published on GitHub Releases, never committed

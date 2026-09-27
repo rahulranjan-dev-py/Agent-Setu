@@ -133,20 +133,31 @@ key and signs. The key never leaves the phone except as your offline backups.
 
 3. Create the key inside Termux's private folder, which other apps cannot read:
 
+   Termux hides passwords while you type them (nothing appears, not even `*`). That is normal. If
+   you prefer to see the password, write it in the command itself, in single quotes, as below.
+   Replace `MyLongPassword123` with your own password (letters and digits are safest; avoid `'` and
+   `\`), and your name after `CN=`:
+
    ```bash
    mkdir -p ~/AgentSetuKeys && cd ~/AgentSetuKeys
    keytool -genkeypair -v -storetype PKCS12 \
      -keystore agentsetu-release.jks \
-     -alias agentsetu -keyalg RSA -keysize 4096 -validity 10000
+     -alias agentsetu -keyalg RSA -keysize 4096 -validity 10000 \
+     -storepass 'MyLongPassword123' -keypass 'MyLongPassword123' \
+     -dname "CN=Your Name, O=Agent Setu, C=IN"
    chmod 600 agentsetu-release.jks
+   history -c && rm -f ~/.bash_history
    ```
 
-   Enter a long password twice and **write it on paper**. Your own name is enough for the name
-   questions; press Enter for the rest and type `yes`. It can take a minute on a slow phone.
+   With this key type (PKCS12) the key password is always the same as the store password. **Write
+   the password on paper.** The last line wipes Termux's command history, which would otherwise keep
+   the password. It can take a minute on a slow phone.
 4. Note the fingerprint (pin it in the WhatsApp group; users compare it in *Settings → About*):
 
    ```bash
-   keytool -list -v -keystore ~/AgentSetuKeys/agentsetu-release.jks -alias agentsetu | grep SHA256
+   keytool -list -v -keystore ~/AgentSetuKeys/agentsetu-release.jks -alias agentsetu \
+     -storepass 'MyLongPassword123' | grep SHA256
+   history -c && rm -f ~/.bash_history
    ```
 
 5. **Back it up twice, offline:**
@@ -171,13 +182,16 @@ key and signs. The key never leaves the phone except as your offline backups.
 2. **Wait for the green tick** on *Actions → Build*, open the run, and download the artifact
    **AgentSetu-release-unsigned** (use Chrome, logged in; the GitHub app cannot download
    artifacts). It is kept for 30 days.
-3. **Unzip and sign** (apksigner asks for the key password; never put it in a script):
+3. **Unzip and sign.** The password is written in the command (`pass:` in front of it) so you can
+   see it; the last line clears the history again. Never save these commands in a script file.
 
    ```bash
    cd ~/storage/shared/Download
    unzip -o AgentSetu-release-unsigned.zip
    apksigner sign --ks ~/AgentSetuKeys/agentsetu-release.jks --ks-key-alias agentsetu \
+     --ks-pass 'pass:MyLongPassword123' --key-pass 'pass:MyLongPassword123' \
      --out AgentSetu-vX.Y.Z.apk app-release-unsigned.apk
+   history -c && rm -f ~/.bash_history
    ```
 
 4. **Check the signature and get the checksum:**
@@ -195,4 +209,83 @@ key and signs. The key never leaves the phone except as your offline backups.
 
 The unsigned artifact is safe to leave on GitHub: Android refuses to install an unsigned APK, and
 only your key can produce a copy with your fingerprint.
+
+## 7. Signing on GitHub with secrets (optional)
+
+The owner may store the release key as **encrypted GitHub secrets**. The build then signs the
+release itself, and you download `AgentSetu-vX.Y.Z.apk` ready to publish, with nothing to sign on
+the phone.
+
+**Trade-off.** It is convenient, but anyone who gets into your GitHub account (or anyone you give
+write access to the repository) could change the build to copy the key or sign a fake version.
+Before you do this:
+
+- turn on **two-factor authentication** on your GitHub account (*Settings → Password and
+  authentication*);
+- give nobody else write access to this repository;
+- still keep the two offline backups from 6.1: GitHub secrets cannot be read back, so they are not a
+  backup.
+
+What the build does with the secrets: only for builds of `main` and the *Run workflow* button (never
+pull requests), it writes the key to a temporary file on GitHub's machine, builds and signs, deletes
+the file, and uploads **AgentSetu-release-signed** (the APK and its `.sha256` file). The run's
+summary page shows the checksum and the certificate fingerprint. GitHub hides secret values in logs.
+Without the secrets, builds stay exactly as before (unsigned release).
+
+### 7.1 One time: put the key into GitHub
+
+1. Create the key in Termux as in 6.1 (steps 1–5, including both offline backups).
+2. Turn the key file into text (base64) and put it where you can copy it:
+
+   ```bash
+   termux-setup-storage     # once, if not done yet
+   base64 -w0 ~/AgentSetuKeys/agentsetu-release.jks > ~/storage/shared/Download/key-base64.txt
+   ```
+
+   Open `key-base64.txt` with a text editor app, select all and copy. (With the **Termux:API** app
+   and `pkg install termux-api` you can copy directly instead:
+   `base64 -w0 ~/AgentSetuKeys/agentsetu-release.jks | termux-clipboard-set`.)
+3. In Chrome, open **github.com/rahulranjan-dev-py/Agent-Setu → Settings → Secrets and variables →
+   Actions → New repository secret** and add four secrets, each exactly as named:
+
+   | Name | Value |
+   |---|---|
+   | `RELEASE_KEYSTORE_BASE64` | the whole text you copied in step 2 |
+   | `RELEASE_KEYSTORE_PASSWORD` | your key password |
+   | `RELEASE_KEY_ALIAS` | `agentsetu` |
+   | `RELEASE_KEY_PASSWORD` | the same password again |
+
+4. **Delete the text copy at once** — it is the key in another form:
+
+   ```bash
+   rm ~/storage/shared/Download/key-base64.txt
+   ```
+
+   If you copied it through the clipboard, copy some other text afterwards so the key is not left in
+   the clipboard.
+
+### 7.2 Every release
+
+1. Bump `versionCode` / `versionName` in `app/build.gradle.kts` on `main` (section 3, step 1).
+   Committing to `main` starts a signed build; or use *Actions → Build → Run workflow* on `main`.
+2. When the run is green, open it: the **summary** shows the SHA-256 checksum and the certificate
+   fingerprint. The fingerprint must match the one pinned in the WhatsApp group.
+3. Download **AgentSetu-release-signed**, unzip it: `AgentSetu-vX.Y.Z.apk` and its `.sha256`.
+4. Optional double check in Termux:
+   `apksigner verify --print-certs AgentSetu-vX.Y.Z.apk | grep -i sha-256`.
+5. Continue with section 3 from step 6 (test on two phones, GitHub Release, `version.json`,
+   WhatsApp post).
+
+### 7.3 To stop signing on GitHub
+
+Delete the four secrets (*Settings → Secrets and variables → Actions*). Builds go back to producing
+the unsigned release for signing in Termux.
+
+## 8. Test builds and the test key
+
+Test builds (`AgentSetu-debug-apk`, app id `in.agentsetu.app.debug`) are signed with a fixed test key
+that is committed to this public repository (`app/debug.keystore`), so each test build installs over
+the previous one without losing data. Because anyone can use that key, test builds are **for testing
+only**: install them only from this repository's Actions page and never keep real customer data in
+them. The test key cannot sign or update the real app.
 

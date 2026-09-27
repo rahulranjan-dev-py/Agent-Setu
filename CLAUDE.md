@@ -16,8 +16,9 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
   are unreachable (as in some cloud sandboxes), build `core` alone and rely on the GitHub Actions run
   to compile `app`.
 - Kotlin package / namespace is `app.agentsetu`; `applicationId` is `in.agentsetu.app` (final, never
-  change it). Releases: follow `docs/RELEASE.md`; signing happens only on the owner's own computer or phone
-  (Termux). CI publishes debug and unsigned release APKs and must never receive the release key.
+  change it). Releases: follow `docs/RELEASE.md`. The release key lives with the owner (computer or Termux)
+  and, only if the owner adds them, as encrypted GitHub secrets used for `main`/manual builds.
+  Never commit it, print it, or use the secrets in pull-request builds.
 
 ## Guardrails (never break these in code, text or assets)
 
@@ -39,7 +40,8 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
 - Scheme cards and calculators never contain a rate: they read the user's `InterestRate` table.
 - **Never hard-code a commission or interest rate.** Rates live in the editable `CommissionRule` /
   `InterestRate` tables, seeded from `data/seed/*.sample.json`, with `effectiveFrom` and `orderRef`.
-- Never commit a keystore, key passwords, `local.properties` or any real customer data.
+- Never commit a keystore, key passwords, `local.properties` or any real customer data. The only
+  exception is the public test key `app/debug.keystore` for `.debug` builds.
 
 ## Security conventions
 
