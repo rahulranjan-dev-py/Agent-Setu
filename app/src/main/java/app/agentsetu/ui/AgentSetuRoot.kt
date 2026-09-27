@@ -1,26 +1,41 @@
 package app.agentsetu.ui
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
+import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.seed.SeedLoader
 import app.agentsetu.data.settings.AppSettings
-import app.agentsetu.ui.home.HomeScreen
+import app.agentsetu.ui.nav.MainNavigation
+import app.agentsetu.ui.profile.ProfileScreen
 import app.agentsetu.ui.welcome.WelcomeScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+enum class RootState { LOADING, NEEDS_DISCLAIMER, NEEDS_PROFILE, READY }
 
 @HiltViewModel
 class RootViewModel @Inject constructor(
     private val settings: AppSettings,
+    db: AgentSetuDatabase,
     seedLoader: SeedLoader,
 ) : ViewModel() {
-    val disclaimerAccepted = settings.disclaimerAccepted
+
+    val state = combine(settings.disclaimerAccepted, db.userProfileDao().observe()) { accepted, profile ->
+        when {
+            !accepted -> RootState.NEEDS_DISCLAIMER
+            profile == null -> RootState.NEEDS_PROFILE
+            else -> RootState.READY
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, RootState.LOADING)
 
     init {
         viewModelScope.launch {
@@ -32,13 +47,15 @@ class RootViewModel @Inject constructor(
     fun acceptDisclaimer() = settings.acceptDisclaimer()
 }
 
-/** Nothing else is reachable until the non-affiliation disclaimer has been acknowledged. */
+/** Disclaimer first, then the profile (staff type decides which rules apply), then the app. */
 @Composable
 fun AgentSetuRoot(viewModel: RootViewModel = hiltViewModel()) {
-    val accepted by viewModel.disclaimerAccepted.collectAsStateWithLifecycle()
-    if (accepted) {
-        HomeScreen()
-    } else {
-        WelcomeScreen(onAccept = viewModel::acceptDisclaimer)
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    when (state) {
+        RootState.LOADING -> Unit
+        RootState.NEEDS_DISCLAIMER -> WelcomeScreen(onAccept = viewModel::acceptDisclaimer)
+        // Saving the profile flips the state to READY by itself.
+        RootState.NEEDS_PROFILE -> ProfileScreen(onBack = null, onSaved = {})
+        RootState.READY -> MainNavigation()
     }
 }

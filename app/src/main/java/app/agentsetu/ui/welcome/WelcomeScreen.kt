@@ -1,6 +1,5 @@
 package app.agentsetu.ui.welcome
 
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,14 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.core.os.LocaleListCompat
 import app.agentsetu.R
+import app.agentsetu.ui.common.LanguageChips
 
 @Composable
 fun WelcomeScreen(onAccept: () -> Unit) {
     // Survives the activity restart that a language change triggers.
     var acknowledged by rememberSaveable { mutableStateOf(false) }
-    val currentLanguage = AppCompatDelegate.getApplicationLocales().toLanguageTags()
 
     Scaffold { padding ->
         Column(
@@ -56,10 +53,7 @@ fun WelcomeScreen(onAccept: () -> Unit) {
             )
 
             Text(stringResource(R.string.welcome_choose_language), style = MaterialTheme.typography.titleMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                LanguageChip(stringResource(R.string.language_hindi), "hi", currentLanguage)
-                LanguageChip(stringResource(R.string.language_english), "en", currentLanguage)
-            }
+            LanguageChips()
 
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -99,14 +93,4 @@ fun WelcomeScreen(onAccept: () -> Unit) {
             }
         }
     }
-}
-
-@Composable
-private fun LanguageChip(label: String, tag: String, currentLanguage: String) {
-    FilterChip(
-        selected = currentLanguage.startsWith(tag),
-        onClick = { AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag)) },
-        label = { Text(label, style = MaterialTheme.typography.titleMedium) },
-        modifier = Modifier.heightIn(min = 48.dp),
-    )
 }

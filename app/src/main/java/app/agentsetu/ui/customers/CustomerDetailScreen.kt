@@ -1,0 +1,170 @@
+package app.agentsetu.ui.customers
+
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
+import app.agentsetu.R
+import app.agentsetu.core.input.MobileNumber
+import app.agentsetu.data.db.AgentSetuDatabase
+import app.agentsetu.data.db.HoldingEntity
+import app.agentsetu.data.db.ProductEntity
+import app.agentsetu.ui.common.AppScaffold
+import app.agentsetu.ui.common.display
+import app.agentsetu.ui.common.labelRes
+import app.agentsetu.ui.common.localized
+import app.agentsetu.ui.common.rupees
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+
+data class HoldingView(val holding: HoldingEntity, val product: ProductEntity?)
+
+@HiltViewModel
+class CustomerDetailViewModel @Inject constructor(
+    db: AgentSetuDatabase,
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
+    private val customerId: String = checkNotNull(savedStateHandle["id"])
+
+    val customer = db.customerDao().observe(customerId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val holdings = combine(db.holdingDao().observeForCustomer(customerId), db.productDao().observeAll()) { holdings, products ->
+        val byId = products.associateBy { it.id }
+        holdings.map { HoldingView(it, byId[it.productId]) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+}
+
+@Composable
+fun CustomerDetailScreen(
+    onBack: () -> Unit,
+    onEdit: (String) -> Unit,
+    onAddBusiness: (String) -> Unit,
+    viewModel: CustomerDetailViewModel = hiltViewModel(),
+) {
+    val customer by viewModel.customer.collectAsStateWithLifecycle()
+    val holdings by viewModel.holdings.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val c = customer ?: return
+
+    fun open(uri: String, action: String) {
+        try {
+            context.startActivity(Intent(action, Uri.parse(uri)))
+        } catch (_: ActivityNotFoundException) {
+            // No dialler/browser on this device; nothing else to do.
+        }
+    }
+
+    AppScaffold(
+        title = c.name,
+        onBack = onBack,
+        actions = {
+            IconButton(onClick = { onEdit(c.id) }) {
+                Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.action_edit))
+            }
+        },
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    listOfNotNull(c.village, c.mobile).filter { it.isNotBlank() }.forEach {
+                        Text(it, style = MaterialTheme.typography.bodyLarge)
+                    }
+                    if (c.notes.isNotBlank()) Text(c.notes, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            c.mobile?.let { mobile ->
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(
+                            onClick = { open(MobileNumber.dialUri(mobile), Intent.ACTION_DIAL) },
+                            modifier = Modifier.heightIn(min = 52.dp),
+                        ) {
+                            Icon(Icons.Filled.Call, contentDescription = null)
+                            Text(stringResource(R.string.customer_call), modifier = Modifier.padding(start = 8.dp))
+                        }
+                        OutlinedButton(
+                            onClick = { open(MobileNumber.whatsAppUri(mobile), Intent.ACTION_VIEW) },
+                            modifier = Modifier.heightIn(min = 52.dp),
+                        ) {
+                            Text(stringResource(R.string.customer_whatsapp))
+                        }
+                    }
+                }
+            }
+            item {
+                Button(
+                    onClick = { onAddBusiness(c.id) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp),
+                ) {
+                    Text(stringResource(R.string.customer_add_business))
+                }
+            }
+            item { Text(stringResource(R.string.customer_holdings), style = MaterialTheme.typography.titleMedium) }
+            if (holdings.isEmpty()) {
+                item { Text(stringResource(R.string.customer_no_holdings), style = MaterialTheme.typography.bodyLarge) }
+            }
+            items(holdings, key = { it.holding.id }) { view -> HoldingCard(view) }
+        }
+    }
+}
+
+@Composable
+private fun HoldingCard(view: HoldingView) {
+    val h = view.holding
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            val name = view.product?.let { localized(it.nameEn, it.nameHi) } ?: "-"
+            Text(name, style = MaterialTheme.typography.titleMedium)
+            h.policyCategory.labelRes()?.let { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium) }
+            val money = h.instalmentPaise?.let { "${rupees(it)} · ${stringResource(h.frequency.labelRes())}" }
+                ?: rupees(h.amountPaise)
+            Text(money, style = MaterialTheme.typography.bodyLarge)
+            h.refLast4?.let { Text(stringResource(R.string.holding_ref, it), style = MaterialTheme.typography.bodyMedium) }
+            h.maturityDate?.let {
+                Text(stringResource(R.string.holding_matures, it.display()), style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+    }
+}
+

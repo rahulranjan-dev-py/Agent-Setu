@@ -23,6 +23,12 @@ interface CustomerDao {
     @Query("SELECT * FROM customer WHERE id = :id")
     suspend fun get(id: String): CustomerEntity?
 
+    @Query("SELECT * FROM customer WHERE id = :id")
+    fun observe(id: String): Flow<CustomerEntity?>
+
+    @Query("SELECT COUNT(*) FROM customer WHERE deleted = 0")
+    fun observeCount(): Flow<Int>
+
     @Upsert
     suspend fun upsert(customer: CustomerEntity)
 }
@@ -34,6 +40,9 @@ interface ProductDao {
 
     @Query("SELECT * FROM product WHERE id = :id")
     suspend fun get(id: String): ProductEntity?
+
+    @Query("SELECT * FROM product")
+    fun observeAll(): Flow<List<ProductEntity>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIgnore(products: List<ProductEntity>)
@@ -111,6 +120,22 @@ interface CommissionEntryDao {
 
     @Query("SELECT * FROM commission_entry WHERE deleted = 0 AND status IN ('EXPECTED', 'PARTLY_RECEIVED', 'NO_RULE') ORDER BY period")
     fun observePending(): Flow<List<CommissionEntryEntity>>
+
+    @Query("SELECT * FROM commission_entry WHERE id = :id")
+    suspend fun get(id: String): CommissionEntryEntity?
+
+    /** Ledger lines for one month with the customer and product names the screen shows. */
+    @Query(
+        "SELECT e.id, e.period, e.policyYear, e.status, e.baseAmountPaise, e.expectedPaise, e.receivedPaise, " +
+            "e.receivedDate, e.rateApplied, c.name AS customerName, p.code AS productCode, " +
+            "p.nameEn AS productNameEn, p.nameHi AS productNameHi " +
+            "FROM commission_entry e " +
+            "JOIN holding h ON h.id = e.holdingId " +
+            "JOIN customer c ON c.id = h.customerId " +
+            "JOIN product p ON p.id = h.productId " +
+            "WHERE e.deleted = 0 AND e.period = :period ORDER BY c.name COLLATE NOCASE",
+    )
+    fun observeLedger(period: String): Flow<List<LedgerRow>>
 
     @Upsert
     suspend fun upsert(entry: CommissionEntryEntity)
