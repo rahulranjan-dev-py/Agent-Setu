@@ -297,4 +297,6 @@
     <string name="update_up_to_date">आपके पास नवीनतम वर्शन है।</string>
     <string name="update_failed">जाँच नहीं हो सकी। क्या इंटरनेट चालू है?</string>
     <string name="update_checking">जाँच रहे हैं...</string>
+    <string name="about_signing">साइनिंग की फ़िंगरप्रिंट (SHA-256)</string>
+    <string name="about_signing_help">इसे आधिकारिक एजेंट सेतु ग्रुप में पिन की गई फ़िंगरप्रिंट से मिलाएँ। अलग हो तो यह कॉपी असली नहीं है: इसे अनइंस्टॉल करें और आधिकारिक लिंक से इंस्टॉल करें।</string>
 </resources>

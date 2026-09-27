@@ -15,8 +15,8 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
 - `./gradlew :app:assembleDebug`: needs the Android SDK and Google Maven (dl.google.com). If those
   are unreachable (as in some cloud sandboxes), build `core` alone and rely on the GitHub Actions run
   to compile `app`.
-- Kotlin package / namespace is `app.agentsetu`; `applicationId` is a placeholder until the owner
-  picks the final package name.
+- Kotlin package / namespace is `app.agentsetu`; `applicationId` is `in.agentsetu.app` (final, never
+  change it). Releases: follow `docs/RELEASE.md`; signing happens only on the owner's computer.
 
 ## Guardrails (never break these in code, text or assets)
 

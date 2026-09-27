@@ -14,8 +14,9 @@ and commission. Hindi + English. Free, no ads.
 Step G: the MVP feature set from the roadmap is in place: customers and business with a live
 commission preview, month-wise ledger, editable commission and interest rates, reminders with a
 daily notification, TD/RD/MIS calculators, Hindi/English scheme cards shared as images, PIN lock,
-encrypted backup, manual error report, and an update check. Next: pilot preparation (final package
-name, signing key, release checklist) and testing on real phones.
+encrypted backup, manual error report, and an update check. Package name `in.agentsetu.app`.
+Next: testing on real phones, the signing key and the first signed release (see `docs/RELEASE.md`
+and `docs/PILOT.md`).
 
 ## Build
 
@@ -48,5 +49,7 @@ must never be committed.
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Decisions made since v1.2 and open questions |
 | [docs/COMMISSION_RATES.md](docs/COMMISSION_RATES.md) | Researched commission/interest rates, sources, and how rates are edited |
 | [docs/DISCLAIMER.md](docs/DISCLAIMER.md) | Standard disclaimer text (Hindi + English) |
+| [docs/RELEASE.md](docs/RELEASE.md) | Signing key, signed build, checksum, GitHub Release, `version.json`, WhatsApp post |
+| [docs/PILOT.md](docs/PILOT.md) | Pilot stages, test checklist, commission hand-check sheet, feedback form, install video script |
 | [docs/PRIVACY.md](docs/PRIVACY.md) | Privacy notice draft (Hindi + English) |
 | [data/seed/](data/seed/) | Editable sample rate tables loaded on first install |

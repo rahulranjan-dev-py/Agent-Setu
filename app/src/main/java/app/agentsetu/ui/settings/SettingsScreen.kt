@@ -23,7 +23,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.agentsetu.BuildConfig
 import app.agentsetu.R
+import androidx.compose.ui.text.font.FontFamily
 import app.agentsetu.security.DataEraser
+import app.agentsetu.security.SigningInfo
 import app.agentsetu.ui.common.AppScaffold
 import app.agentsetu.ui.common.LanguageChips
 import app.agentsetu.ui.common.SectionTitle
@@ -97,6 +99,12 @@ fun SettingsScreen(
                 LanguageChips()
                 SectionTitle(stringResource(R.string.settings_about))
                 Text(stringResource(R.string.about_version, BuildConfig.VERSION_NAME), style = MaterialTheme.typography.bodyLarge)
+                val fingerprint = remember { SigningInfo.sha256(context) }
+                if (fingerprint != null) {
+                    Text(stringResource(R.string.about_signing), style = MaterialTheme.typography.titleSmall)
+                    Text(fingerprint, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.about_signing_help), style = MaterialTheme.typography.bodySmall)
+                }
                 Text(stringResource(R.string.disclaimer_title), style = MaterialTheme.typography.titleSmall)
                 Text(stringResource(R.string.disclaimer_body), style = MaterialTheme.typography.bodyMedium)
             }

@@ -300,4 +300,6 @@
     <string name="update_up_to_date">You have the latest version.</string>
     <string name="update_failed">Could not check. Is the internet on?</string>
     <string name="update_checking">Checking...</string>
+    <string name="about_signing">Signing key fingerprint (SHA-256)</string>
+    <string name="about_signing_help">Compare it with the fingerprint pinned in the official Agent Setu group. If it is different, this copy is not genuine: uninstall it and install from the official link.</string>
 </resources>

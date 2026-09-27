@@ -4,6 +4,9 @@ Decisions made after roadmap v1.2. Newest first.
 
 | Date | Decision | Detail |
 |---|---|---|
+| 29-09-2026 | **Package name: `in.agentsetu.app`** | Approved by the owner. Permanent from the first release: a different package name is a different app to Android. Debug builds use `in.agentsetu.app.debug`, so testers can keep both. Owning the matching web domain is not needed for sideloaded APKs. |
+| 29-09-2026 | **Repository is public** | Confirmed from GitHub (build information is readable without logging in). Consequences: the release key, `keystore.properties`, passwords and any real customer data must never be committed (`.gitignore` blocks key files and `release/out/`); the update check can read `version.json` straight from `main`. |
+| 29-09-2026 | **Release process (step H)** | Signed builds are made only on the owner's computer, with the key kept outside the repository and backed up twice offline ([RELEASE.md](RELEASE.md)). CI builds an unsigned release to catch minification (R8) problems but never signs. `scripts/prepare-release.sh` names the APK, prints its SHA-256 and signing certificate, and the fields for `version.json`. *Settings → About* shows the signing-key fingerprint so users can spot a copy signed by anyone else. |
 | 29-09-2026 | **Tools tab (step G)** | A fifth bottom tab, *Tools*: TD, RD and MIS calculators, scheme cards and interest rates. Calculators pre-fill the rate from the user's `InterestRate` table (still editable) and label sample rates. Formulas are in `core/calc` and tested (RD matches the published ₹10,000 / 5 years / 6.7% → ₹7,13,659). TD shows the yearly payout, since TD interest is paid out each year. |
 | 29-09-2026 | **Scheme cards** | Short Hindi/English summaries of PLI, RPLI, TD, RD, MIS, NSC, KVP, SCSS, PPF and SSA, written in our own words from public information (September 2026). The only rate on a card is the one in force in the user's table. Shared as a plain teal/white image with the "verify at your Post Office" and "unofficial app" footers; no logos. |
 | 29-09-2026 | **Interest rates stay open-ended** | Sample interest rates no longer end on 30-09-2026 (which would have left the calculators without a rate). The Interest rates screen warns when the newest rate is more than 3 months old. Changing a rate follows the same keep-history rule as commission rules. |
@@ -30,7 +33,7 @@ Decisions made after roadmap v1.2. Newest first.
 
 | Question | Why it matters |
 |---|---|
-| Final package name (e.g. `in.agentsetu.app`) | Permanent; cannot change after first release without users reinstalling. |
-| Is this GitHub repository public or private? | The keystore, passwords and any personal notes must never be committed either way; a public repo also exposes work-in-progress. If private, the update check needs `version.json` on a public address (e.g. GitHub Pages) via `-Pagentsetu.updateUrl`. |
+| Merge this work into `main` | The in-app update check reads `release/version.json` from `main`; until the branch is merged it reports "could not check". |
+| Oct–Dec 2026 interest rates | Enter them in *Tools → Interest rates* (and the seed file before release) once announced. |
 | First public release needs real database migrations | From the first release, each schema change must keep users' data; the pre-release shortcut (dropping version 1) must not be reused. |
 | Verified order copies for the rates | Needed to replace sample rates and settle the PLI renewal 1% vs 2% conflict. |

@@ -29,7 +29,7 @@ and the commission they have earned.
 
 - Launcher label **Agent Setu** (confirmed). Colours teal and indigo. Avoid postal red and yellow.
 - Original icon (handshake or notebook with a tick). No emblem, envelope logo or uniform imagery.
-- Package name: permanent, must not contain `gov`, `indiapost`, `dop` or `ippb`. **Still to be chosen.**
+- Package name: **`in.agentsetu.app`** (decided 29-09-2026; permanent).
 - Release file name: `AgentSetu-vX.Y.Z.apk`.
 - Before first release: search Play Store and web for "Agent Setu" and run a trademark search on the
   IP India registry (classes 9 and 42).

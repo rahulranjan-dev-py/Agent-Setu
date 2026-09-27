@@ -20,8 +20,8 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        // PLACEHOLDER - the final package name is still to be chosen (docs/DECISIONS.md).
-        // It becomes permanent with the first public release.
+        // Final package name (decided 29-09-2026). Never change it after the first release:
+        // Android treats a different package name as a different app, and users would lose data.
         applicationId = "in.agentsetu.app"
         minSdk = 26
         targetSdk = 35
