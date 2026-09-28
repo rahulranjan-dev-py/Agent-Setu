@@ -16,12 +16,13 @@ import app.agentsetu.BuildConfig
 import java.io.File
 
 /**
- * Draws a simple sea-green/white card (title, body lines, footer) as a PNG and opens the share sheet,
+ * Draws a simple navy/white card with a sea-green divider (title, body lines, footer) as a PNG and opens the share sheet,
  * for WhatsApp. Uses the system font, which covers Hindi. No logos or official marks.
  */
 object ShareCard {
     private const val WIDTH = 1080
     private const val PAD = 64
+    private val NAVY = Color.rgb(0x1F, 0x4E, 0x79)
     private val SEA_GREEN = Color.rgb(0x2A, 0x9D, 0x8F)
     private val INK = Color.rgb(0x1C, 0x1B, 0x1F)
     private val MUTED = Color.rgb(0x5F, 0x5E, 0x66)
@@ -61,7 +62,7 @@ object ShareCard {
         val bitmap = Bitmap.createBitmap(WIDTH, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawColor(Color.WHITE)
-        canvas.drawRect(0f, 0f, WIDTH.toFloat(), headerHeight.toFloat(), Paint().apply { color = SEA_GREEN })
+        canvas.drawRect(0f, 0f, WIDTH.toFloat(), headerHeight.toFloat(), Paint().apply { color = NAVY })
 
         var y = PAD.toFloat()
         y = draw(canvas, titleLayout, y) + PAD * 2
