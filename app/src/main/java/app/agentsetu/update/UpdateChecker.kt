@@ -9,16 +9,19 @@ import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
 /**
- * Reads the public release/version.json at most once a day (or when the user asks). This is the
- * app's only network request: a plain GET that sends no user or device data (the User-Agent is just
- * "AgentSetu"). The app never downloads or installs anything itself; it opens the link in the browser.
+ * Reads the public release/version.json when the app starts or comes to the foreground, at most once
+ * every 15 minutes (or whenever the user asks in Settings). A plain GET that sends no user or device
+ * data (the User-Agent is just "AgentSetu"). Downloading the APK named there is UpdateInstaller's job.
  */
 @Singleton
 class UpdateChecker @Inject constructor(@ApplicationContext context: Context) {
@@ -26,6 +29,13 @@ class UpdateChecker @Inject constructor(@ApplicationContext context: Context) {
 
     private val _status = MutableStateFlow(cached())
     val status: StateFlow<UpdateStatus?> = _status.asStateFlow()
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /** Called by the Activity whenever the app comes to the foreground (cold start included). */
+    fun onForeground() {
+        scope.launch { check(force = false) }
+    }
 
     private var popupShownFor: Int? = null
 
@@ -42,7 +52,7 @@ class UpdateChecker @Inject constructor(@ApplicationContext context: Context) {
     /** Returns false if the check could not be done (offline, file missing, bad file). */
     suspend fun check(force: Boolean): Boolean {
         val now = System.currentTimeMillis()
-        if (!force && now - prefs.getLong(KEY_LAST_CHECK, 0) < DAY_MS) return true
+        if (!force && now - prefs.getLong(KEY_LAST_CHECK, 0) < THROTTLE_MS) return true
         val text = withContext(Dispatchers.IO) { fetch() } ?: return false
         val info = UpdateCheck.parse(text) ?: return false
         prefs.edit().putLong(KEY_LAST_CHECK, now).putString(KEY_LAST_FILE, text).apply()
@@ -94,7 +104,7 @@ class UpdateChecker @Inject constructor(@ApplicationContext context: Context) {
         const val PREFS_NAME = "updates"
         const val KEY_LAST_CHECK = "last_check"
         const val KEY_LAST_FILE = "last_file"
-        const val DAY_MS = 24 * 60 * 60 * 1000L
+        const val THROTTLE_MS = 15 * 60 * 1000L
         const val TIMEOUT_MS = 10_000
         const val MAX_BYTES = 64 * 1024
     }

@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.agentsetu.R
+import app.agentsetu.core.update.DownloadPolicy
 import app.agentsetu.core.update.UpdateCheck
 import app.agentsetu.core.update.UpdateStatus
 import app.agentsetu.core.update.VersionInfo
@@ -124,23 +125,34 @@ fun UpdateDownloadDialog(info: VersionInfo) {
                         val fraction = s.fraction
                         if (fraction == null) {
                             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                            Text(stringResource(R.string.update_downloading))
                         } else {
                             LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
-                            Text(stringResource(R.string.update_downloading_percent, (fraction * 100).toInt()))
                         }
+                        Text(
+                            when {
+                                s.retry > 0 -> stringResource(R.string.update_reconnecting, s.retry, DownloadPolicy.MAX_RETRIES)
+                                fraction == null -> stringResource(R.string.update_downloading)
+                                else -> stringResource(R.string.update_downloading_percent, (fraction * 100).toInt())
+                            },
+                        )
                     }
                     DownloadState.Verifying -> {
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         Text(stringResource(R.string.update_verifying))
                     }
                     is DownloadState.Ready -> Text(stringResource(R.string.update_ready))
-                    is DownloadState.Failed -> Text(
-                        stringResource(
-                            if (s.reason == DownloadState.Reason.CHECKSUM) R.string.update_failed_checksum else R.string.update_failed_download,
-                        ),
-                        color = MaterialTheme.colorScheme.error,
-                    )
+                    is DownloadState.Failed -> {
+                        Text(
+                            stringResource(
+                                if (s.reason == DownloadState.Reason.CHECKSUM) R.string.update_failed_checksum else R.string.update_failed_download,
+                            ),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                        TextButton(onClick = {
+                            vm.installer.dismiss()
+                            context.openUri(info.downloadUrl)
+                        }) { Text(stringResource(R.string.update_open_page)) }
+                    }
                     DownloadState.Idle -> Unit
                 }
             }
@@ -148,10 +160,11 @@ fun UpdateDownloadDialog(info: VersionInfo) {
         confirmButton = {
             when (val s = state) {
                 is DownloadState.Ready -> Button(onClick = { vm.installer.install(s.file) }) { Text(stringResource(R.string.update_install)) }
-                is DownloadState.Failed -> Button(onClick = {
-                    vm.installer.dismiss()
-                    context.openUri(info.downloadUrl)
-                }) { Text(stringResource(R.string.update_open_page)) }
+                is DownloadState.Failed -> if (s.reason == DownloadState.Reason.NETWORK) {
+                    Button(onClick = { vm.installer.start(info) }) { Text(stringResource(R.string.update_retry)) }
+                } else {
+                    Unit
+                }
                 else -> Unit
             }
         },

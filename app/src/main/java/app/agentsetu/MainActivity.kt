@@ -10,6 +10,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.agentsetu.data.settings.AppSettings
 import app.agentsetu.data.settings.ThemeMode
 import app.agentsetu.security.AppLock
+import app.agentsetu.update.UpdateChecker
 import app.agentsetu.ui.AgentSetuRoot
 import app.agentsetu.ui.theme.AgentSetuTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,6 +22,7 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
     @Inject lateinit var appLock: AppLock
     @Inject lateinit var settings: AppSettings
+    @Inject lateinit var updates: UpdateChecker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         appLock.onForeground(System.currentTimeMillis())
+        updates.onForeground()
     }
 
     override fun onStop() {

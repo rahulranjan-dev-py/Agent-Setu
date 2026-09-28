@@ -6,6 +6,14 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
+## 1.1.3 (versionCode 7) - update check on every start, resumable download; not yet published
+
+- The update check runs whenever the app starts or comes to the foreground (at most once every
+  15 minutes), not once a day, so a new version shows on Today the same day.
+- Download: a slow link never times out; only a 60-second stall does. After a drop the app
+  reconnects up to 3 times and continues from where it stopped (HTTP ranges); a failure offers
+  Retry, which also resumes. The checksum is always checked on the complete file.
+
 ## 1.1.2 (versionCode 6) - in-app update install, recovery-code fix; published 28-09-2026
 
 - Download on an update now fetches the APK inside the app, verifies its SHA-256 against
