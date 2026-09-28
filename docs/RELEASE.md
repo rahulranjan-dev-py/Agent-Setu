@@ -282,9 +282,9 @@ With the secrets in place, GitHub can also publish the release itself (`.github/
 
 1. Make sure `main` has the new `versionCode` / `versionName` and a notes file
    `release/notes/vX.Y.Z.md` (copy the previous one). Its header sets the release title
-   (`Title: …`) and whether it is a pre-release (`Pre-release: yes`); everything below the first
-   `---` line becomes the description, with `<sha256 of the APK>` and
-   `<SHA-256 fingerprint of the release key>` filled in automatically.
+   (`Title: …`) and whether it is a pre-release (`Pre-release: yes` for an early test version,
+   `no` for a normal release); everything below the first `---` line becomes the description, with
+   `<sha256 of the APK>` and `<SHA-256 fingerprint of the release key>` filled in automatically.
 2. Start it, either way:
    - **From the phone:** *Actions → Release → Run workflow* (branch `main`). The tag `vX.Y.Z` is
      created from the version name.
@@ -298,6 +298,10 @@ With the secrets in place, GitHub can also publish the release itself (`.github/
 
 A version that already has a release is refused; to redo one, delete that release and its tag on
 GitHub first.
+
+To turn a pre-release into a full release later (badge removed, marked *Latest*, title
+"Agent Setu X.Y.Z"): *Actions → Promote release → Run workflow* and type the tag. The APK is not
+rebuilt.
 
 ### 7.4 To stop signing on GitHub
 
