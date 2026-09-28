@@ -6,6 +6,12 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
+## 1.1.6 (versionCode 10) - updated libraries; not yet published
+
+- Kotlin 2.4.20, Android Gradle Plugin 9.4.1, core-ktx 1.19.1, navigation-compose 2.10.2,
+  hilt-navigation-compose 1.4.0. No user-facing change. Release builds now need the owner's
+  approval on GitHub (secrets in the `release` environment); Gradle wrapper checksum verified.
+
 ## 1.1.5 (versionCode 9) - updated build toolchain and libraries; published 28-09-2026
 
 - Build toolchain: Android Gradle Plugin 9.4, Gradle 9.6.1, Kotlin 2.3.21, KSP 2.3.12,
