@@ -41,7 +41,7 @@ abstract class AgentSetuDatabase : RoomDatabase() {
     companion object {
         const val FILE_NAME = "agentsetu.db"
         /** Bump together with a Migration in Migrations.kt; users' data must survive every update. */
-        const val VERSION = 3
+        const val VERSION = 4
 
         /** Oldest schema a backup file may have and still be restored (restore upgrades it). */
         const val OLDEST_RESTORABLE_VERSION = 2

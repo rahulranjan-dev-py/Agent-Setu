@@ -20,8 +20,14 @@ object PinHasher {
 
     fun hash(pin: String, random: SecureRandom = SecureRandom()): String {
         require(isValidPin(pin)) { "PIN must be 4 to 6 digits" }
+        return hashSecret(pin, random)
+    }
+
+    /** Same scheme for other short secrets, such as the recovery code. */
+    fun hashSecret(secret: String, random: SecureRandom = SecureRandom()): String {
+        require(secret.isNotEmpty())
         val salt = ByteArray(SALT_BYTES).also(random::nextBytes)
-        return encode(ITERATIONS, salt, derive(pin, salt, ITERATIONS))
+        return encode(ITERATIONS, salt, derive(secret, salt, ITERATIONS))
     }
 
     fun verify(pin: String, stored: String): Boolean {

@@ -82,8 +82,7 @@
     <string name="freq_ONE_TIME">One-time</string>
     <string name="business_start_date">Start / first payment date</string>
     <string name="business_maturity_date">Maturity date (optional)</string>
-    <string name="business_ref_last4">Last 4 digits of policy/account no. (optional)</string>
-    <string name="business_ref_error">Only the last 4 digits - never the full number</string>
+    <string name="business_ref_error">Up to 40 letters, digits, / or -</string>
     <string name="business_expected">Expected commission</string>
     <string name="business_expected_value">%1$s (rate %2$s percent)</string>
     <string name="business_expected_sample">Based on a sample rate - verify it in Settings</string>
@@ -183,10 +182,10 @@
     <string name="lock_unlock">Unlock</string>
     <string name="lock_wrong_pin">Wrong PIN</string>
     <string name="lock_wait">Too many wrong tries. Try again in %1$d seconds.</string>
-    <string name="lock_use_biometric">Use fingerprint</string>
+    <string name="lock_use_biometric">Unlock with fingerprint, face or phone lock</string>
     <string name="lock_biometric_title">Unlock Agent Setu</string>
     <string name="lock_forgot">Forgot PIN?</string>
-    <string name="lock_forgot_body">Without the PIN, the only way in is to erase all data on this phone and start again. You can then restore from a backup file if you made one.</string>
+    <string name="lock_forgot_body">You can set a new PIN after proving it is you: with your phone\'s own lock (face, fingerprint, pattern or PIN), or with the 8-digit recovery code shown when you set the PIN.</string>
     <string name="erase_understood">I understand this cannot be undone</string>
     <string name="erase_confirm">Erase everything</string>
     <string name="pin_title">App lock</string>
@@ -196,12 +195,12 @@
     <string name="pin_confirm">Enter the new PIN again</string>
     <string name="pin_rule">Use 4 to 6 digits</string>
     <string name="pin_mismatch">Does not match</string>
-    <string name="pin_biometric">Also unlock with fingerprint</string>
-    <string name="pin_forget_warning">If you forget the PIN, the app can only be reset by erasing its data. Keep a backup.</string>
+    <string name="pin_biometric">Also unlock with fingerprint, face or phone lock</string>
+    <string name="pin_forget_warning">If you forget the PIN, your phone\'s own lock or the recovery code (shown next) lets you set a new one. Keep a backup anyway.</string>
     <string name="pin_remove">Remove PIN</string>
     <string name="pin_skip">Skip for now</string>
     <string name="settings_app_lock">App lock</string>
-    <string name="settings_app_lock_summary">PIN and fingerprint</string>
+    <string name="settings_app_lock_summary">PIN, fingerprint or face</string>
     <string name="settings_backup">Backup and restore</string>
     <string name="settings_backup_summary">Password-protected backup file</string>
     <string name="settings_error_report">Send error report</string>
@@ -374,4 +373,18 @@
     <string name="product_name_en">Name (English)</string>
     <string name="product_name_hi">Name (Hindi, optional)</string>
     <string name="product_group">Type</string>
+    <string name="lock_forgot_device">Use phone lock</string>
+    <string name="lock_forgot_device_title">Confirm it is you</string>
+    <string name="lock_forgot_code">Recovery code</string>
+    <string name="lock_forgot_code_hint">Or enter the 8-digit recovery code you noted when setting the PIN.</string>
+    <string name="lock_forgot_use_code">Use code</string>
+    <string name="lock_wrong_code">Wrong code</string>
+    <string name="lock_forgot_erase">Erase all data instead</string>
+    <string name="lock_erase_body">Everything on this phone is erased and the app starts again. You can then restore from a backup file if you made one.</string>
+    <string name="recovery_title">Your recovery code</string>
+    <string name="recovery_body">Write this code down and keep it somewhere safe, not in the app. If you ever forget your PIN, this code lets you set a new one. It is shown only this once.</string>
+    <string name="recovery_noted">I have written it down</string>
+    <string name="business_ref_number">Policy / account number (optional)</string>
+    <string name="business_ref_help">Shown in full only on this screen; elsewhere only the last 4 digits. Not for Aadhaar, PAN or bank account numbers.</string>
+    <string name="update_later">Later</string>
 </resources>

@@ -17,6 +17,7 @@ import app.agentsetu.core.model.ProductGroup
 import app.agentsetu.core.model.ReceiptMode
 import app.agentsetu.core.model.ReminderType
 import app.agentsetu.core.model.RefLast4
+import app.agentsetu.core.model.RefNumber
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.serialization.Serializable
@@ -87,8 +88,13 @@ data class HoldingEntity(
     @PrimaryKey override val id: String = newId(),
     val customerId: String,
     val productId: String,
-    /** At most the last 4 digits of the policy/account number; enforced below. */
+    /** Last 4 digits of the policy/account number: what every list, card and screen shows. */
     val refLast4: String?,
+    /**
+     * Optional full policy/account number (schema 4). Shown only on the policy's own screen, never
+     * in notifications, share cards or error reports. Not for Aadhaar, PAN or bank accounts.
+     */
+    val refNumber: String? = null,
     /** AEA / NON_AEA for PLI; ANY for everything else. */
     val policyCategory: PolicyCategory = PolicyCategory.ANY,
     val premiumTermYears: Int? = null,
@@ -106,6 +112,7 @@ data class HoldingEntity(
 ) : SyncEntity {
     init {
         RefLast4.require(refLast4)
+        RefNumber.require(refNumber)
     }
 }
 

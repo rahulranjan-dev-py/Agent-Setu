@@ -84,7 +84,7 @@ their earnings, it waits for v1.5.
 
 - ask for or store departmental logins (Finacle, CSI/McCamish, IPPB, UIDAI client, etc.);
 - scrape, automate or connect to any departmental portal or API;
-- collect full Aadhaar, PAN or bank account numbers (at most the last 4 digits of a policy/account number);
+- collect Aadhaar, PAN or bank account numbers (a policy/account number is optional and shown in full only on its own screen; masked to the last 4 digits elsewhere);
 - accept, collect or route money;
 - promise returns beyond official scheme rules;
 - use the India Post logo, colours, emblem or words like "official" or "authorised";
@@ -123,7 +123,7 @@ Pages/Releases for update checks.
 | Customer | name, mobile, village, dob?, tags, consentGiven, notes (no Aadhaar/PAN) |
 | Lead | customerId, productId, stage, nextFollowUp, source, lostReason |
 | Product | group, name, isCustom, active |
-| Holding | customerId, productId, refLast4, amount/sumAssured, premium/instalment, frequency, startDate, maturityDate, status |
+| Holding | customerId, productId, refLast4, refNumber? (1.1.1, optional, masked outside the detail screen), amount/sumAssured, premium/instalment, frequency, startDate, maturityDate, status |
 | CommissionRule | see [COMMISSION_RATES.md §6](COMMISSION_RATES.md#6-how-rates-stay-editable) |
 | CommissionEntry | holdingId, period, expectedAmount, receivedAmount, receivedDate, status |
 | CommissionReceipt (1.1.0) | entryId, amount, date, mode (cash / POSB / bank / other), reference, note |

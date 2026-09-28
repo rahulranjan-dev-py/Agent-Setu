@@ -27,6 +27,18 @@ class UpdateChecker @Inject constructor(@ApplicationContext context: Context) {
     private val _status = MutableStateFlow(cached())
     val status: StateFlow<UpdateStatus?> = _status.asStateFlow()
 
+    private var popupShownFor: Int? = null
+
+    /**
+     * The Today screen shows a pop-up once per app launch when an update is found. True the first
+     * time it is asked for [versionCode] in this process.
+     */
+    fun claimPopup(versionCode: Int): Boolean {
+        if (popupShownFor == versionCode) return false
+        popupShownFor = versionCode
+        return true
+    }
+
     /** Returns false if the check could not be done (offline, file missing, bad file). */
     suspend fun check(force: Boolean): Boolean {
         val now = System.currentTimeMillis()

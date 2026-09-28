@@ -63,6 +63,8 @@ import app.agentsetu.data.repo.UndoAction
 import app.agentsetu.data.settings.AppSettings
 import app.agentsetu.update.UpdateChecker
 import app.agentsetu.ui.common.UpdateBanner
+import app.agentsetu.ui.common.UpdateDialog
+import app.agentsetu.core.update.UpdateStatus
 import app.agentsetu.reminders.ReminderNotifier
 import app.agentsetu.ui.common.AppScaffold
 import app.agentsetu.ui.common.DateField
@@ -97,12 +99,22 @@ class HomeViewModel @Inject constructor(
     db: AgentSetuDatabase,
     private val reminders: ReminderRepository,
     settings: AppSettings,
-    updates: UpdateChecker,
+    private val updates: UpdateChecker,
 ) : ViewModel() {
     /** Last known update status; checked in the background at most once a day. */
     val update = updates.status
 
     val today: LocalDate = LocalDate.now()
+
+    /** The update pop-up appears once per launch for a given new version. */
+    fun claimUpdatePopup(status: UpdateStatus?): Boolean {
+        val code = when (status) {
+            is UpdateStatus.Available -> status.info.latestVersionCode
+            is UpdateStatus.Required -> status.info.latestVersionCode
+            else -> return false
+        }
+        return updates.claimPopup(code)
+    }
 
     /** Nudge to back up when there is data and no backup in the last 30 days. */
     val backupDue = db.customerDao().observeCount()
@@ -173,10 +185,14 @@ fun HomeScreen(
     }
     val backupDue by viewModel.backupDue.collectAsStateWithLifecycle()
     val update by viewModel.update.collectAsStateWithLifecycle()
+    var updatePopup by remember { mutableStateOf<UpdateStatus?>(null) }
+    LaunchedEffect(update) { if (viewModel.claimUpdatePopup(update)) updatePopup = update }
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val totals by viewModel.monthTotals.collectAsStateWithLifecycle()
     var acting by remember { mutableStateOf<ReminderRow?>(null) }
     val today = viewModel.today
+
+    updatePopup?.let { UpdateDialog(it, onDismiss = { updatePopup = null }) }
 
     AppScaffold(
         title = stringResource(R.string.home_title),

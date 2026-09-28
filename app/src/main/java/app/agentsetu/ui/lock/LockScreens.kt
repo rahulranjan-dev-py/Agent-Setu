@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -14,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +28,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -33,6 +37,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import app.agentsetu.R
 import app.agentsetu.core.security.PinHasher
+import app.agentsetu.core.security.RecoveryCode
 import app.agentsetu.security.AppLock
 import app.agentsetu.security.Biometrics
 import app.agentsetu.security.DataEraser
@@ -66,10 +71,9 @@ fun LockScreen(appLock: AppLock) {
     val wrong = stringResource(R.string.lock_wrong_pin)
     val waitText = stringResource(R.string.lock_wait)
     val bioTitle = stringResource(R.string.lock_biometric_title)
-    val cancel = stringResource(R.string.action_cancel)
     val canUseBiometric = appLock.biometricEnabled && Biometrics.isAvailable(context)
 
-    fun useBiometric() = Biometrics.prompt(context, bioTitle, cancel) { appLock.unlockWithBiometric() }
+    fun useBiometric() = Biometrics.prompt(context, bioTitle) { appLock.unlockWithBiometric() }
 
     LaunchedEffect(Unit) { if (canUseBiometric) useBiometric() }
 
@@ -113,9 +117,111 @@ fun LockScreen(appLock: AppLock) {
         }
     }
 
-    if (forgot) EraseDialog(title = R.string.lock_forgot, body = R.string.lock_forgot_body, onDismiss = { forgot = false }) {
+    if (forgot) ForgotPinDialog(appLock = appLock, onDismiss = { forgot = false })
+}
+
+/**
+ * Forgot PIN: verify with the phone's own lock or the recovery code, then set a new PIN.
+ * Erasing everything remains the last resort.
+ */
+@Composable
+private fun ForgotPinDialog(appLock: AppLock, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var code by remember { mutableStateOf("") }
+    var codeError by remember { mutableStateOf<String?>(null) }
+    var erase by remember { mutableStateOf(false) }
+    val wrongCode = stringResource(R.string.lock_wrong_code)
+    val waitText = stringResource(R.string.lock_wait)
+    val deviceTitle = stringResource(R.string.lock_forgot_device_title)
+    val deviceAvailable = Biometrics.isAvailable(context)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.lock_forgot)) },
+        text = {
+            Column(
+                Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(stringResource(R.string.lock_forgot_body))
+                if (deviceAvailable) {
+                    Button(
+                        onClick = { Biometrics.prompt(context, deviceTitle) { appLock.resetAfterDeviceUnlock() } },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 52.dp),
+                    ) { Text(stringResource(R.string.lock_forgot_device)) }
+                }
+                if (appLock.hasRecoveryCode) {
+                    HorizontalDivider()
+                    Text(stringResource(R.string.lock_forgot_code_hint), style = MaterialTheme.typography.bodyMedium)
+                    OutlinedTextField(
+                        value = code,
+                        onValueChange = { code = it.filter { c -> c.isDigit() || c == ' ' }.take(9); codeError = null },
+                        label = { Text(stringResource(R.string.lock_forgot_code)) },
+                        isError = codeError != null,
+                        supportingText = codeError?.let { { Text(it) } },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedButton(
+                        onClick = {
+                            scope.launch {
+                                when (val result = appLock.tryRecoveryCode(code)) {
+                                    PinAttempt.Ok -> Unit
+                                    PinAttempt.Wrong -> codeError = wrongCode
+                                    is PinAttempt.Wait -> {
+                                        val seconds = ((result.untilMs - System.currentTimeMillis()) / 1000).coerceAtLeast(1)
+                                        codeError = waitText.format(seconds)
+                                    }
+                                }
+                            }
+                        },
+                        enabled = RecoveryCode.isValid(RecoveryCode.normalize(code)),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text(stringResource(R.string.lock_forgot_use_code)) }
+                }
+                HorizontalDivider()
+                TextButton(onClick = { erase = true }) {
+                    Text(stringResource(R.string.lock_forgot_erase), color = MaterialTheme.colorScheme.error)
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+
+    if (erase) EraseDialog(title = R.string.lock_forgot_erase, body = R.string.lock_erase_body, onDismiss = { erase = false }) {
         DataEraser.eraseEverything(context)
     }
+}
+
+/** Shown once, right after a PIN is set. The code is never stored, only its hash. */
+@Composable
+fun RecoveryCodeDialog(code: String, onDone: () -> Unit) {
+    var noted by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text(stringResource(R.string.recovery_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(R.string.recovery_body))
+                Text(
+                    code,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontFamily = FontFamily.Monospace,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                CheckRow(noted, { noted = it }, stringResource(R.string.recovery_noted))
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDone, enabled = noted) { Text(stringResource(R.string.action_done)) }
+        },
+    )
 }
 
 /** Confirmation for wiping every piece of data on this phone. */
@@ -157,6 +263,7 @@ fun PinSetupScreen(appLock: AppLock, onDone: () -> Unit, onSkip: (() -> Unit)?, 
     var biometric by remember { mutableStateOf(appLock.biometricEnabled) }
     var tried by remember { mutableStateOf(false) }
     var currentError by remember { mutableStateOf<String?>(null) }
+    var recoveryCode by remember { mutableStateOf<String?>(null) }
     val wrong = stringResource(R.string.lock_wrong_pin)
     val bioAvailable = Biometrics.isAvailable(context)
 
@@ -192,9 +299,9 @@ fun PinSetupScreen(appLock: AppLock, onDone: () -> Unit, onSkip: (() -> Unit)?, 
                     if (PinHasher.isValidPin(pin) && confirm == pin) {
                         scope.launch {
                             if (currentOk()) {
-                                appLock.setPin(pin)
+                                val code = appLock.setPin(pin)
                                 appLock.biometricEnabled = biometric && bioAvailable
-                                onDone()
+                                recoveryCode = code
                             }
                         }
                     }
@@ -221,4 +328,6 @@ fun PinSetupScreen(appLock: AppLock, onDone: () -> Unit, onSkip: (() -> Unit)?, 
             }
         }
     }
+
+    recoveryCode?.let { code -> RecoveryCodeDialog(code, onDone = onDone) }
 }

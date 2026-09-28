@@ -49,5 +49,16 @@ object Migrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_2_3)
+    /** 3 -> 4 (1.1.1): optional full policy/account number on a holding. */
+    object V4 {
+        const val ADD_REF_NUMBER = "ALTER TABLE `holding` ADD COLUMN `refNumber` TEXT"
+    }
+
+    val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(V4.ADD_REF_NUMBER)
+        }
+    }
+
+    val ALL: Array<Migration> = arrayOf(MIGRATION_2_3, MIGRATION_3_4)
 }

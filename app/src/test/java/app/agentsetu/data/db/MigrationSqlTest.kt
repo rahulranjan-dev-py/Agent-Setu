@@ -6,6 +6,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -47,6 +48,15 @@ class MigrationSqlTest {
     fun statementTableMatchesRoom() {
         assertEquals(createSql("incentive_statement"), Migrations.V3.CREATE_STATEMENT)
         assertEquals(listOf(Migrations.V3.INDEX_STATEMENT_MONTH), indexSql("incentive_statement"))
+    }
+
+    @Test
+    fun holdingHasNullableRefNumber() {
+        val sql = createSql("holding")
+        assertTrue(sql, "`refNumber` TEXT," in sql)
+        assertFalse(sql, "`refNumber` TEXT NOT NULL" in sql)
+        // ALTER TABLE adds a nullable TEXT column with no default, which is what Room expects here.
+        assertEquals("ALTER TABLE `holding` ADD COLUMN `refNumber` TEXT", Migrations.V4.ADD_REF_NUMBER)
     }
 
     @Test

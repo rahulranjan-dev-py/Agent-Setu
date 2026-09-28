@@ -27,7 +27,9 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
 
 - No departmental credentials, and no connection to or scraping of any departmental system
   (Finacle, CSI/McCamish, IPPB, UIDAI, etc.).
-- No full Aadhaar, PAN or bank/policy numbers: store at most the last 4 digits (`refLast4`).
+- No Aadhaar, PAN or bank account numbers, ever. A policy/account number is optional (`refNumber`,
+  since 1.1.1): shown in full only on the policy's own screen; everywhere else (lists, Today, ledger,
+  notifications, share cards, error reports) at most the last 4 digits (`refLast4`).
 - No payments, and no handling of money.
 - No ads, analytics, tracking or crash SDKs. Errors go through the manual "Send error report" flow
   (see `docs/DECISIONS.md`).

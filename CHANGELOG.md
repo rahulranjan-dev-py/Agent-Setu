@@ -6,6 +6,15 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
+## 1.1.1 (versionCode 5) - policy numbers, Forgot PIN, face unlock, update pop-up; not yet published
+
+- Optional full policy/account number on a policy (shown in full only on its own screen; last 4
+  digits everywhere else; never Aadhaar, PAN or bank accounts). Schema 4.
+- Forgot PIN: 8-digit recovery code shown once when a PIN is set, or the phone's own lock; either
+  lets you set a new PIN. Erasing data remains the last resort.
+- Unlock with fingerprint, face or phone lock (was fingerprint only).
+- Update pop-up on Today once per launch when a newer version is found.
+
 ## 1.1.0 (versionCode 4) - received commission, own rules, small fixes; published 28-09-2026
 
 (1.0.3 was prepared with versionCode 4 but never published; its fixes ship here.)
