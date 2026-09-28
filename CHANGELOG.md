@@ -6,7 +6,7 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
-## 1.1.1 (versionCode 5) - policy numbers, Forgot PIN, face unlock, update pop-up; not yet published
+## 1.1.1 (versionCode 5) - policy numbers, Forgot PIN, face unlock, update pop-up; published 28-09-2026
 
 - Optional full policy/account number on a policy (shown in full only on its own screen; last 4
   digits everywhere else; never Aadhaar, PAN or bank accounts). Schema 4.
