@@ -46,14 +46,18 @@ object ReminderNotifier {
         alerts.take(MAX_LINES).forEach { style.addLine(line(context, it)) }
 
         // Customer names stay off the lock screen: the public version only says there are reminders.
+        // Status-bar icons must be white; this colour tints the icon and the app name in the shade.
+        val accent = ContextCompat.getColor(context, R.color.brand_sea_green)
         val publicVersion = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
+            .setColor(accent)
             .setContentTitle(context.getString(R.string.app_name))
             .setContentText(context.getString(R.string.notif_public))
             .build()
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
+            .setColor(accent)
             .setContentTitle(title)
             .setContentText(line(context, alerts.first()))
             .setStyle(style)
