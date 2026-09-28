@@ -1,10 +1,10 @@
 {
-  "latestVersionCode": 2,
-  "latestVersionName": "1.0.1",
+  "latestVersionCode": 3,
+  "latestVersionName": "1.0.2",
   "downloadUrl": "https://github.com/rahulranjan-dev-py/Agent-Setu/releases",
   "sha256": "",
   "minSupportedVersionCode": 0,
-  "releasedOn": "",
-  "changelogEn": "Smaller download: about 7 MB instead of 22 MB. No feature changes; install over 1.0.0, your data stays.",
-  "changelogHi": "छोटा डाउनलोड: लगभग 22 MB की जगह 7 MB। सुविधाओं में कोई बदलाव नहीं; 1.0.0 के ऊपर इंस्टॉल करें, आपका डेटा बना रहेगा।"
+  "releasedOn": "28-09-2026",
+  "changelogEn": "New colours: navy and sea green. No feature changes; install over 1.0.1, your data stays.",
+  "changelogHi": "नया रंग: नेवी और समुद्री हरा। सुविधाओं में कोई बदलाव नहीं; 1.0.1 के ऊपर इंस्टॉल करें, आपका डेटा बना रहेगा।"
 }

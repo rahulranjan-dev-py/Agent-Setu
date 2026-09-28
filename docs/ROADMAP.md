@@ -27,7 +27,7 @@ and the commission they have earned.
 
 ## 2. Brand
 
-- Launcher label **Agent Setu** (confirmed). Colours teal and indigo. Avoid postal red and yellow.
+- Launcher label **Agent Setu** (confirmed). Colours navy and sea green (changed from teal and indigo on 28-09-2026). Avoid postal red and yellow, and IPPB purple.
 - Original icon (handshake or notebook with a tick). No emblem, envelope logo or uniform imagery.
 - Package name: **`in.agentsetu.app`** (decided 29-09-2026; permanent).
 - Release file name: `AgentSetu-vX.Y.Z.apk`.
