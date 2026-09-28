@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -43,4 +45,35 @@ fun UpdateBanner(status: UpdateStatus?) {
             Button(onClick = { context.openUri(info.downloadUrl) }) { Text(stringResource(R.string.update_download)) }
         }
     }
+}
+
+/** Pop-up version of the banner, shown once per launch on Today when an update is found. */
+@Composable
+fun UpdateDialog(status: UpdateStatus, onDismiss: () -> Unit) {
+    val (info, required) = when (status) {
+        is UpdateStatus.Available -> status.info to false
+        is UpdateStatus.Required -> status.info to true
+        UpdateStatus.UpToDate -> return
+    }
+    val context = LocalContext.current
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(if (required) stringResource(R.string.update_required_title) else stringResource(R.string.update_available_title, info.latestVersionName))
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                val changelog = localized(info.changelogEn, info.changelogHi.ifBlank { info.changelogEn })
+                if (changelog.isNotBlank()) Text(changelog, style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.update_only_official), style = MaterialTheme.typography.bodySmall)
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                context.openUri(info.downloadUrl)
+                onDismiss()
+            }) { Text(stringResource(R.string.update_download)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.update_later)) } },
+    )
 }

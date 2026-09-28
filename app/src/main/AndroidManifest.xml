@@ -6,7 +6,7 @@
         The only permission the user is ever asked for: notifications, for reminders.
         Libraries merge in install-time permissions the user never sees a prompt for: WorkManager
         (wake lock, boot completed, network state) so daily reminders survive restarts, and
-        androidx.biometric (use biometric / fingerprint) for the optional fingerprint unlock.
+        androidx.biometric (use biometric / fingerprint) for the optional fingerprint / face / phone-lock unlock.
         None of them gives access to personal data.
         INTERNET (install-time, no prompt) is used for one thing only: reading the public
         release/version.json for the update check. No user data is ever sent.

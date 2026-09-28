@@ -147,6 +147,10 @@ class BackupManager @Inject constructor(private val db: AgentSetuDatabase) {
             }
             p = p.copy(schemaVersion = 3, receipts = receipts, statements = emptyList())
         }
+        if (p.schemaVersion < 4) {
+            // 3 -> 4: refNumber is a new optional field; older rows simply have none.
+            p = p.copy(schemaVersion = 4)
+        }
         return p
     }
 }

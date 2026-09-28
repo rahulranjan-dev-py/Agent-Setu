@@ -23,4 +23,19 @@ class MoneyAndRefTest {
         assertFalse(RefLast4.isValid("R-12345678")) // full number pasted by mistake
         assertFalse(RefLast4.isValid("12345"))
     }
+
+    @Test
+    fun refNumber() {
+        assertTrue(RefNumber.isValid(null))
+        assertTrue(RefNumber.isValid("R-12345678"))
+        assertTrue(RefNumber.isValid("PLI/DHN/00123456"))
+        assertFalse(RefNumber.isValid(""))
+        assertFalse(RefNumber.isValid("x".repeat(41)))
+        assertFalse(RefNumber.isValid("1234;DROP"))
+        assertEquals("5678", RefNumber.last4("R-12345678"))
+        assertEquals("3456", RefNumber.last4("PLI/DHN/00123456"))
+        assertEquals(null, RefNumber.last4("AB-12"))
+        assertEquals(null, RefNumber.last4(null))
+        assertEquals("••••5678", RefNumber.masked("12345678"))
+    }
 }

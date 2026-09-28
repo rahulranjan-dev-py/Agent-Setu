@@ -42,4 +42,16 @@ class SecurityTest {
         assertFalse(LockPolicy.shouldLockOnReturn(1_000_000, 1_000_000 + 119_000))
         assertTrue(LockPolicy.shouldLockOnReturn(1_000_000, 1_000_000 + 120_000))
     }
+
+    @Test
+    fun recoveryCode() {
+        val code = RecoveryCode.generate()
+        assertTrue(RecoveryCode.isValid(code))
+        assertEquals(code, RecoveryCode.normalize(RecoveryCode.format(code)))
+        assertEquals("1234 5678", RecoveryCode.format("12345678"))
+        assertFalse(RecoveryCode.isValid("1234567"))
+        val hash = PinHasher.hashSecret(code)
+        assertTrue(PinHasher.verify(code, hash))
+        assertFalse(PinHasher.verify("00000000", hash))
+    }
 }

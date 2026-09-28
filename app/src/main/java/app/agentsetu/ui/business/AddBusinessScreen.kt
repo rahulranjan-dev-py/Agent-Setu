@@ -48,7 +48,7 @@ import app.agentsetu.core.model.Money
 import app.agentsetu.core.model.PaymentFrequency
 import app.agentsetu.core.model.PolicyCategory
 import app.agentsetu.core.model.ProductGroup
-import app.agentsetu.core.model.RefLast4
+import app.agentsetu.core.model.RefNumber
 import app.agentsetu.core.model.StaffType
 import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.db.HoldingEntity
@@ -113,7 +113,8 @@ class AddBusinessViewModel @Inject constructor(
         private set
     var maturityDate by mutableStateOf("")
         private set
-    var refLast4 by mutableStateOf("")
+    /** Full policy/account number as typed (optional); the stored refLast4 is derived from it. */
+    var refNumber by mutableStateOf("")
         private set
     var preview by mutableStateOf<Preview>(Preview.NeedInput)
         private set
@@ -143,7 +144,7 @@ class AddBusinessViewModel @Inject constructor(
         startDate = IndianFormat.date(h.startDate)
         maturityDate = h.maturityDate?.let(IndianFormat::date).orEmpty()
         maturityEdited = true
-        refLast4 = h.refLast4.orEmpty()
+        refNumber = h.refNumber ?: h.refLast4.orEmpty()
         val insurance = p.productGroup == ProductGroup.PLI || p.productGroup == ProductGroup.RPLI
         sumAssured = if (insurance) editableAmount(h.amountPaise) else ""
         amount = editableAmount(h.instalmentPaise ?: h.amountPaise)
@@ -168,7 +169,7 @@ class AddBusinessViewModel @Inject constructor(
     val termInvalid get() = isInsurance && termYears.toIntOrNull()?.takeIf { it in 1..60 } == null
     val startInvalid get() = IndianFormat.parseDate(startDate) == null
     val maturityInvalid get() = maturityDate.isNotBlank() && IndianFormat.parseDate(maturityDate) == null
-    val refInvalid get() = refLast4.isNotBlank() && !RefLast4.isValid(refLast4)
+    val refInvalid get() = !RefNumber.isValid(refNumber.trim().ifBlank { null })
 
     fun selectProduct(p: ProductEntity) {
         product = p
@@ -188,7 +189,7 @@ class AddBusinessViewModel @Inject constructor(
     fun updateFrequency(value: PaymentFrequency) { frequency = value }
     fun updateStart(value: String) { startDate = value; suggestMaturity(); refreshPreview() }
     fun updateMaturity(value: String) { maturityDate = value; maturityEdited = true }
-    fun updateRef(value: String) { refLast4 = value.filter { it.isDigit() }.take(4) }
+    fun updateRef(value: String) { refNumber = value.take(RefNumber.MAX_LENGTH) }
 
     private fun suggestMaturity() {
         if (maturityEdited) return
@@ -250,7 +251,8 @@ class AddBusinessViewModel @Inject constructor(
                 db.holdingDao().upsert(
                     existing.copy(
                         productId = p.id,
-                        refLast4 = refLast4.ifBlank { null },
+                        refNumber = refNumber.trim().ifBlank { null },
+                        refLast4 = RefNumber.last4(refNumber),
                         policyCategory = if (p.productGroup == ProductGroup.PLI) category else PolicyCategory.ANY,
                         premiumTermYears = if (isInsurance) termYears.toIntOrNull() else null,
                         amountPaise = if (isInsurance) Money.toPaise(AmountInput.parse(sumAssured) ?: BigDecimal.ZERO) else basePaise,
@@ -268,7 +270,8 @@ class AddBusinessViewModel @Inject constructor(
             val holding = HoldingEntity(
                 customerId = owner,
                 productId = p.id,
-                refLast4 = refLast4.ifBlank { null },
+                refNumber = refNumber.trim().ifBlank { null },
+                refLast4 = RefNumber.last4(refNumber),
                 policyCategory = if (p.productGroup == ProductGroup.PLI) category else PolicyCategory.ANY,
                 premiumTermYears = if (isInsurance) termYears.toIntOrNull() else null,
                 amountPaise = if (isInsurance) Money.toPaise(AmountInput.parse(sumAssured) ?: BigDecimal.ZERO) else basePaise,
@@ -370,10 +373,9 @@ fun AddBusinessScreen(onBack: () -> Unit, onSaved: () -> Unit, viewModel: AddBus
                 error = if (err && vm.maturityInvalid) stringResource(R.string.error_date) else null,
             )
             FormField(
-                vm.refLast4, vm::updateRef, stringResource(R.string.business_ref_last4),
+                vm.refNumber, vm::updateRef, stringResource(R.string.business_ref_number),
                 error = if (err && vm.refInvalid) stringResource(R.string.business_ref_error) else null,
-                supporting = stringResource(R.string.business_ref_error),
-                keyboardType = KeyboardType.Number,
+                supporting = stringResource(R.string.business_ref_help),
             )
 
             if (!vm.isEditing) PreviewCard(vm.preview)

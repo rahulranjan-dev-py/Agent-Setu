@@ -12,8 +12,9 @@ developer. It is not an India Post / Department of Posts / IPPB product.
 
 **2. What the app stores.** Only what you type in: your profile (staff type, designation, office,
 division, agent codes), your customers (name, mobile, village, optional date of birth, notes), the
-policies and accounts you track (product, amounts, dates and at most the **last 4 digits** of a
-policy or account number), your commission records (including the receipts and incentive statements
+policies and accounts you track (product, amounts, dates and, only if you type it in, the policy or
+account number, which the app shows in full only on that policy's own screen and masks to the
+**last 4 digits** everywhere else), your commission records (including the receipts and incentive statements
 you enter), targets and reminders. The app does **not**
 ask for Aadhaar, PAN, full bank or policy numbers, or any departmental login.
 
@@ -37,11 +38,11 @@ their details and contact them. The app asks you to confirm consent when you add
 **6. Your choices.** You can edit or delete any customer (their details are wiped at once; commission
 you already earned stays in your ledger without the name), and use **Settings → Delete all my data**
 to erase everything. Uninstalling the app also deletes its data. Backup files you saved elsewhere
-must be deleted by you. You can lock the app with a PIN (and fingerprint); only a scrambled form of
-the PIN is kept.
+must be deleted by you. You can lock the app with a PIN (and fingerprint, face or your phone's lock); only scrambled forms of
+the PIN and of its recovery code are kept.
 
 **7. Permissions.** Notifications (for reminders) is the only one you are asked for. The app also
-has fingerprint access (only if you turn on fingerprint unlock) and background-scheduling
+has fingerprint / face access (only if you turn on that unlock) and background-scheduling
 permissions for daily reminders; none of these reads your personal data. No SMS, call-log, contacts
 (unless you choose to import in a later version), location or storage permissions.
 

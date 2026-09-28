@@ -79,8 +79,7 @@
     <string name="freq_ONE_TIME">एकमुश्त</string>
     <string name="business_start_date">शुरुआत / पहले भुगतान की तारीख</string>
     <string name="business_maturity_date">मैच्योरिटी तारीख (वैकल्पिक)</string>
-    <string name="business_ref_last4">पॉलिसी/खाता नं. के अंतिम 4 अंक (वैकल्पिक)</string>
-    <string name="business_ref_error">केवल अंतिम 4 अंक - पूरा नंबर कभी नहीं</string>
+    <string name="business_ref_error">अधिकतम 40 अक्षर, अंक, / या -</string>
     <string name="business_expected">अपेक्षित कमीशन</string>
     <string name="business_expected_value">%1$s (दर %2$s प्रतिशत)</string>
     <string name="business_expected_sample">सैंपल दर पर आधारित - सेटिंग्स में पुष्टि करें</string>
@@ -180,10 +179,10 @@
     <string name="lock_unlock">खोलें</string>
     <string name="lock_wrong_pin">गलत PIN</string>
     <string name="lock_wait">बहुत बार गलत PIN। %1$d सेकंड बाद फिर कोशिश करें।</string>
-    <string name="lock_use_biometric">फ़िंगरप्रिंट से खोलें</string>
+    <string name="lock_use_biometric">फ़िंगरप्रिंट, चेहरे या फ़ोन लॉक से खोलें</string>
     <string name="lock_biometric_title">एजेंट सेतु खोलें</string>
     <string name="lock_forgot">PIN भूल गए?</string>
-    <string name="lock_forgot_body">PIN के बिना एकमात्र रास्ता है इस फ़ोन का सारा डेटा मिटाकर फिर से शुरू करना। अगर आपने बैकअप फ़ाइल बनाई है तो बाद में उससे डेटा वापस ला सकते हैं।</string>
+    <string name="lock_forgot_body">यह साबित करके कि आप ही हैं, नया PIN रखा जा सकता है: अपने फ़ोन के लॉक से (चेहरा, फ़िंगरप्रिंट, पैटर्न या PIN), या PIN बनाते समय दिखाए गए 8 अंकों के रिकवरी कोड से।</string>
     <string name="erase_understood">मैं समझता/समझती हूँ कि इसे वापस नहीं किया जा सकता</string>
     <string name="erase_confirm">सब कुछ मिटाएँ</string>
     <string name="pin_title">ऐप लॉक</string>
@@ -193,12 +192,12 @@
     <string name="pin_confirm">नया PIN दोबारा डालें</string>
     <string name="pin_rule">4 से 6 अंक डालें</string>
     <string name="pin_mismatch">मेल नहीं खाता</string>
-    <string name="pin_biometric">फ़िंगरप्रिंट से भी खोलें</string>
-    <string name="pin_forget_warning">PIN भूलने पर ऐप का डेटा मिटाकर ही उसे फिर से शुरू किया जा सकता है। बैकअप रखें।</string>
+    <string name="pin_biometric">फ़िंगरप्रिंट, चेहरे या फ़ोन लॉक से भी खोलें</string>
+    <string name="pin_forget_warning">PIN भूल जाएँ तो फ़ोन का लॉक या रिकवरी कोड (आगे दिखेगा) नया PIN रखने देता है। फिर भी बैकअप रखें।</string>
     <string name="pin_remove">PIN हटाएँ</string>
     <string name="pin_skip">अभी नहीं</string>
     <string name="settings_app_lock">ऐप लॉक</string>
-    <string name="settings_app_lock_summary">PIN और फ़िंगरप्रिंट</string>
+    <string name="settings_app_lock_summary">PIN, फ़िंगरप्रिंट या चेहरा</string>
     <string name="settings_backup">बैकअप और रीस्टोर</string>
     <string name="settings_backup_summary">पासवर्ड से सुरक्षित बैकअप फ़ाइल</string>
     <string name="settings_error_report">एरर रिपोर्ट भेजें</string>
@@ -371,4 +370,18 @@
     <string name="product_name_en">नाम (अंग्रेज़ी)</string>
     <string name="product_name_hi">नाम (हिंदी, वैकल्पिक)</string>
     <string name="product_group">प्रकार</string>
+    <string name="lock_forgot_device">फ़ोन लॉक से खोलें</string>
+    <string name="lock_forgot_device_title">पुष्टि करें कि आप ही हैं</string>
+    <string name="lock_forgot_code">रिकवरी कोड</string>
+    <string name="lock_forgot_code_hint">या PIN बनाते समय नोट किया 8 अंकों का रिकवरी कोड डालें।</string>
+    <string name="lock_forgot_use_code">कोड इस्तेमाल करें</string>
+    <string name="lock_wrong_code">गलत कोड</string>
+    <string name="lock_forgot_erase">इसके बजाय सारा डेटा मिटाएँ</string>
+    <string name="lock_erase_body">इस फ़ोन का सब कुछ मिट जाएगा और ऐप फिर से शुरू होगा। अगर बैकअप फ़ाइल बनाई है तो बाद में उससे डेटा वापस ला सकते हैं।</string>
+    <string name="recovery_title">आपका रिकवरी कोड</string>
+    <string name="recovery_body">यह कोड लिखकर सुरक्षित जगह रखें, ऐप में नहीं। PIN भूल जाएँ तो इस कोड से नया PIN रख सकते हैं। यह केवल इसी बार दिखेगा।</string>
+    <string name="recovery_noted">मैंने लिख लिया है</string>
+    <string name="business_ref_number">पॉलिसी / खाता नंबर (वैकल्पिक)</string>
+    <string name="business_ref_help">पूरा नंबर केवल इसी स्क्रीन पर दिखता है; बाकी जगह सिर्फ़ अंतिम 4 अंक। आधार, PAN या बैंक खाता नंबर के लिए नहीं।</string>
+    <string name="update_later">बाद में</string>
 </resources>
