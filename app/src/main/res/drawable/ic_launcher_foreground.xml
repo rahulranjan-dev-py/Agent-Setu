@@ -11,11 +11,11 @@
         android:pathData="M38,30 L70,30 Q74,30 74,34 L74,74 Q74,78 70,78 L38,78 Q34,78 34,74 L34,34 Q34,30 38,30 Z" />
     <!-- Spine -->
     <path
-        android:fillColor="#3949AB"
+        android:fillColor="#2A9D8F"
         android:pathData="M34,34 Q34,30 38,30 L42,30 L42,78 L38,78 Q34,78 34,74 Z" />
     <!-- Tick -->
     <path
-        android:strokeColor="#00796B"
+        android:strokeColor="#1F4E79"
         android:strokeWidth="5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"

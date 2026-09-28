@@ -10,32 +10,44 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 
-// Teal and indigo only: no postal red or yellow, and no dynamic colour so the brand stays neutral.
-private val Teal = Color(0xFF00796B)
-private val TealLight = Color(0xFF4DB6AC)
-private val Indigo = Color(0xFF3949AB)
-private val IndigoLight = Color(0xFF7986CB)
+// Navy and sea green (chosen 28-09-2026): no postal red or yellow, no IPPB purple, and no dynamic
+// colour so the brand stays neutral. Navy is the main colour; sea green marks the add button and
+// the selected tab.
+private val Navy = Color(0xFF1F4E79)
+private val NavyLight = Color(0xFF8FB8E0)
+private val SeaGreen = Color(0xFF2A9D8F)
+private val SeaGreenLight = Color(0xFF7ED3C7)
 
 private val LightColors = lightColorScheme(
-    primary = Teal,
+    primary = Navy,
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFB2DFDB),
-    onPrimaryContainer = Color(0xFF00251F),
-    secondary = Indigo,
+    primaryContainer = Color(0xFFD6E4F2),
+    onPrimaryContainer = Color(0xFF0E2A44),
+    secondary = SeaGreen,
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFC5CAE9),
-    onSecondaryContainer = Color(0xFF0A1450),
+    secondaryContainer = Color(0xFFCCEBE6),
+    onSecondaryContainer = Color(0xFF0B3F38),
+    background = Color(0xFFF7F9FC),
+    surface = Color(0xFFF7F9FC),
+    surfaceVariant = Color(0xFFE6ECF3),
+    onSurfaceVariant = Color(0xFF44505C),
+    outline = Color(0xFF74808D),
 )
 
 private val DarkColors = darkColorScheme(
-    primary = TealLight,
-    onPrimary = Color(0xFF00382F),
-    primaryContainer = Color(0xFF005047),
-    onPrimaryContainer = Color(0xFFB2DFDB),
-    secondary = IndigoLight,
-    onSecondary = Color(0xFF0A1450),
-    secondaryContainer = Color(0xFF283593),
-    onSecondaryContainer = Color(0xFFC5CAE9),
+    primary = NavyLight,
+    onPrimary = Color(0xFF0B2740),
+    primaryContainer = Color(0xFF173C5E),
+    onPrimaryContainer = Color(0xFFD6E4F2),
+    secondary = SeaGreenLight,
+    onSecondary = Color(0xFF05332D),
+    secondaryContainer = Color(0xFF1D6A60),
+    onSecondaryContainer = Color(0xFFCCEBE6),
+    background = Color(0xFF0F1318),
+    surface = Color(0xFF0F1318),
+    surfaceVariant = Color(0xFF28313C),
+    onSurfaceVariant = Color(0xFFC3CBD5),
+    outline = Color(0xFF8D98A4),
 )
 
 // Slightly larger body text than the Material default: field users, small phones, bright sunlight.
