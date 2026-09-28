@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.db.DatabaseKeyProvider
+import app.agentsetu.data.db.Migrations
 import app.agentsetu.data.db.UserProfileDao
 import dagger.Module
 import dagger.Provides
@@ -29,6 +30,7 @@ object DatabaseModule {
             // Version 1 only ever existed in pre-release debug builds. From the first public
             // release onwards every schema change needs a real Migration: users' data must survive.
             .fallbackToDestructiveMigrationFrom(true, 1)
+            .addMigrations(*Migrations.ALL)
             .build()
     }
 

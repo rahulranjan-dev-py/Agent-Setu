@@ -19,6 +19,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.MaterialTheme
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -39,6 +41,7 @@ import app.agentsetu.ui.customers.CustomersScreen
 import app.agentsetu.ui.home.HomeScreen
 import app.agentsetu.ui.profile.ProfileScreen
 import app.agentsetu.ui.rates.RatesScreen
+import app.agentsetu.ui.rates.RuleAddScreen
 import app.agentsetu.ui.rates.RuleEditScreen
 import app.agentsetu.ui.lock.PinSetupScreen
 import app.agentsetu.ui.settings.ErrorReportScreen
@@ -60,9 +63,11 @@ private object Routes {
     const val CUSTOMER = "customer/{id}"
     const val CUSTOMER_EDIT = "customer-edit/{id}"
     const val BUSINESS = "business/{customerId}"
+    const val HOLDING = "holding/{holdingId}"
     const val PROFILE = "profile"
     const val RATES = "rates"
     const val RULE = "rule/{id}"
+    const val RULE_NEW = "rule-new"
     const val TOOLS = "tools"
     const val CALC = "calc/{kind}"
     const val SCHEMES = "schemes"
@@ -76,6 +81,7 @@ private object Routes {
     fun customer(id: String) = "customer/$id"
     fun customerEdit(id: String) = "customer-edit/$id"
     fun business(customerId: String) = "business/$customerId"
+    fun holding(holdingId: String) = "holding/$holdingId"
     fun rule(id: String) = "rule/$id"
     fun calc(kind: CalcKind) = "calc/${kind.name}"
     fun scheme(code: String) = "scheme/$code"
@@ -110,7 +116,15 @@ fun MainNavigation() {
                             selected = route == tab.route,
                             onClick = { nav.switchTab(tab.route) },
                             icon = { Icon(tab.icon, contentDescription = null) },
-                            label = { Text(stringResource(tab.label)) },
+                            label = {
+                                Text(
+                                    stringResource(tab.label),
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            },
                         )
                     }
                 }
@@ -122,6 +136,7 @@ fun MainNavigation() {
                 HomeScreen(
                     onOpenCustomer = { nav.navigate(Routes.customer(it)) },
                     onAddBusiness = { nav.navigate(Routes.business(it)) },
+                    onAddCustomer = { nav.navigate(Routes.CUSTOMER_NEW) },
                     onBackup = { nav.navigate(Routes.BACKUP) },
                 )
             }
@@ -167,7 +182,8 @@ fun MainNavigation() {
                 CustomerEditScreen(
                     onBack = { nav.popBackStack() },
                     onSaved = { id ->
-                        nav.navigate(Routes.customer(id)) { popUpTo(Routes.CUSTOMERS) }
+                        // Replace the form with the new customer's page, whichever tab opened the form.
+                        nav.navigate(Routes.customer(id)) { popUpTo(Routes.CUSTOMER_NEW) { inclusive = true } }
                     },
                     onDeleted = { nav.popBackStack() },
                 )
@@ -177,6 +193,7 @@ fun MainNavigation() {
                     onBack = { nav.popBackStack() },
                     onEdit = { nav.navigate(Routes.customerEdit(it)) },
                     onAddBusiness = { nav.navigate(Routes.business(it)) },
+                    onOpenHolding = { nav.navigate(Routes.holding(it)) },
                 )
             }
             composable(Routes.CUSTOMER_EDIT, arguments = listOf(navArgument("id") { type = NavType.StringType })) {
@@ -189,11 +206,21 @@ fun MainNavigation() {
             composable(Routes.BUSINESS, arguments = listOf(navArgument("customerId") { type = NavType.StringType })) {
                 AddBusinessScreen(onBack = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
             }
+            composable(Routes.HOLDING, arguments = listOf(navArgument("holdingId") { type = NavType.StringType })) {
+                AddBusinessScreen(onBack = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
+            }
             composable(Routes.PROFILE) {
                 ProfileScreen(onBack = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
             }
             composable(Routes.RATES) {
-                RatesScreen(onBack = { nav.popBackStack() }, onEdit = { nav.navigate(Routes.rule(it)) })
+                RatesScreen(
+                    onBack = { nav.popBackStack() },
+                    onEdit = { nav.navigate(Routes.rule(it)) },
+                    onAdd = { nav.navigate(Routes.RULE_NEW) },
+                )
+            }
+            composable(Routes.RULE_NEW) {
+                RuleAddScreen(onBack = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
             }
             composable(Routes.APP_LOCK) {
                 val lock = hiltViewModel<AgentSetuRootLock>().appLock

@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ListItem
@@ -55,6 +56,8 @@ import app.agentsetu.data.db.ProductEntity
 import app.agentsetu.data.repo.CommissionRepository
 import app.agentsetu.data.repo.ReminderRepository
 import app.agentsetu.ui.common.AppScaffold
+import app.agentsetu.ui.common.DateField
+import app.agentsetu.ui.common.editableAmount
 import app.agentsetu.ui.common.FormField
 import app.agentsetu.ui.common.RadioGroup
 import app.agentsetu.ui.common.SectionTitle
@@ -86,7 +89,10 @@ class AddBusinessViewModel @Inject constructor(
     private val reminders: ReminderRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    private val customerId: String = checkNotNull(savedStateHandle["customerId"])
+    /** Editing an existing policy/account when set; otherwise adding one for [customerId]. */
+    private val holdingId: String? = savedStateHandle["holdingId"]
+    private var customerId: String? = savedStateHandle["customerId"]
+    val isEditing get() = holdingId != null
 
     val products = db.productDao().observeActive()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -121,7 +127,33 @@ class AddBusinessViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             staffType = db.userProfileDao().observe().first()?.staffType
+            holdingId?.let { loadForEdit(it) }
             refreshPreview()
+        }
+    }
+
+    private suspend fun loadForEdit(id: String) {
+        val h = db.holdingDao().get(id) ?: return
+        val p = db.productDao().get(h.productId) ?: return
+        customerId = h.customerId
+        product = p
+        category = h.policyCategory.takeIf { it != PolicyCategory.ANY } ?: PolicyCategory.NON_AEA
+        termYears = h.premiumTermYears?.toString().orEmpty()
+        frequency = h.frequency
+        startDate = IndianFormat.date(h.startDate)
+        maturityDate = h.maturityDate?.let(IndianFormat::date).orEmpty()
+        maturityEdited = true
+        refLast4 = h.refLast4.orEmpty()
+        val insurance = p.productGroup == ProductGroup.PLI || p.productGroup == ProductGroup.RPLI
+        sumAssured = if (insurance) editableAmount(h.amountPaise) else ""
+        amount = editableAmount(h.instalmentPaise ?: h.amountPaise)
+    }
+
+    fun delete(onDeleted: () -> Unit) {
+        val id = holdingId ?: return
+        viewModelScope.launch {
+            reminders.deleteHolding(id)
+            onDeleted()
         }
     }
 
@@ -208,11 +240,33 @@ class AddBusinessViewModel @Inject constructor(
         val p = product ?: return
         val base = AmountInput.parse(amount) ?: return
         val start = IndianFormat.parseDate(startDate) ?: return
+        val owner = customerId ?: return
         viewModelScope.launch {
             val now = System.currentTimeMillis()
             val basePaise = Money.toPaise(base)
+            val existing = holdingId?.let { db.holdingDao().get(it) }
+            if (existing != null) {
+                // Editing: change the policy/account itself; ledger entries already recorded stay as they are.
+                db.holdingDao().upsert(
+                    existing.copy(
+                        productId = p.id,
+                        refLast4 = refLast4.ifBlank { null },
+                        policyCategory = if (p.productGroup == ProductGroup.PLI) category else PolicyCategory.ANY,
+                        premiumTermYears = if (isInsurance) termYears.toIntOrNull() else null,
+                        amountPaise = if (isInsurance) Money.toPaise(AmountInput.parse(sumAssured) ?: BigDecimal.ZERO) else basePaise,
+                        instalmentPaise = if (isInsurance || isRecurring) basePaise else null,
+                        frequency = frequency,
+                        startDate = start,
+                        maturityDate = IndianFormat.parseDate(maturityDate),
+                        updatedAt = now,
+                    ),
+                )
+                reminders.regenerate()
+                onSaved()
+                return@launch
+            }
             val holding = HoldingEntity(
-                customerId = customerId,
+                customerId = owner,
                 productId = p.id,
                 refLast4 = refLast4.ifBlank { null },
                 policyCategory = if (p.productGroup == ProductGroup.PLI) category else PolicyCategory.ANY,
@@ -241,9 +295,13 @@ fun AddBusinessScreen(onBack: () -> Unit, onSaved: () -> Unit, viewModel: AddBus
     val vm = viewModel
     val products by vm.products.collectAsStateWithLifecycle()
     var picking by remember { mutableStateOf(false) }
+    var confirmDelete by remember { mutableStateOf(false) }
     val err = vm.showErrors
 
-    AppScaffold(title = stringResource(R.string.business_title), onBack = onBack) { padding ->
+    AppScaffold(
+        title = stringResource(if (vm.isEditing) R.string.holding_edit_title else R.string.business_title),
+        onBack = onBack,
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -303,17 +361,13 @@ fun AddBusinessScreen(onBack: () -> Unit, onSaved: () -> Unit, viewModel: AddBus
                     onSelect = vm::updateFrequency,
                 )
             }
-            FormField(
+            DateField(
                 vm.startDate, vm::updateStart, stringResource(R.string.business_start_date),
                 error = if (err && vm.startInvalid) stringResource(R.string.error_date) else null,
-                supporting = stringResource(R.string.date_hint),
-                keyboardType = KeyboardType.Number,
             )
-            FormField(
+            DateField(
                 vm.maturityDate, vm::updateMaturity, stringResource(R.string.business_maturity_date),
                 error = if (err && vm.maturityInvalid) stringResource(R.string.error_date) else null,
-                supporting = stringResource(R.string.date_hint),
-                keyboardType = KeyboardType.Number,
             )
             FormField(
                 vm.refLast4, vm::updateRef, stringResource(R.string.business_ref_last4),
@@ -322,7 +376,7 @@ fun AddBusinessScreen(onBack: () -> Unit, onSaved: () -> Unit, viewModel: AddBus
                 keyboardType = KeyboardType.Number,
             )
 
-            PreviewCard(vm.preview)
+            if (!vm.isEditing) PreviewCard(vm.preview)
 
             Button(
                 onClick = { vm.save(onSaved) },
@@ -332,7 +386,32 @@ fun AddBusinessScreen(onBack: () -> Unit, onSaved: () -> Unit, viewModel: AddBus
             ) {
                 Text(stringResource(R.string.action_save))
             }
+            if (vm.isEditing) {
+                OutlinedButton(
+                    onClick = { confirmDelete = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(R.string.holding_delete)) }
+            }
         }
+    }
+
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text(stringResource(R.string.holding_delete)) },
+            text = { Text(stringResource(R.string.holding_delete_body)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        confirmDelete = false
+                        vm.delete(onSaved)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(R.string.holding_delete)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 
     if (picking) {

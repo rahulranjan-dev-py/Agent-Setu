@@ -41,6 +41,9 @@ interface ProductDao {
     @Query("SELECT * FROM product WHERE id = :id")
     suspend fun get(id: String): ProductEntity?
 
+    @Query("SELECT * FROM product WHERE code = :code")
+    suspend fun byCode(code: String): ProductEntity?
+
     @Query("SELECT * FROM product")
     fun observeAll(): Flow<List<ProductEntity>>
 
@@ -155,14 +158,60 @@ interface CommissionEntryDao {
     )
     fun observeLedger(period: String): Flow<List<LedgerRow>>
 
+    /** Every ledger line of one customer, newest month first (the customer's page). */
+    @Query(
+        "SELECT e.id, e.period, e.policyYear, e.status, e.baseAmountPaise, e.expectedPaise, e.receivedPaise, " +
+            "e.receivedDate, e.rateApplied, c.name AS customerName, p.code AS productCode, " +
+            "p.nameEn AS productNameEn, p.nameHi AS productNameHi " +
+            "FROM commission_entry e " +
+            "JOIN holding h ON h.id = e.holdingId " +
+            "JOIN customer c ON c.id = h.customerId " +
+            "JOIN product p ON p.id = h.productId " +
+            "WHERE e.deleted = 0 AND h.customerId = :customerId ORDER BY e.period DESC, p.code",
+    )
+    fun observeLedgerForCustomer(customerId: String): Flow<List<LedgerRow>>
+
+    @Query("SELECT * FROM commission_entry WHERE deleted = 0 AND period = :period AND status IN ('EXPECTED', 'PARTLY_RECEIVED')")
+    suspend fun pendingForPeriod(period: String): List<CommissionEntryEntity>
+
     @Upsert
     suspend fun upsert(entry: CommissionEntryEntity)
+}
+
+@Dao
+interface CommissionReceiptDao {
+    @Query("SELECT * FROM commission_receipt WHERE deleted = 0 AND entryId = :entryId ORDER BY date, createdAt")
+    fun observeForEntry(entryId: String): Flow<List<CommissionReceiptEntity>>
+
+    @Query("SELECT * FROM commission_receipt WHERE deleted = 0 AND entryId = :entryId ORDER BY date, createdAt")
+    suspend fun forEntry(entryId: String): List<CommissionReceiptEntity>
+
+    @Query("SELECT * FROM commission_receipt WHERE id = :id")
+    suspend fun get(id: String): CommissionReceiptEntity?
+
+    @Upsert
+    suspend fun upsert(receipt: CommissionReceiptEntity)
+}
+
+@Dao
+interface IncentiveStatementDao {
+    @Query("SELECT * FROM incentive_statement WHERE deleted = 0 AND month = :month ORDER BY date, createdAt")
+    fun observeForMonth(month: String): Flow<List<IncentiveStatementEntity>>
+
+    @Query("SELECT * FROM incentive_statement WHERE id = :id")
+    suspend fun get(id: String): IncentiveStatementEntity?
+
+    @Upsert
+    suspend fun upsert(statement: IncentiveStatementEntity)
 }
 
 @Dao
 interface ReminderDao {
     @Query("SELECT * FROM reminder WHERE id = :id")
     suspend fun get(id: String): ReminderEntity?
+
+    @Query("UPDATE reminder SET deleted = 1, updatedAt = :now WHERE subjectId = :subjectId")
+    suspend fun softDeleteForSubject(subjectId: String, now: Long)
 
     /** Run before the customer's holdings and leads are soft-deleted (it looks them up). */
     @Query(

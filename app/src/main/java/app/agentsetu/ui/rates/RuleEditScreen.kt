@@ -32,6 +32,7 @@ import app.agentsetu.data.db.CommissionRuleEntity
 import app.agentsetu.data.repo.CommissionRepository
 import app.agentsetu.ui.common.AppScaffold
 import app.agentsetu.ui.common.CheckRow
+import app.agentsetu.ui.common.DateField
 import app.agentsetu.ui.common.FormField
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
@@ -118,11 +119,9 @@ fun RuleEditScreen(onBack: () -> Unit, onSaved: () -> Unit, viewModel: RuleEditV
                 },
                 keyboardType = KeyboardType.Decimal,
             )
-            FormField(
+            DateField(
                 vm.from, { vm.from = it }, stringResource(R.string.rule_from),
                 error = if (vm.showErrors && vm.fromInvalid) stringResource(R.string.error_date) else null,
-                supporting = stringResource(R.string.date_hint),
-                keyboardType = KeyboardType.Number,
             )
             FormField(
                 vm.orderRef, { vm.orderRef = it }, stringResource(R.string.rule_order),

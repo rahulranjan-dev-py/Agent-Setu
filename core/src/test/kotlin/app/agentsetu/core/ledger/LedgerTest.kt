@@ -52,4 +52,22 @@ class LedgerTest {
         assertEquals(2, t.pendingCount)
         assertEquals(1, t.noRuleCount)
     }
+
+    @Test
+    fun outstandingAndReceipts() {
+        assertEquals(40000, Ledger.outstanding(60000, 20000))
+        assertEquals(0, Ledger.outstanding(60000, 70000))
+        assertEquals(60000, Ledger.outstanding(60000, null))
+        assertEquals(0, Ledger.outstanding(null, 5000))
+        assertNull(Ledger.receivedTotal(emptyList()))
+        assertEquals(30000L, Ledger.receivedTotal(listOf(10000, 20000)))
+    }
+
+    @Test
+    fun statementMatch() {
+        val totals = Ledger.Totals(expectedPaise = 185000, receivedPaise = 140000, pendingCount = 2, noRuleCount = 0)
+        val m = Ledger.matchStatement(180000, totals)
+        assertEquals(-5000, m.vsExpected)
+        assertEquals(40000, m.vsReceived)
+    }
 }

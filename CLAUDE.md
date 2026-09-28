@@ -12,6 +12,9 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
 ## Build and test
 
 - `./gradlew :core:test`: pure-Kotlin unit tests, including validation of `data/seed/*.json`.
+- Schema change: bump `AgentSetuDatabase.VERSION`, add a `Migration` in `data/db/Migrations.kt` and
+  extend `MigrationSqlTest` (it checks the SQL against Room's exported `app/schemas`). Also extend
+  `BackupPayload` (defaults for new lists) and `BackupManager.upgrade`. Never drop user data.
 - `./gradlew :app:assembleDebug`: needs the Android SDK and Google Maven (dl.google.com). If those
   are unreachable (as in some cloud sandboxes), build `core` alone and rely on the GitHub Actions run
   to compile `app`.

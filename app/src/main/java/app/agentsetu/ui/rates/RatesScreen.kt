@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -83,7 +84,12 @@ class RatesViewModel @Inject constructor(
 }
 
 @Composable
-fun RatesScreen(onBack: () -> Unit, onEdit: (String) -> Unit, viewModel: RatesViewModel = hiltViewModel()) {
+fun RatesScreen(
+    onBack: () -> Unit,
+    onEdit: (String) -> Unit,
+    onAdd: () -> Unit,
+    viewModel: RatesViewModel = hiltViewModel(),
+) {
     val rules by viewModel.rules.collectAsStateWithLifecycle()
     val showHistory by viewModel.showHistory.collectAsStateWithLifecycle()
     var confirmReset by remember { mutableStateOf(false) }
@@ -92,6 +98,9 @@ fun RatesScreen(onBack: () -> Unit, onEdit: (String) -> Unit, viewModel: RatesVi
         title = stringResource(R.string.rates_title),
         onBack = onBack,
         actions = {
+            IconButton(onClick = onAdd) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.rule_add_title))
+            }
             IconButton(onClick = { confirmReset = true }) {
                 Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.rates_reset))
             }
@@ -112,6 +121,9 @@ fun RatesScreen(onBack: () -> Unit, onEdit: (String) -> Unit, viewModel: RatesVi
                         modifier = Modifier.padding(16.dp),
                     )
                 }
+            }
+            item {
+                Text(stringResource(R.string.rates_add_hint), style = MaterialTheme.typography.bodyMedium)
             }
             item {
                 CheckRow(showHistory, { viewModel.showHistory.value = it }, stringResource(R.string.rates_show_history))
@@ -178,6 +190,7 @@ private fun RuleCard(view: RuleView, modifier: Modifier) {
             Text(stringResource(R.string.rates_order, r.orderRef), style = MaterialTheme.typography.bodySmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (r.isSample) Badge(stringResource(R.string.rates_badge_sample), MaterialTheme.colorScheme.secondary)
+                if (view.product?.isCustom == true) Badge(stringResource(R.string.rates_badge_custom), MaterialTheme.colorScheme.secondary)
                 if (r.verified) {
                     Badge(stringResource(R.string.rates_badge_verified), MaterialTheme.colorScheme.primary)
                 } else {

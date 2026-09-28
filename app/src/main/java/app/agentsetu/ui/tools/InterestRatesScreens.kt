@@ -40,6 +40,7 @@ import app.agentsetu.data.db.InterestRateEntity
 import app.agentsetu.data.repo.InterestRateRepository
 import app.agentsetu.ui.common.AppScaffold
 import app.agentsetu.ui.common.CheckRow
+import app.agentsetu.ui.common.DateField
 import app.agentsetu.ui.common.FormField
 import app.agentsetu.ui.common.display
 import app.agentsetu.ui.common.localized
@@ -195,11 +196,9 @@ fun InterestRateEditScreen(onBack: () -> Unit, onSaved: () -> Unit, viewModel: I
                 error = if (vm.tried && vm.rateInvalid) stringResource(R.string.error_percent) else null,
                 keyboardType = KeyboardType.Decimal,
             )
-            FormField(
+            DateField(
                 vm.from, { vm.from = it }, stringResource(R.string.rule_from),
                 error = if (vm.tried && vm.fromInvalid) stringResource(R.string.error_date) else null,
-                supporting = stringResource(R.string.date_hint),
-                keyboardType = KeyboardType.Number,
             )
             FormField(
                 vm.source, { vm.source = it }, stringResource(R.string.rate_source),

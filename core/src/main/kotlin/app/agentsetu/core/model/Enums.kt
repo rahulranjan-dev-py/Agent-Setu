@@ -57,3 +57,15 @@ enum class CommissionStatus {
     /** No rule matched when the entry was created; the user must add or fix a rule. */
     NO_RULE,
 }
+
+/** How a commission payment reached the user. */
+enum class ReceiptMode {
+    CASH,
+
+    /** Credited to the user's Post Office Savings Bank account. */
+    POSB,
+    BANK,
+
+    /** Anything else, and receipts recorded before modes existed. */
+    OTHER,
+}

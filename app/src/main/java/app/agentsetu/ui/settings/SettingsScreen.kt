@@ -7,7 +7,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,6 +42,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.agentsetu.core.update.UpdateStatus
+import app.agentsetu.data.settings.AppSettings
+import app.agentsetu.data.settings.ThemeMode
+import app.agentsetu.reminders.ReminderWorker
 import app.agentsetu.update.UpdateChecker
 import app.agentsetu.ui.common.UpdateBanner
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,7 +52,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(val updates: UpdateChecker) : ViewModel()
+class SettingsViewModel @Inject constructor(val updates: UpdateChecker, val settings: AppSettings) : ViewModel()
 
 @Composable
 fun SettingsScreen(
@@ -56,6 +67,9 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     var erasing by remember { mutableStateOf(false) }
     val update by viewModel.updates.status.collectAsStateWithLifecycle()
+    val themeMode by viewModel.settings.themeMode.collectAsStateWithLifecycle()
+    val reminderMinute by viewModel.settings.reminderMinuteOfDay.collectAsStateWithLifecycle()
+    var pickingTime by remember { mutableStateOf(false) }
     // null = not checked in this visit; otherwise the message to show.
     var checkMessage by remember { mutableStateOf<Int?>(null) }
 
@@ -71,6 +85,38 @@ fun SettingsScreen(
             Item(R.string.settings_app_lock, R.string.settings_app_lock_summary, onAppLock)
             Item(R.string.settings_backup, R.string.settings_backup_summary, onBackup)
             Item(R.string.settings_error_report, R.string.settings_error_report_summary, onErrorReport)
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.settings_reminder_time)) },
+                supportingContent = {
+                    Text(stringResource(R.string.settings_reminder_time_summary, "%02d:%02d".format(reminderMinute / 60, reminderMinute % 60)))
+                },
+                modifier = Modifier.clickable { pickingTime = true },
+            )
+            HorizontalDivider()
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SectionTitle(stringResource(R.string.settings_theme))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ThemeMode.entries.forEach { mode ->
+                        FilterChip(
+                            selected = themeMode == mode,
+                            onClick = { viewModel.settings.setThemeMode(mode) },
+                            label = {
+                                Text(
+                                    stringResource(
+                                        when (mode) {
+                                            ThemeMode.SYSTEM -> R.string.theme_system
+                                            ThemeMode.LIGHT -> R.string.theme_light
+                                            ThemeMode.DARK -> R.string.theme_dark
+                                        },
+                                    ),
+                                )
+                            },
+                            modifier = Modifier.heightIn(min = 48.dp),
+                        )
+                    }
+                }
+            }
+            HorizontalDivider()
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_updates)) },
                 supportingContent = checkMessage?.let { { Text(stringResource(it)) } },
@@ -111,6 +157,19 @@ fun SettingsScreen(
         }
     }
 
+    if (pickingTime) {
+        ReminderTimeDialog(
+            hour = reminderMinute / 60,
+            minute = reminderMinute % 60,
+            onDismiss = { pickingTime = false },
+            onSave = { h, m ->
+                viewModel.settings.setReminderTime(h, m)
+                ReminderWorker.reschedule(context)
+                pickingTime = false
+            },
+        )
+    }
+
     if (erasing) {
         EraseDialog(
             title = R.string.settings_delete_all,
@@ -128,4 +187,17 @@ private fun Item(title: Int, summary: Int?, onClick: () -> Unit) {
         modifier = Modifier.clickable(onClick = onClick),
     )
     HorizontalDivider()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReminderTimeDialog(hour: Int, minute: Int, onDismiss: () -> Unit, onSave: (Int, Int) -> Unit) {
+    val state = rememberTimePickerState(initialHour = hour, initialMinute = minute, is24Hour = true)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_reminder_time)) },
+        text = { TimePicker(state = state) },
+        confirmButton = { TextButton(onClick = { onSave(state.hour, state.minute) }) { Text(stringResource(R.string.action_save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
 }

@@ -69,7 +69,8 @@ fun CustomersScreen(onAdd: () -> Unit, onOpen: (String) -> Unit, viewModel: Cust
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                placeholder = { Text(stringResource(R.string.customers_search)) },
+                placeholder = { Text(stringResource(R.string.customers_search), maxLines = 1) },
+                textStyle = MaterialTheme.typography.bodyMedium,
                 singleLine = true,
             )
             if (customers.isEmpty() && query.isBlank()) {
