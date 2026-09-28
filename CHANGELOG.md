@@ -6,7 +6,7 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
-## 1.1.0 (versionCode 4) - received commission, own rules, small fixes; not yet published
+## 1.1.0 (versionCode 4) - received commission, own rules, small fixes; published 28-09-2026
 
 (1.0.3 was prepared with versionCode 4 but never published; its fixes ship here.)
 
