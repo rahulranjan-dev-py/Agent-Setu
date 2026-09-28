@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
@@ -17,7 +16,7 @@ val keystoreProps = Properties().apply {
 
 android {
     namespace = "app.agentsetu"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         // Final package name (decided 29-09-2026). Never change it after the first release:

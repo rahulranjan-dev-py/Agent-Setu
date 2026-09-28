@@ -6,6 +6,12 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
+## Unreleased
+
+- Build toolchain: Android Gradle Plugin 9.4, Gradle 9.6.1, Kotlin 2.3.21, KSP 2.3.12,
+  compileSdk 37 (targetSdk unchanged); libraries: Hilt 2.60.1, SQLCipher 4.19.0, Room 2.8.5,
+  WorkManager 2.12.0, AppCompat 1.8.0. No user-facing change; ships with the next version.
+
 ## 1.1.4 (versionCode 8) - review fixes: security, privacy and bugs; published 28-09-2026
 
 Result of a bug, risk and security review (docs/REVIEW_2026-09.md). Nothing here changes what the
