@@ -133,7 +133,7 @@ class CommissionViewModel @Inject constructor(
     }
 
     fun saveStatement(id: String?, input: PaymentInput): Boolean {
-        val amount = AmountInput.parse(input.amount) ?: return false
+        val amount = AmountInput.parse(input.amount)?.takeIf { it.signum() > 0 } ?: return false
         val date = IndianFormat.parseDate(input.date) ?: return false
         val forMonth = month.value
         viewModelScope.launch { commission.saveStatement(id, forMonth, amount, date, input.mode, input.reference, input.note) }
@@ -380,7 +380,7 @@ private fun LedgerItem(row: LedgerRow, onClick: () -> Unit) {
 private fun PaymentFields(input: PaymentInput, onChange: (PaymentInput) -> Unit, tried: Boolean, amountLabel: String) {
     FormField(
         input.amount, { onChange(input.copy(amount = it)) }, amountLabel,
-        error = if (tried && AmountInput.parse(input.amount) == null) stringResource(R.string.error_amount) else null,
+        error = if (tried && AmountInput.parse(input.amount)?.signum() != 1) stringResource(R.string.error_amount) else null,
         keyboardType = KeyboardType.Decimal,
     )
     DateField(

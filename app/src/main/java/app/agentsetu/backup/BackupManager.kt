@@ -104,6 +104,11 @@ class BackupManager @Inject constructor(private val db: AgentSetuDatabase) {
             // A row that breaks a data rule (e.g. a full account number) is treated as damaged.
             return@withContext RestoreResult.WrongPasswordOrDamaged
         }
+        // Rates are decimal text; a hand-edited file with "abc" would crash every rates screen later.
+        val badRate = payload.rules.any { it.rate.toBigDecimalOrNull() == null } ||
+            payload.interestRates.any { it.rate.toBigDecimalOrNull() == null } ||
+            payload.entries.any { e -> e.rateApplied?.let { it.toBigDecimalOrNull() == null } == true }
+        if (badRate) return@withContext RestoreResult.WrongPasswordOrDamaged
         // A newer app's backup may hold data this version cannot keep; older ones are upgraded below.
         if (payload.schemaVersion > AgentSetuDatabase.VERSION) return@withContext RestoreResult.FromNewerApp
         if (payload.schemaVersion < AgentSetuDatabase.OLDEST_RESTORABLE_VERSION) return@withContext RestoreResult.WrongPasswordOrDamaged

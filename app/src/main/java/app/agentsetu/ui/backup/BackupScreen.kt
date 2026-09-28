@@ -106,8 +106,20 @@ class BackupViewModel @Inject constructor(
 
     fun restore(uri: Uri, restorePassword: String) = launchTask {
         val bytes = withContext(Dispatchers.IO) {
-            context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: error("Cannot read")
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                // One byte over the cap is enough to know the file is not one of ours.
+                val limit = BackupCrypto.MAX_FILE_BYTES.toInt() + 1
+                val out = java.io.ByteArrayOutputStream()
+                val buffer = ByteArray(64 * 1024)
+                while (out.size() < limit) {
+                    val n = input.read(buffer, 0, minOf(buffer.size, limit - out.size()))
+                    if (n < 0) break
+                    out.write(buffer, 0, n)
+                }
+                out.toByteArray()
+            } ?: error("Cannot read")
         }
+        if (bytes.size > BackupCrypto.MAX_FILE_BYTES) return@launchTask BackupStatus.Failed(R.string.restore_not_backup)
         when (val result = backups.restore(bytes, restorePassword)) {
             is RestoreResult.Restored -> BackupStatus.Done(R.string.restore_done, result.customers)
             RestoreResult.WrongPasswordOrDamaged -> BackupStatus.Failed(R.string.restore_wrong_password)

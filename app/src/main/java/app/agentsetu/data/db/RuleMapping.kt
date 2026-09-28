@@ -17,4 +17,5 @@ fun CommissionRuleEntity.toSpec(): RuleSpec = RuleSpec(
     maxPremiumTermYears = maxPremiumTermYears,
     effectiveFrom = effectiveFrom,
     effectiveTo = effectiveTo,
+    userDefined = !isSample,
 )

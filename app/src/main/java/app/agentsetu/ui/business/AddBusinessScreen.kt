@@ -133,10 +133,14 @@ class AddBusinessViewModel @Inject constructor(
         }
     }
 
+    /** Last-4 of a policy recorded before 1.1.1, kept as is unless a full number is typed. */
+    var legacyLast4: String? = null
+        private set
+
     private suspend fun loadForEdit(id: String) {
         val h = db.holdingDao().get(id) ?: return
-        val p = db.productDao().get(h.productId) ?: return
         customerId = h.customerId
+        val p = db.productDao().get(h.productId) ?: return
         product = p
         category = h.policyCategory.takeIf { it != PolicyCategory.ANY } ?: PolicyCategory.NON_AEA
         termYears = h.premiumTermYears?.toString().orEmpty()
@@ -144,7 +148,8 @@ class AddBusinessViewModel @Inject constructor(
         startDate = IndianFormat.date(h.startDate)
         maturityDate = h.maturityDate?.let(IndianFormat::date).orEmpty()
         maturityEdited = true
-        refNumber = h.refNumber ?: h.refLast4.orEmpty()
+        refNumber = h.refNumber.orEmpty()
+        legacyLast4 = if (h.refNumber == null) h.refLast4 else null
         val insurance = p.productGroup == ProductGroup.PLI || p.productGroup == ProductGroup.RPLI
         sumAssured = if (insurance) editableAmount(h.amountPaise) else ""
         amount = editableAmount(h.instalmentPaise ?: h.amountPaise)
@@ -168,7 +173,10 @@ class AddBusinessViewModel @Inject constructor(
     val sumAssuredInvalid get() = isInsurance && AmountInput.parse(sumAssured)?.takeIf { it.signum() > 0 } == null
     val termInvalid get() = isInsurance && termYears.toIntOrNull()?.takeIf { it in 1..60 } == null
     val startInvalid get() = IndianFormat.parseDate(startDate) == null
-    val maturityInvalid get() = maturityDate.isNotBlank() && IndianFormat.parseDate(maturityDate) == null
+    val maturityInvalid get() = maturityDate.isNotBlank() && (
+        IndianFormat.parseDate(maturityDate) == null ||
+            IndianFormat.parseDate(startDate)?.let { start -> IndianFormat.parseDate(maturityDate)!!.isBefore(start) } == true
+        )
     val refInvalid get() = !RefNumber.isValid(refNumber.trim().ifBlank { null })
 
     fun selectProduct(p: ProductEntity) {
@@ -195,7 +203,8 @@ class AddBusinessViewModel @Inject constructor(
         if (maturityEdited) return
         val code = product?.code ?: return
         val start = IndianFormat.parseDate(startDate) ?: return
-        val catalogue = DefaultProducts.byCode(code) ?: return
+        // A custom product has no usual term: clear any suggestion left by the previous product.
+        val catalogue = DefaultProducts.byCode(code) ?: run { maturityDate = ""; return }
         maturityDate = PolicyDates.suggestedMaturity(catalogue, start)?.let(IndianFormat::date).orEmpty()
     }
 
@@ -252,7 +261,7 @@ class AddBusinessViewModel @Inject constructor(
                     existing.copy(
                         productId = p.id,
                         refNumber = refNumber.trim().ifBlank { null },
-                        refLast4 = RefNumber.last4(refNumber),
+                        refLast4 = RefNumber.last4(refNumber) ?: legacyLast4.takeIf { refNumber.isBlank() },
                         policyCategory = if (p.productGroup == ProductGroup.PLI) category else PolicyCategory.ANY,
                         premiumTermYears = if (isInsurance) termYears.toIntOrNull() else null,
                         amountPaise = if (isInsurance) Money.toPaise(AmountInput.parse(sumAssured) ?: BigDecimal.ZERO) else basePaise,
@@ -263,7 +272,7 @@ class AddBusinessViewModel @Inject constructor(
                         updatedAt = now,
                     ),
                 )
-                reminders.regenerate()
+                reminders.holdingEdited(existing.id)
                 onSaved()
                 return@launch
             }
@@ -375,7 +384,9 @@ fun AddBusinessScreen(onBack: () -> Unit, onSaved: () -> Unit, viewModel: AddBus
             FormField(
                 vm.refNumber, vm::updateRef, stringResource(R.string.business_ref_number),
                 error = if (err && vm.refInvalid) stringResource(R.string.business_ref_error) else null,
-                supporting = stringResource(R.string.business_ref_help),
+                supporting = vm.legacyLast4?.takeIf { vm.refNumber.isBlank() }
+                    ?.let { stringResource(R.string.business_ref_legacy, it) }
+                    ?: stringResource(R.string.business_ref_help),
             )
 
             if (!vm.isEditing) PreviewCard(vm.preview)

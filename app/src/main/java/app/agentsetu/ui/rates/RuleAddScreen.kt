@@ -109,7 +109,10 @@ class RuleAddViewModel @Inject constructor(
     val staffMissing get() = staffTypes.isEmpty()
     val rateInvalid get() = parsedRate() == null
     val minTermInvalid get() = minTerm.isNotBlank() && parsedTerm(minTerm) == null
-    val maxTermInvalid get() = maxTerm.isNotBlank() && parsedTerm(maxTerm) == null
+    val maxTermInvalid get() = maxTerm.isNotBlank() && (
+        parsedTerm(maxTerm) == null ||
+            parsedTerm(minTerm)?.let { min -> parsedTerm(maxTerm)!! < min } == true
+        )
     val fromInvalid get() = IndianFormat.parseDate(from) == null
     val orderMissing get() = orderRef.isBlank()
 
@@ -143,6 +146,7 @@ class RuleAddViewModel @Inject constructor(
                 verified = verified,
                 notes = notes,
             )
+            commission.recomputeNoRuleEntries()
             onSaved()
         }
     }

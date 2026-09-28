@@ -6,6 +6,29 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
+## 1.1.4 (versionCode 8) - review fixes: security, privacy and bugs; not yet published
+
+Result of a bug, risk and security review (docs/REVIEW_2026-09.md). Nothing here changes what the
+app does day to day; it closes gaps found in the review.
+
+- Security: a downloaded update must be this app (same package and signing key, the announced
+  version) and come from the app's own release address before Android is asked to install it;
+  the lock-out after wrong PINs cannot be shortened by changing the phone's date; the PIN and
+  recovery-code screens cannot be captured and the app is hidden in Recents on Android 13+;
+  backup files are capped in size and their key-stretching raised to 600,000 rounds (old files
+  still open); a lost database key shows an explanation and an erase button instead of crashing.
+- Privacy: deleting a customer or a policy now also wipes the policy number and follow-up notes
+  from the hidden rows; deleted receipts lose their reference and note; the privacy notice is
+  updated in both languages and linked from Settings → About.
+- Bugs: "Collected" after an Undo recorded nothing (fixed); collecting a premium dated before an
+  edited start date crashed (fixed); editing a policy now replaces its reminders instead of leaving
+  stale ones; Undo of a follow-up removes the follow-up reminder it created; a changed reminder time
+  now really takes effect; Today notices the date change and refreshes on return; "Reset to sample"
+  cannot revive a sample rule you revised; entries with "No rule" are recomputed when you add or
+  change a rule; a rule can be ended from a date; a term band with min above max is refused;
+  searching with % or _ works literally; rotation keeps the recovery code on screen.
+- Build: GitHub Actions pinned to commits, Dependabot enabled, signed test builds only on demand.
+
 ## 1.1.3 (versionCode 7) - update check on every start, resumable download; published 28-09-2026
 
 - The update check runs whenever the app starts or comes to the foreground (at most once every

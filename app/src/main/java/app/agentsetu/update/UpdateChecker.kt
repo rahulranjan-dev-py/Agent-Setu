@@ -13,6 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,15 +51,17 @@ class UpdateChecker @Inject constructor(@ApplicationContext context: Context) {
         return true
     }
 
+    private val inFlight = Mutex()
+
     /** Returns false if the check could not be done (offline, file missing, bad file). */
-    suspend fun check(force: Boolean): Boolean {
+    suspend fun check(force: Boolean): Boolean = inFlight.withLock {
         val now = System.currentTimeMillis()
-        if (!force && now - prefs.getLong(KEY_LAST_CHECK, 0) < THROTTLE_MS) return true
-        val text = withContext(Dispatchers.IO) { fetch() } ?: return false
-        val info = UpdateCheck.parse(text) ?: return false
+        if (!force && now - prefs.getLong(KEY_LAST_CHECK, 0) < THROTTLE_MS) return@withLock true
+        val text = withContext(Dispatchers.IO) { fetch() } ?: return@withLock false
+        val info = UpdateCheck.parse(text) ?: return@withLock false
         prefs.edit().putLong(KEY_LAST_CHECK, now).putString(KEY_LAST_FILE, text).apply()
         _status.value = UpdateCheck.evaluate(BuildConfig.VERSION_CODE, info)
-        return true
+        true
     }
 
     private fun cached(): UpdateStatus? =

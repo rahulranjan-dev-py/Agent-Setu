@@ -45,8 +45,11 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         /** Safe to call on every app start: an existing schedule is kept. */
         fun schedule(context: Context) = enqueue(context, ExistingPeriodicWorkPolicy.KEEP)
 
-        /** After the user changes the reminder time. */
-        fun reschedule(context: Context) = enqueue(context, ExistingPeriodicWorkPolicy.UPDATE)
+        /**
+         * After the user changes the reminder time. UPDATE would keep the original period start and
+         * ignore the new initial delay once the work has run, so the schedule is replaced outright.
+         */
+        fun reschedule(context: Context) = enqueue(context, ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE)
 
         private fun enqueue(context: Context, policy: ExistingPeriodicWorkPolicy) {
             val settings = EntryPointAccessors.fromApplication(context.applicationContext, Dependencies::class.java).appSettings()

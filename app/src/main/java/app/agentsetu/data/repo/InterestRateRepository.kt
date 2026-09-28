@@ -24,8 +24,9 @@ class InterestRateRepository @Inject constructor(private val db: AgentSetuDataba
             require(!current.deleted) { "Rate $id was replaced" }
             val now = System.currentTimeMillis()
             val old = when (val plan = DatedRevision.plan(current.effectiveFrom, current.effectiveTo, from)) {
-                is DatedRevision.Old.CloseOn -> current.copy(effectiveTo = plan.effectiveTo, updatedAt = now)
-                DatedRevision.Old.SoftDelete -> current.copy(deleted = true, updatedAt = now)
+                // No longer a sample: a later seed update must not revive the closed row.
+                is DatedRevision.Old.CloseOn -> current.copy(effectiveTo = plan.effectiveTo, isSample = false, updatedAt = now)
+                DatedRevision.Old.SoftDelete -> current.copy(deleted = true, isSample = false, updatedAt = now)
             }
             val new = current.copy(
                 id = UUID.randomUUID().toString(),

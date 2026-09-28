@@ -21,6 +21,8 @@ data class RuleSpec(
     val maxPremiumTermYears: Int?,
     val effectiveFrom: LocalDate,
     val effectiveTo: LocalDate?,
+    /** Written by the user (not a bundled sample). Wins a tie against an equally specific sample rule. */
+    val userDefined: Boolean = false,
 ) {
     fun isInForceOn(date: LocalDate): Boolean =
         !date.isBefore(effectiveFrom) && (effectiveTo == null || !date.isAfter(effectiveTo))

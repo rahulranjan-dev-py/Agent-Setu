@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import app.agentsetu.R
 import app.agentsetu.data.db.AgentSetuDatabase
+import app.agentsetu.data.db.escapeLike
 import app.agentsetu.ui.common.AppScaffold
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -43,7 +44,7 @@ class CustomersViewModel @Inject constructor(db: AgentSetuDatabase) : ViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val customers = query
-        .flatMapLatest { q -> if (q.isBlank()) db.customerDao().observeAll() else db.customerDao().search(q.trim()) }
+        .flatMapLatest { q -> if (q.isBlank()) db.customerDao().observeAll() else db.customerDao().search(escapeLike(q.trim())) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 }
 

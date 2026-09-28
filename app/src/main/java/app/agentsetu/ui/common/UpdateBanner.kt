@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.agentsetu.BuildConfig
 import app.agentsetu.R
 import app.agentsetu.core.update.DownloadPolicy
 import app.agentsetu.core.update.UpdateCheck
@@ -43,7 +44,7 @@ private fun DownloadButton(info: VersionInfo, afterClick: () -> Unit = {}) {
     val context = LocalContext.current
     val vm: UpdateInstallViewModel = hiltViewModel()
     Button(onClick = {
-        if (UpdateCheck.canInstallInApp(info)) vm.installer.start(info) else context.openUri(info.downloadUrl)
+        if (UpdateCheck.canInstallInApp(info, BuildConfig.APK_URL_PREFIX)) vm.installer.start(info) else context.openUri(info.downloadUrl)
         afterClick()
     }) { Text(stringResource(R.string.update_download)) }
 }
@@ -144,7 +145,11 @@ fun UpdateDownloadDialog(info: VersionInfo) {
                     is DownloadState.Failed -> {
                         Text(
                             stringResource(
-                                if (s.reason == DownloadState.Reason.CHECKSUM) R.string.update_failed_checksum else R.string.update_failed_download,
+                                when (s.reason) {
+                                    DownloadState.Reason.CHECKSUM -> R.string.update_failed_checksum
+                                    DownloadState.Reason.NOT_GENUINE -> R.string.update_failed_not_genuine
+                                    DownloadState.Reason.NETWORK -> R.string.update_failed_download
+                                },
                             ),
                             color = MaterialTheme.colorScheme.error,
                         )
@@ -160,11 +165,8 @@ fun UpdateDownloadDialog(info: VersionInfo) {
         confirmButton = {
             when (val s = state) {
                 is DownloadState.Ready -> Button(onClick = { vm.installer.install(s.file) }) { Text(stringResource(R.string.update_install)) }
-                is DownloadState.Failed -> if (s.reason == DownloadState.Reason.NETWORK) {
-                    Button(onClick = { vm.installer.start(info) }) { Text(stringResource(R.string.update_retry)) }
-                } else {
-                    Unit
-                }
+                // After a checksum or genuineness failure the file is gone, so Retry starts afresh.
+                is DownloadState.Failed -> Button(onClick = { vm.installer.start(info) }) { Text(stringResource(R.string.update_retry)) }
                 else -> Unit
             }
         },

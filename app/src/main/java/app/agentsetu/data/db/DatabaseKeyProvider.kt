@@ -20,14 +20,41 @@ import javax.inject.Singleton
  * App data is excluded from Android backup, so the pair can never be restored onto another phone;
  * moving data between phones goes through the user's own password-protected backup file.
  */
+/** The stored passphrase can no longer be unwrapped on this phone; the data cannot be read. */
+class DatabaseKeyUnavailableException(cause: Throwable?) :
+    IllegalStateException("The database key cannot be recovered on this phone", cause)
+
 @Singleton
 class DatabaseKeyProvider @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
 
+    private val prefs get() = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    /**
+     * False when a wrapped passphrase exists but can no longer be opened (Keystore key lost after a
+     * system repair, or the prefs file damaged). The database is then unreadable for good; the app
+     * shows a screen offering to erase and restore from a backup instead of crashing at start-up.
+     */
+    fun isUsable(): Boolean = try {
+        passphrase()
+        true
+    } catch (e: DatabaseKeyUnavailableException) {
+        false
+    }
+
     fun passphrase(): ByteArray {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.getString(KEY_WRAPPED, null)?.let { return unwrap(it) }
+        val stored = prefs.getString(KEY_WRAPPED, null)
+        if (stored != null) {
+            // Never generate a new Keystore key here: it could not open the stored passphrase anyway,
+            // and it would hide the real problem behind a decryption error.
+            val key = existingKey() ?: throw DatabaseKeyUnavailableException(null)
+            return try {
+                unwrap(stored, key)
+            } catch (e: Exception) {
+                throw DatabaseKeyUnavailableException(e)
+            }
+        }
 
         val raw = ByteArray(PASSPHRASE_BYTES).also { SecureRandom().nextBytes(it) }
         // Hex text, so the passphrase contains no zero bytes for the native layer to trip on.
@@ -45,16 +72,22 @@ class DatabaseKeyProvider @Inject constructor(
         return encode(cipher.iv) + SEPARATOR + encode(encrypted)
     }
 
-    private fun unwrap(stored: String): ByteArray {
-        val (iv, encrypted) = stored.split(SEPARATOR).map { Base64.decode(it, Base64.NO_WRAP) }
+    private fun unwrap(stored: String, key: SecretKey): ByteArray {
+        val parts = stored.split(SEPARATOR)
+        require(parts.size == 2) { "Malformed wrapped key" }
+        val (iv, encrypted) = parts.map { Base64.decode(it, Base64.NO_WRAP) }
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.DECRYPT_MODE, keystoreKey(), GCMParameterSpec(GCM_TAG_BITS, iv))
+        cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(GCM_TAG_BITS, iv))
         return cipher.doFinal(encrypted)
     }
 
-    private fun keystoreKey(): SecretKey {
+    private fun existingKey(): SecretKey? {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
-        (keyStore.getKey(KEY_ALIAS, null) as? SecretKey)?.let { return it }
+        return keyStore.getKey(KEY_ALIAS, null) as? SecretKey
+    }
+
+    private fun keystoreKey(): SecretKey {
+        existingKey()?.let { return it }
 
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
         generator.init(

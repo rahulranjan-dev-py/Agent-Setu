@@ -5,17 +5,23 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
+import app.agentsetu.core.model.ReminderType
 import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
+
+/** Makes user text safe for a LIKE pattern with ESCAPE '\\'. */
+fun escapeLike(text: String): String = text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 @Dao
 interface CustomerDao {
     @Query("SELECT * FROM customer WHERE deleted = 0 ORDER BY name COLLATE NOCASE")
     fun observeAll(): Flow<List<CustomerEntity>>
 
+    /** [text] must already be escaped with [escapeLike] so that % and _ are searched literally. */
     @Query(
         "SELECT * FROM customer WHERE deleted = 0 AND " +
-            "(name LIKE '%' || :text || '%' OR mobile LIKE '%' || :text || '%' OR village LIKE '%' || :text || '%') " +
+            "(name LIKE '%' || :text || '%' ESCAPE '\\' OR mobile LIKE '%' || :text || '%' ESCAPE '\\' " +
+            "OR village LIKE '%' || :text || '%' ESCAPE '\\') " +
             "ORDER BY name COLLATE NOCASE",
     )
     fun search(text: String): Flow<List<CustomerEntity>>
@@ -74,7 +80,8 @@ interface LeadDao {
     @Query("SELECT * FROM sales_lead WHERE id = :id")
     suspend fun get(id: String): LeadEntity?
 
-    @Query("UPDATE sales_lead SET deleted = 1, updatedAt = :now WHERE customerId = :customerId")
+    /** Also blanks the follow-up note and lost reason: a deleted customer leaves no text behind. */
+    @Query("UPDATE sales_lead SET deleted = 1, source = '', lostReason = NULL, updatedAt = :now WHERE customerId = :customerId")
     suspend fun softDeleteForCustomer(customerId: String, now: Long)
 
     @Upsert
@@ -98,7 +105,8 @@ interface HoldingDao {
     @Query("SELECT * FROM holding WHERE id = :id")
     suspend fun get(id: String): HoldingEntity?
 
-    @Query("UPDATE holding SET deleted = 1, updatedAt = :now WHERE customerId = :customerId")
+    /** Also drops the policy/account number: soft-deleted rows must not keep it. */
+    @Query("UPDATE holding SET deleted = 1, refNumber = NULL, refLast4 = NULL, updatedAt = :now WHERE customerId = :customerId")
     suspend fun softDeleteForCustomer(customerId: String, now: Long)
 
     @Upsert
@@ -142,8 +150,13 @@ interface CommissionEntryDao {
     @Query("SELECT * FROM commission_entry WHERE id = :id")
     suspend fun get(id: String): CommissionEntryEntity?
 
+    /** Includes a soft-deleted row (there is at most one per holding and month, deleted or not). */
     @Query("SELECT * FROM commission_entry WHERE holdingId = :holdingId AND period = :period")
     suspend fun find(holdingId: String, period: String): CommissionEntryEntity?
+
+    /** Entries still waiting for a rule, to recompute once the user adds or changes one. */
+    @Query("SELECT * FROM commission_entry WHERE deleted = 0 AND status = 'NO_RULE'")
+    suspend fun noRule(): List<CommissionEntryEntity>
 
     /** Ledger lines for one month with the customer and product names the screen shows. */
     @Query(
@@ -212,6 +225,20 @@ interface ReminderDao {
 
     @Query("UPDATE reminder SET deleted = 1, updatedAt = :now WHERE subjectId = :subjectId")
     suspend fun softDeleteForSubject(subjectId: String, now: Long)
+
+    /**
+     * Removes the open reminders of a subject for real, so that regeneration can plan them afresh
+     * after the holding changed. (The unique index counts soft-deleted rows, so a soft delete would
+     * block the new plan.) Reminders are derived data; nothing else refers to them.
+     */
+    @Query("DELETE FROM reminder WHERE subjectId = :subjectId AND done = 0")
+    suspend fun deleteOpenForSubject(subjectId: String)
+
+    @Query("DELETE FROM reminder WHERE id = :id AND done = 0")
+    suspend fun deleteIfOpen(id: String)
+
+    @Query("SELECT * FROM reminder WHERE type = :type AND subjectId = :subjectId AND dueDate = :dueDate")
+    suspend fun find(type: ReminderType, subjectId: String, dueDate: LocalDate): ReminderEntity?
 
     /** Run before the customer's holdings and leads are soft-deleted (it looks them up). */
     @Query(

@@ -85,6 +85,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class TodaySections(
@@ -106,7 +115,21 @@ class HomeViewModel @Inject constructor(
     /** Last known update status; checked in the background at most once a day. */
     val update = updates.status
 
-    val today: LocalDate = LocalDate.now()
+    /** Re-read whenever the screen comes to the front, so a day change is noticed. */
+    private val _today = MutableStateFlow(LocalDate.now())
+    val todayFlow: StateFlow<LocalDate> = _today.asStateFlow()
+    val today: LocalDate get() = _today.value
+
+    /** Bumped on resume so time-based values (backup nudge) are recomputed. */
+    private val refreshTick = MutableStateFlow(0)
+
+    fun onResume() {
+        val now = LocalDate.now()
+        val changed = now != _today.value
+        _today.value = now
+        refreshTick.value++
+        if (changed) viewModelScope.launch { runCatching { reminders.regenerate(now) } }
+    }
 
     /** The update pop-up appears once per launch for a given new version. */
     fun claimUpdatePopup(status: UpdateStatus?): Boolean {
@@ -119,22 +142,29 @@ class HomeViewModel @Inject constructor(
     }
 
     /** Nudge to back up when there is data and no backup in the last 30 days. */
-    val backupDue = db.customerDao().observeCount()
-        .map { count -> count > 0 && System.currentTimeMillis() - settings.lastBackupAt > BACKUP_INTERVAL_MS }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+    val backupDue = combine(db.customerDao().observeCount(), refreshTick) { count, _ ->
+        count > 0 && System.currentTimeMillis() - settings.lastBackupAt > BACKUP_INTERVAL_MS
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
-    val sections = db.reminderDao().observeOpen(reminders.horizon(today))
-        .map { rows ->
-            TodaySections(
-                overdue = rows.filter { it.dueDate.isBefore(today) },
-                today = rows.filter { it.dueDate == today },
-                week = rows.filter { it.dueDate.isAfter(today) && it.type != ReminderType.MATURITY },
-                maturities = rows.filter { it.dueDate.isAfter(today) && it.type == ReminderType.MATURITY },
-            )
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val sections = _today
+        .flatMapLatest { day ->
+            db.reminderDao().observeOpen(reminders.horizon(day)).map { rows ->
+                TodaySections(
+                    overdue = rows.filter { it.dueDate.isBefore(day) },
+                    today = rows.filter { it.dueDate == day },
+                    week = rows.filter { it.dueDate.isAfter(day) && it.type != ReminderType.MATURITY },
+                    maturities = rows.filter { it.dueDate.isAfter(day) && it.type == ReminderType.MATURITY },
+                )
+            }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodaySections())
 
-    val monthTotals = db.commissionEntryDao().observeLedger(YearMonth.now().toString())
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val monthTotals = _today
+        .map { YearMonth.from(it).toString() }
+        .distinctUntilChanged()
+        .flatMapLatest { db.commissionEntryDao().observeLedger(it) }
         .map { rows -> Ledger.totals(rows.map { Ledger.Line(it.expectedPaise, it.receivedPaise, it.status) }) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), Ledger.totals(emptyList()))
 
@@ -152,16 +182,20 @@ class HomeViewModel @Inject constructor(
     private val undoChannel = Channel<UndoAction>(Channel.BUFFERED)
     val undoEvents = undoChannel.receiveAsFlow()
 
-    fun collected(id: String) = viewModelScope.launch { undoChannel.send(reminders.markCollected(id)) }
-    fun dismiss(id: String) = viewModelScope.launch { undoChannel.send(reminders.markDone(id)) }
-    fun maturity(id: String, outcome: MaturityOutcome) =
-        viewModelScope.launch { undoChannel.send(reminders.maturityHandled(id, outcome)) }
+    /** A failed action must never take the app down; the reminder simply stays on the list. */
+    private fun act(block: suspend () -> UndoAction) = viewModelScope.launch {
+        runCatching { block() }.onSuccess { undoChannel.send(it) }
+    }
+
+    fun collected(id: String) = act { reminders.markCollected(id) }
+    fun dismiss(id: String) = act { reminders.markDone(id) }
+    fun maturity(id: String, outcome: MaturityOutcome) = act { reminders.maturityHandled(id, outcome) }
     fun undo(action: UndoAction) = viewModelScope.launch { reminders.undo(action) }
 
     /** Returns false for an unreadable date; blank means no next follow-up. */
     fun followUpDone(id: String, nextText: String): Boolean {
         val next = if (nextText.isBlank()) null else IndianFormat.parseDate(nextText) ?: return false
-        viewModelScope.launch { undoChannel.send(reminders.followUpDone(id, next)) }
+        act { reminders.followUpDone(id, next) }
         return true
     }
 }
@@ -189,10 +223,11 @@ fun HomeScreen(
     val update by viewModel.update.collectAsStateWithLifecycle()
     var updatePopup by remember { mutableStateOf<UpdateStatus?>(null) }
     LaunchedEffect(update) { if (viewModel.claimUpdatePopup(update)) updatePopup = update }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.onResume() }
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val totals by viewModel.monthTotals.collectAsStateWithLifecycle()
     var acting by remember { mutableStateOf<ReminderRow?>(null) }
-    val today = viewModel.today
+    val today by viewModel.todayFlow.collectAsStateWithLifecycle()
 
     updatePopup?.let { UpdateDialog(it, onDismiss = { updatePopup = null }) }
     // Lives at screen level so the progress dialog stays while the list scrolls.
@@ -350,6 +385,8 @@ private fun NotificationPermissionCard() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
     val context = LocalContext.current
     var granted by remember { mutableStateOf(ReminderNotifier.canNotify(context)) }
+    // Re-checked on return from Settings, where the user may have allowed or blocked it.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { granted = ReminderNotifier.canNotify(context) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted = it }
     if (granted) return
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {

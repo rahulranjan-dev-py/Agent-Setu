@@ -17,7 +17,7 @@ import java.io.File
 
 /**
  * Draws a simple navy/white card with a sea-green divider (title, body lines, footer) as a PNG and opens the share sheet,
- * for WhatsApp. Uses the system font, which covers Hindi. No logos or official marks.
+ * for WhatsApp. Uses the system font, which covers Hindi. No logos or Agent Setu marks.
  */
 object ShareCard {
     private const val WIDTH = 1080

@@ -44,6 +44,8 @@ import app.agentsetu.security.DataEraser
 import app.agentsetu.security.PinAttempt
 import app.agentsetu.ui.common.AppScaffold
 import app.agentsetu.ui.common.CheckRow
+import app.agentsetu.ui.common.SecureWindow
+import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.coroutines.launch
 
 @Composable
@@ -75,6 +77,7 @@ fun LockScreen(appLock: AppLock) {
 
     fun useBiometric() = Biometrics.prompt(context, bioTitle) { appLock.unlockWithBiometric() }
 
+    SecureWindow()
     LaunchedEffect(Unit) { if (canUseBiometric) useBiometric() }
 
     Scaffold { padding ->
@@ -263,9 +266,11 @@ fun PinSetupScreen(appLock: AppLock, onDone: () -> Unit, onSkip: (() -> Unit)?, 
     var biometric by remember { mutableStateOf(appLock.biometricEnabled) }
     var tried by remember { mutableStateOf(false) }
     var currentError by remember { mutableStateOf<String?>(null) }
-    var recoveryCode by remember { mutableStateOf<String?>(null) }
+    // Saveable: a rotation while the code is on screen must not lose it.
+    var recoveryCode by rememberSaveable { mutableStateOf<String?>(null) }
     val wrong = stringResource(R.string.lock_wrong_pin)
     val bioAvailable = Biometrics.isAvailable(context)
+    SecureWindow()
 
     suspend fun currentOk(): Boolean {
         if (!hasPin) return true

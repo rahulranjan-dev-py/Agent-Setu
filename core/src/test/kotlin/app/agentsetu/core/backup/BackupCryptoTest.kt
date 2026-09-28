@@ -51,4 +51,13 @@ class BackupCryptoTest {
     fun shortPasswordRefused() {
         BackupCrypto.encrypt(payload, "short")
     }
+
+    @Test
+    fun hostileIterationCountRefused() {
+        val file = BackupCrypto.encrypt("x".repeat(100).toByteArray(), "correct horse")
+        // Bytes 7..10 hold the iteration count; a file demanding 50 million rounds is not ours.
+        val hostile = file.copyOf()
+        java.nio.ByteBuffer.wrap(hostile, 7, 4).putInt(50_000_000)
+        expectFailure(BackupException.Reason.NOT_A_BACKUP) { BackupCrypto.decrypt(hostile, "correct horse") }
+    }
 }

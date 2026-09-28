@@ -27,7 +27,16 @@ class BackupException(val reason: Reason) : Exception(reason.name) {
 object BackupCrypto {
     private val MAGIC = "AGSETU".toByteArray(Charsets.US_ASCII)
     private const val FORMAT_VERSION: Byte = 1
-    private const val ITERATIONS = 150_000
+    /** 600,000 rounds (OWASP 2023 guidance for PBKDF2-HMAC-SHA256). Older files carry their own count. */
+    private const val ITERATIONS = 600_000
+
+    /** A file may claim any count in this range; a hostile file cannot make decryption take minutes. */
+    private const val MIN_ACCEPTED_ITERATIONS = 10_000
+    private const val MAX_ACCEPTED_ITERATIONS = 1_000_000
+
+    /** Caps against decompression bombs and accidental huge files. */
+    const val MAX_FILE_BYTES = 64L * 1024 * 1024
+    const val MAX_PLAIN_BYTES = 256L * 1024 * 1024
     private const val SALT_BYTES = 16
     private const val IV_BYTES = 12
     private const val TAG_BITS = 128
@@ -51,12 +60,13 @@ object BackupCrypto {
         if (file.size <= HEADER_BYTES || !file.copyOfRange(0, MAGIC.size).contentEquals(MAGIC)) {
             throw BackupException(BackupException.Reason.NOT_A_BACKUP)
         }
+        if (file.size > MAX_FILE_BYTES) throw BackupException(BackupException.Reason.NOT_A_BACKUP)
         val buffer = ByteBuffer.wrap(file, MAGIC.size, HEADER_BYTES - MAGIC.size)
         val version = buffer.get()
         if (version > FORMAT_VERSION) throw BackupException(BackupException.Reason.NEWER_FORMAT)
         if (version < 1) throw BackupException(BackupException.Reason.NOT_A_BACKUP)
         val iterations = buffer.getInt()
-        if (iterations !in 10_000..10_000_000) throw BackupException(BackupException.Reason.NOT_A_BACKUP)
+        if (iterations !in MIN_ACCEPTED_ITERATIONS..MAX_ACCEPTED_ITERATIONS) throw BackupException(BackupException.Reason.NOT_A_BACKUP)
         val salt = ByteArray(SALT_BYTES).also { buffer.get(it) }
         val iv = ByteArray(IV_BYTES).also { buffer.get(it) }
         return try {
@@ -82,5 +92,16 @@ object BackupCrypto {
     private fun gzip(data: ByteArray): ByteArray =
         ByteArrayOutputStream().also { out -> GZIPOutputStream(out).use { it.write(data) } }.toByteArray()
 
-    private fun gunzip(data: ByteArray): ByteArray = GZIPInputStream(ByteArrayInputStream(data)).use { it.readBytes() }
+    /** Stops at MAX_PLAIN_BYTES so a crafted file cannot exhaust memory. */
+    private fun gunzip(data: ByteArray): ByteArray = GZIPInputStream(ByteArrayInputStream(data)).use { input ->
+        val out = ByteArrayOutputStream()
+        val buffer = ByteArray(64 * 1024)
+        while (true) {
+            val n = input.read(buffer)
+            if (n < 0) break
+            out.write(buffer, 0, n)
+            if (out.size() > MAX_PLAIN_BYTES) throw BackupException(BackupException.Reason.NOT_A_BACKUP)
+        }
+        out.toByteArray()
+    }
 }

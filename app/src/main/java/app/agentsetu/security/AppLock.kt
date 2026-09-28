@@ -1,6 +1,8 @@
 package app.agentsetu.security
 
 import android.content.Context
+import android.os.SystemClock
+import android.provider.Settings
 import app.agentsetu.core.security.LockPolicy
 import app.agentsetu.core.security.PinHasher
 import app.agentsetu.core.security.RecoveryCode
@@ -27,7 +29,7 @@ sealed interface PinAttempt {
  * PIN is then removed and set-up is asked again (resetForNewPin). There is no other way in.
  */
 @Singleton
-class AppLock @Inject constructor(@ApplicationContext context: Context) {
+class AppLock @Inject constructor(@ApplicationContext private val context: Context) {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     val isPinSet: Boolean get() = prefs.getString(KEY_HASH, null) != null
@@ -35,8 +37,12 @@ class AppLock @Inject constructor(@ApplicationContext context: Context) {
     private val _locked = MutableStateFlow(isPinSet)
     val locked: StateFlow<Boolean> = _locked.asStateFlow()
 
-    /** True once the user set a PIN or chose "skip" during onboarding. */
-    private val _choiceMade = MutableStateFlow(isPinSet || prefs.getBoolean(KEY_CHOICE_MADE, false))
+    /**
+     * True once the user finished the PIN step: chose "skip", or set a PIN and confirmed they wrote
+     * the recovery code down. A PIN saved without that confirmation (process died in between) brings
+     * the setup screen back, so the code is never silently lost.
+     */
+    private val _choiceMade = MutableStateFlow(prefs.getBoolean(KEY_CHOICE_MADE, false))
     val choiceMade: StateFlow<Boolean> = _choiceMade.asStateFlow()
 
     /** PINs set before 1.1.1 have no recovery code until the PIN is changed. */
@@ -59,11 +65,27 @@ class AppLock @Inject constructor(@ApplicationContext context: Context) {
         backgroundedAt = null
     }
 
-    fun waitUntil(): Long = prefs.getLong(KEY_LOCKED_UNTIL, 0)
+    /**
+     * End of the current lock-out as wall-clock millis, or 0. The wait is also tracked on the
+     * monotonic clock (with the boot count), so moving the phone's date forward does not shorten it.
+     */
+    fun waitUntil(now: Long = System.currentTimeMillis()): Long {
+        val wall = prefs.getLong(KEY_LOCKED_UNTIL, 0)
+        val sameBoot = prefs.getInt(KEY_LOCK_BOOT, -1) == bootCount()
+        val elapsedRemaining = if (sameBoot) prefs.getLong(KEY_LOCKED_UNTIL_ELAPSED, 0) - SystemClock.elapsedRealtime() else 0
+        val remaining = maxOf(wall - now, elapsedRemaining)
+        return if (remaining > 0) now + remaining else 0
+    }
+
+    private fun bootCount(): Int = try {
+        Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT)
+    } catch (e: Exception) {
+        -1
+    }
 
     suspend fun tryPin(pin: String, now: Long = System.currentTimeMillis()): PinAttempt {
-        val until = waitUntil()
-        if (now < until) return PinAttempt.Wait(until)
+        val until = waitUntil(now)
+        if (until > 0) return PinAttempt.Wait(until)
         val hash = prefs.getString(KEY_HASH, null) ?: return PinAttempt.Ok.also { _locked.value = false }
         val ok = withContext(Dispatchers.Default) { PinHasher.verify(pin, hash) }
         if (ok) {
@@ -79,8 +101,8 @@ class AppLock @Inject constructor(@ApplicationContext context: Context) {
      * guessed any faster than the PIN. On success the PIN is removed and set-up is asked again.
      */
     suspend fun tryRecoveryCode(input: String, now: Long = System.currentTimeMillis()): PinAttempt {
-        val until = waitUntil()
-        if (now < until) return PinAttempt.Wait(until)
+        val until = waitUntil(now)
+        if (until > 0) return PinAttempt.Wait(until)
         val hash = prefs.getString(KEY_RECOVERY_HASH, null) ?: return PinAttempt.Wrong
         val code = RecoveryCode.normalize(input)
         val ok = RecoveryCode.isValid(code) && withContext(Dispatchers.Default) { PinHasher.verify(code, hash) }
@@ -100,19 +122,25 @@ class AppLock @Inject constructor(@ApplicationContext context: Context) {
             .putBoolean(KEY_CHOICE_MADE, false)
             .putInt(KEY_FAILURES, 0)
             .putLong(KEY_LOCKED_UNTIL, 0)
+            .putLong(KEY_LOCKED_UNTIL_ELAPSED, 0)
             .apply()
         _locked.value = false
         _choiceMade.value = false
     }
 
     private fun clearFailures() {
-        prefs.edit().putInt(KEY_FAILURES, 0).putLong(KEY_LOCKED_UNTIL, 0).apply()
+        prefs.edit().putInt(KEY_FAILURES, 0).putLong(KEY_LOCKED_UNTIL, 0).putLong(KEY_LOCKED_UNTIL_ELAPSED, 0).apply()
     }
 
     private fun recordFailure(now: Long): PinAttempt {
         val failures = prefs.getInt(KEY_FAILURES, 0) + 1
         val wait = LockPolicy.lockoutMs(failures)
-        prefs.edit().putInt(KEY_FAILURES, failures).putLong(KEY_LOCKED_UNTIL, if (wait > 0) now + wait else 0).apply()
+        prefs.edit()
+            .putInt(KEY_FAILURES, failures)
+            .putLong(KEY_LOCKED_UNTIL, if (wait > 0) now + wait else 0)
+            .putLong(KEY_LOCKED_UNTIL_ELAPSED, if (wait > 0) SystemClock.elapsedRealtime() + wait else 0)
+            .putInt(KEY_LOCK_BOOT, bootCount())
+            .apply()
         return if (wait > 0) PinAttempt.Wait(now + wait) else PinAttempt.Wrong
     }
 
@@ -160,6 +188,8 @@ class AppLock @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_BIOMETRIC = "biometric"
         const val KEY_FAILURES = "failures"
         const val KEY_LOCKED_UNTIL = "locked_until"
+        const val KEY_LOCKED_UNTIL_ELAPSED = "locked_until_elapsed"
+        const val KEY_LOCK_BOOT = "lock_boot_count"
         const val KEY_CHOICE_MADE = "choice_made"
     }
 }

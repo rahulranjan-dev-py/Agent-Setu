@@ -25,8 +25,8 @@ android {
         applicationId = "in.agentsetu.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 7
-        versionName = "1.1.3"
+        versionCode = 8
+        versionName = "1.1.4"
 
         // Only ARM phones: every Android 8+ phone this app targets is ARM. Leaving out the x86
         // copies of the encryption library (for emulators) saves about 10 MB.
@@ -39,6 +39,11 @@ android {
         val updateUrl = (project.findProperty("agentsetu.updateUrl") as String?)
             ?: "https://raw.githubusercontent.com/rahulranjan-dev-py/Agent-Setu/main/release/version.json"
         buildConfigField("String", "UPDATE_URL", "\"$updateUrl\"")
+        // Only an APK under this address is downloaded and installed by the app itself (and only
+        // after its checksum, package name and signing key are verified).
+        val apkUrlPrefix = (project.findProperty("agentsetu.apkUrlPrefix") as String?)
+            ?: "https://github.com/rahulranjan-dev-py/Agent-Setu/releases/download/"
+        buildConfigField("String", "APK_URL_PREFIX", "\"$apkUrlPrefix\"")
     }
 
     signingConfigs {

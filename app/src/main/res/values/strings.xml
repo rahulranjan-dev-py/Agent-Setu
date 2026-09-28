@@ -162,7 +162,7 @@
     <string name="maturity_withdrawn">Withdrawn</string>
     <string name="maturity_later">Not decided - remind me in 7 days</string>
     <string name="notif_permission_title">Turn on reminders</string>
-    <string name="notif_permission_body">Allow notifications so Agent Setu can remind you about dues, maturities and follow-ups. This is the only permission the app asks for.</string>
+    <string name="notif_permission_body">Allow notifications so Agent Setu can remind you about dues, maturities and follow-ups. This is the only permission Agent Setu itself asks for; Android asks once more before installing an update.</string>
     <string name="notif_permission_allow">Allow</string>
     <string name="battery_title">Reminders not arriving?</string>
     <string name="battery_body">Some phones stop apps in the background to save battery. Open the app settings, go to Battery, and choose No restrictions (or Allow background activity).</string>
@@ -293,13 +293,13 @@
     <string name="update_available_title">New version %1$s available</string>
     <string name="update_required_title">Please update: this version has a known problem</string>
     <string name="update_download">Download</string>
-    <string name="update_only_official">Install only from the official group or GitHub link.</string>
+    <string name="update_only_official">Install only from the Agent Setu users group or its GitHub page.</string>
     <string name="settings_updates">Check for updates</string>
     <string name="update_up_to_date">You have the latest version.</string>
     <string name="update_failed">Could not check. Is the internet on?</string>
     <string name="update_checking">Checking...</string>
     <string name="about_signing">Signing key fingerprint (SHA-256)</string>
-    <string name="about_signing_help">Compare it with the fingerprint pinned in the official Agent Setu group. If it is different, this copy is not genuine: uninstall it and install from the official link.</string>
+    <string name="about_signing_help">Compare it with the fingerprint pinned in the Agent Setu users group. If it is different, this copy is not genuine: uninstall it and install from the group\'s link.</string>
     <string name="pick_date">Choose date</string>
     <string name="action_ok">OK</string>
     <string name="action_undo">Undo</string>
@@ -399,4 +399,13 @@
     <string name="action_close">Close</string>
     <string name="update_reconnecting">Connection lost, reconnecting (%1$d of %2$d)… the download continues from where it stopped.</string>
     <string name="update_retry">Retry</string>
+    <string name="data_unavailable_title">Your data cannot be opened</string>
+    <string name="data_unavailable_body">The key that protects the database is no longer available on this phone. This can happen after a system repair, or if the app\'s files were copied from another phone. The data cannot be read any more. Erase and start again, then restore from your backup file if you have one.</string>
+    <string name="data_unavailable_erase">Erase and start again</string>
+    <string name="business_ref_legacy">Recorded earlier as ending %1$s. Type the full number to replace it, or leave blank to keep it.</string>
+    <string name="rule_end">End this rule</string>
+    <string name="rule_end_help">Ends the rule the day before the date above. Entries already recorded keep their rate.</string>
+    <string name="rule_end_confirm">Stop applying this rule from %1$s? Add a new rule if a different rate applies from then.</string>
+    <string name="about_privacy">Privacy notice</string>
+    <string name="update_failed_not_genuine">The downloaded file is not a genuine Agent Setu release for this app (different package or signing key), so it was deleted. Install only from the Agent Setu users group or its GitHub page.</string>
 </resources>

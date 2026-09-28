@@ -76,4 +76,14 @@ class RuleMatcherTest {
         assertTrue(m is RuleMatch.Ambiguous)
         assertEquals(setOf("a", "b"), (m as RuleMatch.Ambiguous).rules.map { it.id }.toSet())
     }
+
+    @Test
+    fun userRuleWinsTieAgainstSample() {
+        val sample = rule("sample", "TD_5Y", "0.5")
+        val mine = rule("mine", "TD_5Y", "1").copy(userDefined = true)
+        assertEquals("mine", foundId(listOf(sample, mine), query("TD_5Y")))
+        // Two user rules of the same shape are still a clash the user must fix.
+        val other = rule("other", "TD_5Y", "2").copy(userDefined = true)
+        assertTrue(RuleMatcher.match(listOf(sample, mine, other), query("TD_5Y")) is RuleMatch.Ambiguous)
+    }
 }
