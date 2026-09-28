@@ -1,11 +1,11 @@
 {
-  "latestVersionCode": 8,
-  "latestVersionName": "1.1.4",
+  "latestVersionCode": 9,
+  "latestVersionName": "1.1.5",
   "downloadUrl": "https://github.com/rahulranjan-dev-py/Agent-Setu/releases",
-  "sha256": "e926f83bc47b66919648fda4d5f728bb1fda87b4fa64abe97b2739244ca4dc0d",
+  "sha256": "e9e454a7b9505ebcf9610d191cd9b9fa424316dd8d7fcf6266707ca34d9f7413",
   "minSupportedVersionCode": 0,
   "releasedOn": "28-09-2026",
-  "changelogEn": "Security and bug fixes from a review: genuine-update check before install, ledger and reminder fixes, privacy notice in About. Install over 1.1.3; your data stays.",
-  "changelogHi": "समीक्षा के बाद सुरक्षा और बग सुधार: इंस्टॉल से पहले असली अपडेट की जाँच, लेजर और रिमाइंडर सुधार, ऐप के बारे में में गोपनीयता सूचना। 1.1.3 के ऊपर इंस्टॉल करें; आपका डेटा बना रहेगा।",
-  "apkUrl": "https://github.com/rahulranjan-dev-py/Agent-Setu/releases/download/v1.1.4/AgentSetu-v1.1.4.apk"
+  "changelogEn": "Updated libraries (database encryption, build tools); smaller download. Nothing changes in use. Install over 1.1.4; your data stays.",
+  "changelogHi": "नई लाइब्रेरियाँ (डेटाबेस एन्क्रिप्शन, बिल्ड टूल); छोटा डाउनलोड। इस्तेमाल में कोई बदलाव नहीं। 1.1.4 के ऊपर इंस्टॉल करें; आपका डेटा बना रहेगा।",
+  "apkUrl": "https://github.com/rahulranjan-dev-py/Agent-Setu/releases/download/v1.1.5/AgentSetu-v1.1.5.apk"
 }
