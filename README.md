@@ -59,5 +59,7 @@ must never be committed.
 | [docs/DISCLAIMER.md](docs/DISCLAIMER.md) | Standard disclaimer text (Hindi + English) |
 | [docs/RELEASE.md](docs/RELEASE.md) | Signing key, signed build, checksum, GitHub Release, `version.json`, WhatsApp post |
 | [docs/PILOT.md](docs/PILOT.md) | Pilot stages, test checklist, commission hand-check sheet, feedback form, install video script |
-| [docs/PRIVACY.md](docs/PRIVACY.md) | Privacy notice draft (Hindi + English) |
+| [docs/PRIVACY.md](docs/PRIVACY.md) | Privacy notice (Hindi + English), linked from Settings → About |
+| [docs/REVIEW_2026-09.md](docs/REVIEW_2026-09.md) | Bug, risk and security review of 1.1.3: findings, what 1.1.4 fixed, what needs the owner |
+| [CHANGELOG.md](CHANGELOG.md) | Every published version, newest first |
 | [data/seed/](data/seed/) | Editable sample rate tables loaded on first install |
