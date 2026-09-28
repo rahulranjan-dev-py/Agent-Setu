@@ -1,10 +1,10 @@
 {
-  "latestVersionCode": 4,
-  "latestVersionName": "1.1.0",
+  "latestVersionCode": 5,
+  "latestVersionName": "1.1.1",
   "downloadUrl": "https://github.com/rahulranjan-dev-py/Agent-Setu/releases",
-  "sha256": "cbba69cae2afa9c0028bf2f04ebe9b82a74574b45f4a4c86a7e1a5a7cfd80c03",
+  "sha256": "723fa07652d5beae3ec8da15075a29bcc38a765db3cd00b85dc3d1f91b7d20bb",
   "minSupportedVersionCode": 0,
   "releasedOn": "28-09-2026",
-  "changelogEn": "Received commission in detail (receipts with mode and voucher no.), incentive statement matching, your own rules and products, small fixes. Install over 1.0.2; your data stays.",
-  "changelogHi": "मिले कमीशन का पूरा विवरण (प्राप्तियाँ, तरीका, वाउचर नंबर), इंसेंटिव स्टेटमेंट से मिलान, अपने नियम और उत्पाद, छोटे सुधार। 1.0.2 के ऊपर इंस्टॉल करें; आपका डेटा बना रहेगा।"
+  "changelogEn": "Optional full policy/account number (masked outside its own screen), Forgot PIN via recovery code or phone lock, face unlock, update pop-up. Install over 1.1.0; your data stays.",
+  "changelogHi": "पूरा पॉलिसी/खाता नंबर (वैकल्पिक, अपनी स्क्रीन के बाहर छिपा), रिकवरी कोड या फ़ोन लॉक से PIN रीसेट, चेहरे से अनलॉक, अपडेट पॉप-अप। 1.1.0 के ऊपर इंस्टॉल करें; आपका डेटा बना रहेगा।"
 }
