@@ -267,8 +267,10 @@ Without the secrets, builds stay exactly as before (unsigned release).
 ### 7.2 Every release
 
 1. Bump `versionCode` / `versionName` in `app/build.gradle.kts` on `main` (section 3, step 1).
-   Then *Actions → Build → Run workflow* on `main` (since 1.1.4 an ordinary push to `main` no
-   longer signs, so no signed APK exists for an untested commit).
+   Signed APKs come only from the *Release* workflow (7.3). To check the key without publishing,
+   run it with **Dry run** ticked: it builds, signs and shows the fingerprint, and publishes nothing.
+   The secrets live in the `release` environment, so every run first waits for your approval:
+   *Actions → the run → Review deployments → Approve and deploy*.
 2. When the run is green, open it: the **summary** shows the SHA-256 checksum and the certificate
    fingerprint. The fingerprint must match the one pinned in the WhatsApp group.
 3. Download **AgentSetu-release-signed**, unzip it: `AgentSetu-vX.Y.Z.apk` and its `.sha256`.
