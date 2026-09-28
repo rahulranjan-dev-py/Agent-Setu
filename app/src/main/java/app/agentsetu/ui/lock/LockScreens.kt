@@ -329,5 +329,10 @@ fun PinSetupScreen(appLock: AppLock, onDone: () -> Unit, onSkip: (() -> Unit)?, 
         }
     }
 
-    recoveryCode?.let { code -> RecoveryCodeDialog(code, onDone = onDone) }
+    recoveryCode?.let { code ->
+        RecoveryCodeDialog(code) {
+            appLock.recoveryNoted()
+            onDone()
+        }
+    }
 }

@@ -16,6 +16,8 @@ data class VersionInfo(
     val releasedOn: String = "",
     val changelogEn: String = "",
     val changelogHi: String = "",
+    /** Direct https link to the APK (a GitHub release asset). Empty: the app can only open [downloadUrl]. */
+    val apkUrl: String = "",
 )
 
 sealed interface UpdateStatus {
@@ -31,6 +33,15 @@ object UpdateCheck {
     fun parse(text: String): VersionInfo? = runCatching { json.decodeFromString(VersionInfo.serializer(), text) }
         .getOrNull()
         ?.takeIf { it.latestVersionCode > 0 && it.downloadUrl.startsWith("https://") }
+
+    private val SHA256_HEX = Regex("^[0-9a-fA-F]{64}$")
+
+    /**
+     * The app downloads and installs the APK itself only when it can verify it: an https link to an
+     * .apk file and a published SHA-256 to compare against. Otherwise it opens the download page.
+     */
+    fun canInstallInApp(info: VersionInfo): Boolean =
+        info.apkUrl.startsWith("https://") && info.apkUrl.endsWith(".apk") && SHA256_HEX.matches(info.sha256)
 
     fun evaluate(currentVersionCode: Int, info: VersionInfo): UpdateStatus = when {
         currentVersionCode < info.minSupportedVersionCode -> UpdateStatus.Required(info)

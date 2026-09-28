@@ -5,6 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class UpdateCheckTest {
@@ -36,5 +37,17 @@ class UpdateCheckTest {
         val parsed = UpdateCheck.parse(file.readText())
         assertNotNull("release/version.json must parse", parsed)
         assertTrue(parsed!!.changelogHi.isNotBlank() && parsed.changelogEn.isNotBlank())
+    }
+
+    @Test
+    fun inAppInstallNeedsApkLinkAndChecksum() {
+        val sha = "a".repeat(64)
+        val ok = VersionInfo(5, "1.1.1", "https://example.org/releases", sha256 = sha, apkUrl = "https://example.org/AgentSetu-v1.1.1.apk")
+        assertTrue(UpdateCheck.canInstallInApp(ok))
+        assertFalse(UpdateCheck.canInstallInApp(ok.copy(apkUrl = "")))
+        assertFalse(UpdateCheck.canInstallInApp(ok.copy(apkUrl = "http://example.org/a.apk")))
+        assertFalse(UpdateCheck.canInstallInApp(ok.copy(apkUrl = "https://example.org/a.zip")))
+        assertFalse(UpdateCheck.canInstallInApp(ok.copy(sha256 = "")))
+        assertFalse(UpdateCheck.canInstallInApp(ok.copy(sha256 = "xyz")))
     }
 }
