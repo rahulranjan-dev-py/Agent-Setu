@@ -22,7 +22,7 @@
     <string name="disclaimer_ack">I have read and understood this</string>
     <string name="nav_today">Today</string>
     <string name="nav_customers">Customers</string>
-    <string name="nav_commission">Commission</string>
+    <string name="nav_commission">Ledger</string>
     <string name="nav_settings">Settings</string>
     <string name="home_title">Today</string>
     <string name="home_placeholder">Follow-up, due-date and maturity reminders will appear here in the next version.</string>
@@ -45,7 +45,7 @@
     <string name="staff_SAS_AGENT">Small Savings (SAS) Agent</string>
     <string name="staff_MPKBY_AGENT">MPKBY Agent</string>
     <string name="customers_title">Customers</string>
-    <string name="customers_search">Search name, mobile or village</string>
+    <string name="customers_search">Search</string>
     <string name="customers_empty">No customers yet. Tap + to add one.</string>
     <string name="customer_add">Add customer</string>
     <string name="customer_edit">Edit customer</string>
@@ -302,4 +302,18 @@
     <string name="update_checking">Checking...</string>
     <string name="about_signing">Signing key fingerprint (SHA-256)</string>
     <string name="about_signing_help">Compare it with the fingerprint pinned in the official Agent Setu group. If it is different, this copy is not genuine: uninstall it and install from the official link.</string>
+    <string name="pick_date">Choose date</string>
+    <string name="action_ok">OK</string>
+    <string name="action_undo">Undo</string>
+    <string name="done_snackbar">Marked done</string>
+    <string name="collected_snackbar">Collected - commission added to the ledger</string>
+    <string name="settings_theme">Appearance</string>
+    <string name="theme_system">Same as phone</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_reminder_time">Reminder time</string>
+    <string name="settings_reminder_time_summary">Daily summary at %1$s</string>
+    <string name="holding_edit_title">Edit policy / account</string>
+    <string name="holding_delete">Delete this policy / account</string>
+    <string name="holding_delete_body">Its reminders will be removed. Commission already recorded stays in your ledger.</string>
 </resources>

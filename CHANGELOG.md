@@ -6,6 +6,12 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
+## 1.0.3 (versionCode 4) - small fixes, not yet published
+
+- Edit or delete a policy/account; calendar picker on every date field; reminder time setting;
+  appearance setting (same as phone / light / dark); add-customer button on Today; Undo after acting
+  on a reminder; single-line tab labels ("Ledger"); compact search box.
+
 ## 1.0.2 (versionCode 3) - new colours, published 28-09-2026
 
 - Colour scheme changed from teal/indigo to navy and sea green: app icon, buttons, tabs, card

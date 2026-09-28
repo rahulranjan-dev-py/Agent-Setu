@@ -19,10 +19,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +36,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -54,12 +59,13 @@ import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.db.ReminderRow
 import app.agentsetu.data.repo.MaturityOutcome
 import app.agentsetu.data.repo.ReminderRepository
+import app.agentsetu.data.repo.UndoAction
 import app.agentsetu.data.settings.AppSettings
 import app.agentsetu.update.UpdateChecker
 import app.agentsetu.ui.common.UpdateBanner
 import app.agentsetu.reminders.ReminderNotifier
 import app.agentsetu.ui.common.AppScaffold
-import app.agentsetu.ui.common.FormField
+import app.agentsetu.ui.common.DateField
 import app.agentsetu.ui.common.display
 import app.agentsetu.ui.common.localized
 import app.agentsetu.ui.common.openAppSettings
@@ -70,7 +76,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -126,14 +134,20 @@ class HomeViewModel @Inject constructor(
         const val BACKUP_INTERVAL_MS = 30L * 24 * 60 * 60 * 1000
     }
 
-    fun collected(id: String) = viewModelScope.launch { reminders.markCollected(id) }
-    fun dismiss(id: String) = viewModelScope.launch { reminders.markDone(id) }
-    fun maturity(id: String, outcome: MaturityOutcome) = viewModelScope.launch { reminders.maturityHandled(id, outcome) }
+    /** Each completed action arrives here once, so the screen can offer Undo for a few seconds. */
+    private val undoChannel = Channel<UndoAction>(Channel.BUFFERED)
+    val undoEvents = undoChannel.receiveAsFlow()
+
+    fun collected(id: String) = viewModelScope.launch { undoChannel.send(reminders.markCollected(id)) }
+    fun dismiss(id: String) = viewModelScope.launch { undoChannel.send(reminders.markDone(id)) }
+    fun maturity(id: String, outcome: MaturityOutcome) =
+        viewModelScope.launch { undoChannel.send(reminders.maturityHandled(id, outcome)) }
+    fun undo(action: UndoAction) = viewModelScope.launch { reminders.undo(action) }
 
     /** Returns false for an unreadable date; blank means no next follow-up. */
     fun followUpDone(id: String, nextText: String): Boolean {
         val next = if (nextText.isBlank()) null else IndianFormat.parseDate(nextText) ?: return false
-        viewModelScope.launch { reminders.followUpDone(id, next) }
+        viewModelScope.launch { undoChannel.send(reminders.followUpDone(id, next)) }
         return true
     }
 }
@@ -142,9 +156,21 @@ class HomeViewModel @Inject constructor(
 fun HomeScreen(
     onOpenCustomer: (String) -> Unit,
     onAddBusiness: (String) -> Unit,
+    onAddCustomer: () -> Unit,
     onBackup: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    val snackbar = remember { SnackbarHostState() }
+    val doneText = stringResource(R.string.done_snackbar)
+    val collectedText = stringResource(R.string.collected_snackbar)
+    val undoText = stringResource(R.string.action_undo)
+    LaunchedEffect(Unit) {
+        viewModel.undoEvents.collect { action ->
+            val message = if (action is UndoAction.Collected && action.createdEntryId != null) collectedText else doneText
+            val result = snackbar.showSnackbar(message, actionLabel = undoText, duration = SnackbarDuration.Short)
+            if (result == SnackbarResult.ActionPerformed) viewModel.undo(action)
+        }
+    }
     val backupDue by viewModel.backupDue.collectAsStateWithLifecycle()
     val update by viewModel.update.collectAsStateWithLifecycle()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
@@ -152,7 +178,16 @@ fun HomeScreen(
     var acting by remember { mutableStateOf<ReminderRow?>(null) }
     val today = viewModel.today
 
-    AppScaffold(title = stringResource(R.string.home_title), aboveBottomBar = true) { padding ->
+    AppScaffold(
+        title = stringResource(R.string.home_title),
+        aboveBottomBar = true,
+        snackbarHostState = snackbar,
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddCustomer) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.customer_add))
+            }
+        },
+    ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -364,11 +399,9 @@ private fun ActionDialog(
                 onDismissRequest = onDismiss,
                 title = { Text(stringResource(R.string.followup_done_title)) },
                 text = {
-                    FormField(
+                    DateField(
                         next, { next = it }, stringResource(R.string.followup_next),
                         error = if (tried && next.isNotBlank() && IndianFormat.parseDate(next) == null) stringResource(R.string.error_date) else null,
-                        supporting = stringResource(R.string.date_hint),
-                        keyboardType = KeyboardType.Number,
                     )
                 },
                 confirmButton = {

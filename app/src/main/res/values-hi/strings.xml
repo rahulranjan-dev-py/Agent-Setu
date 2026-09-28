@@ -19,7 +19,7 @@
     <string name="disclaimer_ack">मैंने इसे पढ़ और समझ लिया है</string>
     <string name="nav_today">आज</string>
     <string name="nav_customers">ग्राहक</string>
-    <string name="nav_commission">कमीशन</string>
+    <string name="nav_commission">लेजर</string>
     <string name="nav_settings">सेटिंग्स</string>
     <string name="home_title">आज</string>
     <string name="home_placeholder">फ़ॉलो-अप, देय तिथि और मैच्योरिटी रिमाइंडर अगले वर्शन में यहाँ दिखेंगे।</string>
@@ -42,7 +42,7 @@
     <string name="staff_SAS_AGENT">लघु बचत (SAS) एजेंट</string>
     <string name="staff_MPKBY_AGENT">MPKBY एजेंट</string>
     <string name="customers_title">ग्राहक</string>
-    <string name="customers_search">नाम, मोबाइल या गाँव खोजें</string>
+    <string name="customers_search">खोजें</string>
     <string name="customers_empty">अभी कोई ग्राहक नहीं। जोड़ने के लिए + दबाएँ।</string>
     <string name="customer_add">ग्राहक जोड़ें</string>
     <string name="customer_edit">ग्राहक बदलें</string>
@@ -299,4 +299,18 @@
     <string name="update_checking">जाँच रहे हैं...</string>
     <string name="about_signing">साइनिंग की फ़िंगरप्रिंट (SHA-256)</string>
     <string name="about_signing_help">इसे आधिकारिक एजेंट सेतु ग्रुप में पिन की गई फ़िंगरप्रिंट से मिलाएँ। अलग हो तो यह कॉपी असली नहीं है: इसे अनइंस्टॉल करें और आधिकारिक लिंक से इंस्टॉल करें।</string>
+    <string name="pick_date">तारीख चुनें</string>
+    <string name="action_ok">ठीक है</string>
+    <string name="action_undo">पूर्ववत</string>
+    <string name="done_snackbar">हो गया दर्ज</string>
+    <string name="collected_snackbar">मिल गया - कमीशन लेजर में जुड़ा</string>
+    <string name="settings_theme">रूप</string>
+    <string name="theme_system">फ़ोन जैसा</string>
+    <string name="theme_light">हल्का</string>
+    <string name="theme_dark">गहरा</string>
+    <string name="settings_reminder_time">रिमाइंडर का समय</string>
+    <string name="settings_reminder_time_summary">रोज़ %1$s बजे सारांश</string>
+    <string name="holding_edit_title">पॉलिसी / खाता बदलें</string>
+    <string name="holding_delete">यह पॉलिसी / खाता हटाएँ</string>
+    <string name="holding_delete_body">इसके रिमाइंडर हट जाएँगे। दर्ज कमीशन आपके लेजर में रहेगा।</string>
 </resources>

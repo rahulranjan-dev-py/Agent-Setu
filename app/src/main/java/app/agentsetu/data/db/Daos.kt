@@ -164,6 +164,9 @@ interface ReminderDao {
     @Query("SELECT * FROM reminder WHERE id = :id")
     suspend fun get(id: String): ReminderEntity?
 
+    @Query("UPDATE reminder SET deleted = 1, updatedAt = :now WHERE subjectId = :subjectId")
+    suspend fun softDeleteForSubject(subjectId: String, now: Long)
+
     /** Run before the customer's holdings and leads are soft-deleted (it looks them up). */
     @Query(
         "UPDATE reminder SET deleted = 1, updatedAt = :now WHERE " +

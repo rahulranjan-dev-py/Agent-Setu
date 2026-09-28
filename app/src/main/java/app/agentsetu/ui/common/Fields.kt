@@ -15,6 +15,20 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import app.agentsetu.core.format.IndianFormat
+import java.time.Instant
+import java.time.ZoneOffset
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,9 +62,11 @@ fun AppScaffold(
     aboveBottomBar: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
+    snackbarHostState: SnackbarHostState? = null,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
+        snackbarHost = { snackbarHostState?.let { SnackbarHost(it) } },
         topBar = {
             TopAppBar(
                 title = { Text(title) },
@@ -84,6 +100,7 @@ fun FormField(
     supporting: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true,
+    trailingIcon: (@Composable () -> Unit)? = null,
 ) {
     val help = error ?: supporting
     OutlinedTextField(
@@ -95,7 +112,51 @@ fun FormField(
         supportingText = help?.let { { Text(it) } },
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         singleLine = singleLine,
+        trailingIcon = trailingIcon,
     )
+}
+
+/** A DD-MM-YYYY field that can be typed or picked from a calendar (the icon on the right). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DateField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    error: String? = null,
+) {
+    var open by remember { mutableStateOf(false) }
+    FormField(
+        value = value,
+        onValueChange = onValueChange,
+        label = label,
+        modifier = modifier,
+        error = error,
+        supporting = stringResource(R.string.date_hint),
+        keyboardType = KeyboardType.Number,
+        trailingIcon = {
+            IconButton(onClick = { open = true }) {
+                Icon(Icons.Filled.DateRange, contentDescription = stringResource(R.string.pick_date))
+            }
+        },
+    )
+    if (open) {
+        val initial = IndianFormat.parseDate(value)?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+        val state = rememberDatePickerState(initialSelectedDateMillis = initial)
+        DatePickerDialog(
+            onDismissRequest = { open = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    state.selectedDateMillis?.let { millis ->
+                        onValueChange(IndianFormat.date(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()))
+                    }
+                    open = false
+                }) { Text(stringResource(R.string.action_ok)) }
+            },
+            dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.action_cancel)) } },
+        ) { DatePicker(state = state) }
+    }
 }
 
 @Composable

@@ -44,6 +44,7 @@ import app.agentsetu.core.model.Money
 import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.db.LedgerRow
 import app.agentsetu.ui.common.AppScaffold
+import app.agentsetu.ui.common.DateField
 import app.agentsetu.ui.common.FormField
 import app.agentsetu.ui.common.currentLocale
 import app.agentsetu.ui.common.editableAmount
@@ -219,11 +220,9 @@ private fun ReceivedDialog(row: LedgerRow, onDismiss: () -> Unit, onSave: (Strin
                     error = if (tried && AmountInput.parse(amount) == null) stringResource(R.string.error_amount) else null,
                     keyboardType = KeyboardType.Decimal,
                 )
-                FormField(
+                DateField(
                     date, { date = it }, stringResource(R.string.commission_received_date),
                     error = if (tried && IndianFormat.parseDate(date) == null) stringResource(R.string.error_date) else null,
-                    supporting = stringResource(R.string.date_hint),
-                    keyboardType = KeyboardType.Number,
                 )
             }
         },

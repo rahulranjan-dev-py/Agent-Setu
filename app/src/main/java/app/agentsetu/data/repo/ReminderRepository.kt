@@ -23,6 +23,21 @@ import javax.inject.Singleton
 
 enum class MaturityOutcome { REINVESTED, WITHDRAWN, UNDECIDED }
 
+/** What "Undo" has to put back after a reminder action. */
+sealed interface UndoAction {
+    val reminderId: String
+
+    data class Dismissed(override val reminderId: String) : UndoAction
+    data class Collected(override val reminderId: String, val createdEntryId: String?) : UndoAction
+    data class FollowUp(override val reminderId: String, val leadId: String, val previousNext: LocalDate?) : UndoAction
+    data class Maturity(
+        override val reminderId: String,
+        val holdingId: String,
+        val previousStatus: HoldingStatus,
+        val createdLeadId: String?,
+    ) : UndoAction
+}
+
 @Singleton
 class ReminderRepository @Inject constructor(
     private val db: AgentSetuDatabase,
@@ -65,21 +80,51 @@ class ReminderRepository @Inject constructor(
         return open.filter { it.id in alertIds }
     }
 
-    suspend fun markDone(reminderId: String) {
+    suspend fun markDone(reminderId: String): UndoAction {
+        setDone(reminderId, true)
+        return UndoAction.Dismissed(reminderId)
+    }
+
+    private suspend fun setDone(reminderId: String, done: Boolean) {
         val reminder = db.reminderDao().get(reminderId) ?: return
-        db.reminderDao().upsert(reminder.copy(done = true, updatedAt = System.currentTimeMillis()))
+        db.reminderDao().upsert(reminder.copy(done = done, updatedAt = System.currentTimeMillis()))
+    }
+
+    /** Reverses one action taken from the Today screen. */
+    suspend fun undo(action: UndoAction) = db.withTransaction {
+        val now = System.currentTimeMillis()
+        when (action) {
+            is UndoAction.Dismissed -> Unit
+            is UndoAction.Collected -> action.createdEntryId?.let { id ->
+                db.commissionEntryDao().get(id)?.let { db.commissionEntryDao().upsert(it.copy(deleted = true, updatedAt = now)) }
+            }
+            is UndoAction.FollowUp -> db.leadDao().get(action.leadId)?.let {
+                db.leadDao().upsert(it.copy(nextFollowUp = action.previousNext, updatedAt = now))
+            }
+            is UndoAction.Maturity -> {
+                db.holdingDao().get(action.holdingId)?.let {
+                    db.holdingDao().upsert(it.copy(status = action.previousStatus, updatedAt = now))
+                }
+                action.createdLeadId?.let { leadId ->
+                    db.leadDao().get(leadId)?.let { db.leadDao().upsert(it.copy(deleted = true, updatedAt = now)) }
+                    db.reminderDao().softDeleteForSubject(leadId, now)
+                }
+            }
+        }
+        setDone(action.reminderId, false)
     }
 
     /**
      * Premium or RD instalment collected: adds the expected commission for that period to the
      * ledger (with the rule and rate in force on the due date), then closes the reminder.
      */
-    suspend fun markCollected(reminderId: String) = db.withTransaction {
-        val reminder = db.reminderDao().get(reminderId) ?: return@withTransaction
+    suspend fun markCollected(reminderId: String): UndoAction = db.withTransaction {
+        val reminder = db.reminderDao().get(reminderId) ?: return@withTransaction UndoAction.Dismissed(reminderId)
         val holding = db.holdingDao().get(reminder.subjectId)
         val product = holding?.let { db.productDao().get(it.productId) }
         val staffType = db.userProfileDao().current()?.staffType
         val base = holding?.instalmentPaise
+        var createdEntryId: String? = null
         if (holding != null && product != null && staffType != null && base != null) {
             val insurance = product.productGroup == ProductGroup.PLI || product.productGroup == ProductGroup.RPLI
             val query = CommissionQuery(
@@ -90,49 +135,63 @@ class ReminderRepository @Inject constructor(
                 policyYear = if (insurance) PolicyDates.policyYear(holding.startDate, reminder.dueDate) else null,
                 date = reminder.dueDate,
             )
-            commission.recordExpected(holding.id, YearMonth.from(reminder.dueDate), query, Money.fromPaise(base))
+            val period = YearMonth.from(reminder.dueDate)
+            val existed = db.commissionEntryDao().find(holding.id, period.toString()) != null
+            val entry = commission.recordExpected(holding.id, period, query, Money.fromPaise(base))
+            if (!existed) createdEntryId = entry.id
         }
-        markDone(reminderId)
+        setDone(reminderId, true)
+        UndoAction.Collected(reminderId, createdEntryId)
     }
 
     /** Follow-up done. With [next], the lead gets a new follow-up date; without, it has none. */
-    suspend fun followUpDone(reminderId: String, next: LocalDate?) {
-        val reminder = db.reminderDao().get(reminderId) ?: return
-        db.leadDao().get(reminder.subjectId)?.let {
-            db.leadDao().upsert(it.copy(nextFollowUp = next, updatedAt = System.currentTimeMillis()))
-        }
-        markDone(reminderId)
+    suspend fun followUpDone(reminderId: String, next: LocalDate?): UndoAction {
+        val reminder = db.reminderDao().get(reminderId) ?: return UndoAction.Dismissed(reminderId)
+        val lead = db.leadDao().get(reminder.subjectId)
+        lead?.let { db.leadDao().upsert(it.copy(nextFollowUp = next, updatedAt = System.currentTimeMillis())) }
+        setDone(reminderId, true)
         if (next != null) regenerate()
+        return if (lead != null) UndoAction.FollowUp(reminderId, lead.id, lead.nextFollowUp) else UndoAction.Dismissed(reminderId)
     }
 
     /** Maturity handled. Reinvested/withdrawn closes the holding; undecided asks again in 7 days. */
-    suspend fun maturityHandled(reminderId: String, outcome: MaturityOutcome) {
-        val reminder = db.reminderDao().get(reminderId) ?: return
-        val holding = db.holdingDao().get(reminder.subjectId) ?: return
+    suspend fun maturityHandled(reminderId: String, outcome: MaturityOutcome): UndoAction {
+        val reminder = db.reminderDao().get(reminderId) ?: return UndoAction.Dismissed(reminderId)
+        val holding = db.holdingDao().get(reminder.subjectId) ?: return markDone(reminderId)
         val now = System.currentTimeMillis()
+        var createdLeadId: String? = null
         when (outcome) {
             MaturityOutcome.REINVESTED, MaturityOutcome.WITHDRAWN ->
                 db.holdingDao().upsert(holding.copy(status = HoldingStatus.MATURED, updatedAt = now))
             MaturityOutcome.UNDECIDED ->
-                addFollowUp(holding.customerId, LocalDate.now().plusDays(7), note = "", productId = holding.productId)
+                createdLeadId = addFollowUp(holding.customerId, LocalDate.now().plusDays(7), note = "", productId = holding.productId)
         }
-        markDone(reminderId)
+        setDone(reminderId, true)
+        return UndoAction.Maturity(reminderId, holding.id, holding.status, createdLeadId)
     }
 
-    suspend fun addFollowUp(customerId: String, date: LocalDate, note: String, productId: String = "") {
+    /** Returns the new lead's id. */
+    suspend fun addFollowUp(customerId: String, date: LocalDate, note: String, productId: String = ""): String {
         val now = System.currentTimeMillis()
-        db.leadDao().upsert(
-            LeadEntity(
-                customerId = customerId,
-                productId = productId,
-                stage = LeadStage.CONTACTED,
-                nextFollowUp = date,
-                source = note.trim(),
-                createdAt = now,
-                updatedAt = now,
-            ),
+        val lead = LeadEntity(
+            customerId = customerId,
+            productId = productId,
+            stage = LeadStage.CONTACTED,
+            nextFollowUp = date,
+            source = note.trim(),
+            createdAt = now,
+            updatedAt = now,
         )
+        db.leadDao().upsert(lead)
         regenerate()
+        return lead.id
+    }
+
+    /** Removes a policy/account (soft delete) and its reminders; ledger entries stay. */
+    suspend fun deleteHolding(holdingId: String) = db.withTransaction {
+        val now = System.currentTimeMillis()
+        db.holdingDao().get(holdingId)?.let { db.holdingDao().upsert(it.copy(deleted = true, updatedAt = now)) }
+        db.reminderDao().softDeleteForSubject(holdingId, now)
     }
 
 }

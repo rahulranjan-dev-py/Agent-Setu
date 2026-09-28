@@ -1,6 +1,7 @@
 package app.agentsetu.ui.customers
 
 import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,6 +46,7 @@ import app.agentsetu.data.db.HoldingEntity
 import app.agentsetu.data.db.ProductEntity
 import app.agentsetu.data.repo.ReminderRepository
 import app.agentsetu.ui.common.AppScaffold
+import app.agentsetu.ui.common.DateField
 import app.agentsetu.ui.common.FormField
 import app.agentsetu.ui.common.display
 import app.agentsetu.ui.common.labelRes
@@ -89,6 +91,7 @@ fun CustomerDetailScreen(
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
     onAddBusiness: (String) -> Unit,
+    onOpenHolding: (String) -> Unit,
     viewModel: CustomerDetailViewModel = hiltViewModel(),
 ) {
     val customer by viewModel.customer.collectAsStateWithLifecycle()
@@ -164,7 +167,7 @@ fun CustomerDetailScreen(
             if (holdings.isEmpty()) {
                 item { Text(stringResource(R.string.customer_no_holdings), style = MaterialTheme.typography.bodyLarge) }
             }
-            items(holdings, key = { it.holding.id }) { view -> HoldingCard(view) }
+            items(holdings, key = { it.holding.id }) { view -> HoldingCard(view, onClick = { onOpenHolding(view.holding.id) }) }
         }
     }
 
@@ -186,11 +189,9 @@ private fun FollowUpDialog(onDismiss: () -> Unit, onSave: (String, String) -> Un
         title = { Text(stringResource(R.string.followup_add)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                FormField(
+                DateField(
                     date, { date = it }, stringResource(R.string.followup_date),
                     error = if (tried && IndianFormat.parseDate(date) == null) stringResource(R.string.error_date) else null,
-                    supporting = stringResource(R.string.date_hint),
-                    keyboardType = KeyboardType.Number,
                 )
                 FormField(note, { note = it }, stringResource(R.string.followup_note))
             }
@@ -206,9 +207,9 @@ private fun FollowUpDialog(onDismiss: () -> Unit, onSave: (String, String) -> Un
 }
 
 @Composable
-private fun HoldingCard(view: HoldingView) {
+private fun HoldingCard(view: HoldingView, onClick: () -> Unit) {
     val h = view.holding
-    Card(Modifier.fillMaxWidth()) {
+    Card(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             val name = view.product?.let { localized(it.nameEn, it.nameHi) } ?: "-"
             Text(name, style = MaterialTheme.typography.titleMedium)
