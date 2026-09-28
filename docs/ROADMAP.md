@@ -100,15 +100,16 @@ their earnings, it waits for v1.5.
 - DPDP Act 2023: minimum data, consent note, per-customer delete, "Delete all my data", and a
   Hindi + English privacy notice on GitHub Pages ([draft](PRIVACY.md)).
 - Android developer verification for sideloaded apps: register before global enforcement in 2027.
-- Permissions: notifications is the only one users are asked for (plus "install unknown apps" if
-  in-app APK download is added). WorkManager adds install-time permissions without a prompt (wake
-  lock, boot completed, network state). No SMS, call log, contacts or location.
+- Permissions: notifications is the only one users are asked for, plus "install unknown apps",
+  which Android asks once when the in-app updater (1.1.2) hands a verified APK to the installer.
+  WorkManager adds install-time permissions without a prompt (wake lock, boot completed, network
+  state). No SMS, call log, contacts or location.
 - Scheme text written in our own words from public sources, dated, with a "rules may change" note.
 
 ## 8. Technology
 
 Kotlin + Jetpack Compose (Material 3) · MVVM · Room + SQLCipher (key in Android Keystore) · Hilt ·
-WorkManager (nightly reminder scan, update check) · local notifications · `strings.xml` for Hindi
+WorkManager (nightly reminder scan) · update check on each start (at most every 15 minutes) · local notifications · `strings.xml` for Hindi
 and English · password-protected backup file via the share sheet · `version.json` on GitHub
 Pages/Releases for update checks.
 

@@ -38,10 +38,16 @@ object UpdateCheck {
 
     /**
      * The app downloads and installs the APK itself only when it can verify it: an https link to an
-     * .apk file and a published SHA-256 to compare against. Otherwise it opens the download page.
+     * .apk file under the app's own release-download address ([apkUrlPrefix], e.g.
+     * "https://github.com/<owner>/<repo>/releases/download/") and a published SHA-256 to compare
+     * against. Otherwise it opens the download page. The installer additionally checks that the file
+     * is this app, signed with the same key.
      */
-    fun canInstallInApp(info: VersionInfo): Boolean =
-        info.apkUrl.startsWith("https://") && info.apkUrl.endsWith(".apk") && SHA256_HEX.matches(info.sha256)
+    fun canInstallInApp(info: VersionInfo, apkUrlPrefix: String): Boolean =
+        apkUrlPrefix.startsWith("https://") &&
+            info.apkUrl.startsWith(apkUrlPrefix) &&
+            info.apkUrl.endsWith(".apk") &&
+            SHA256_HEX.matches(info.sha256)
 
     fun evaluate(currentVersionCode: Int, info: VersionInfo): UpdateStatus = when {
         currentVersionCode < info.minSupportedVersionCode -> UpdateStatus.Required(info)

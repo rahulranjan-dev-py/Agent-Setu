@@ -8,6 +8,7 @@ import app.agentsetu.core.model.LeadStage
 import app.agentsetu.core.model.Money
 import app.agentsetu.core.model.PolicyCategory
 import app.agentsetu.core.model.ProductGroup
+import app.agentsetu.core.model.ReminderType
 import app.agentsetu.core.reminders.PlannedReminder
 import app.agentsetu.core.reminders.PlannerHolding
 import app.agentsetu.core.reminders.PlannerLead
@@ -29,7 +30,13 @@ sealed interface UndoAction {
 
     data class Dismissed(override val reminderId: String) : UndoAction
     data class Collected(override val reminderId: String, val createdEntryId: String?) : UndoAction
-    data class FollowUp(override val reminderId: String, val leadId: String, val previousNext: LocalDate?) : UndoAction
+    data class FollowUp(
+        override val reminderId: String,
+        val leadId: String,
+        val previousNext: LocalDate?,
+        /** The reminder created for the new follow-up date, removed again on undo. */
+        val createdReminderId: String? = null,
+    ) : UndoAction
     data class Maturity(
         override val reminderId: String,
         val holdingId: String,
@@ -98,8 +105,11 @@ class ReminderRepository @Inject constructor(
             is UndoAction.Collected -> action.createdEntryId?.let { id ->
                 db.commissionEntryDao().get(id)?.let { db.commissionEntryDao().upsert(it.copy(deleted = true, updatedAt = now)) }
             }
-            is UndoAction.FollowUp -> db.leadDao().get(action.leadId)?.let {
-                db.leadDao().upsert(it.copy(nextFollowUp = action.previousNext, updatedAt = now))
+            is UndoAction.FollowUp -> {
+                db.leadDao().get(action.leadId)?.let {
+                    db.leadDao().upsert(it.copy(nextFollowUp = action.previousNext, updatedAt = now))
+                }
+                action.createdReminderId?.let { db.reminderDao().deleteIfOpen(it) }
             }
             is UndoAction.Maturity -> {
                 db.holdingDao().get(action.holdingId)?.let {
@@ -127,16 +137,19 @@ class ReminderRepository @Inject constructor(
         var createdEntryId: String? = null
         if (holding != null && product != null && staffType != null && base != null) {
             val insurance = product.productGroup == ProductGroup.PLI || product.productGroup == ProductGroup.RPLI
+            // A reminder dated before an (edited) start date counts as the first policy year instead of crashing.
+            val dueDate = if (reminder.dueDate.isBefore(holding.startDate)) holding.startDate else reminder.dueDate
             val query = CommissionQuery(
                 productCode = product.code,
                 policyCategory = if (product.productGroup == ProductGroup.PLI) holding.policyCategory else PolicyCategory.ANY,
                 staffType = staffType,
                 premiumTermYears = holding.premiumTermYears,
-                policyYear = if (insurance) PolicyDates.policyYear(holding.startDate, reminder.dueDate) else null,
+                policyYear = if (insurance) PolicyDates.policyYear(holding.startDate, dueDate) else null,
                 date = reminder.dueDate,
             )
             val period = YearMonth.from(reminder.dueDate)
-            val existed = db.commissionEntryDao().find(holding.id, period.toString()) != null
+            // A soft-deleted entry (after Undo) is revived by recordExpected and counts as created again.
+            val existed = db.commissionEntryDao().find(holding.id, period.toString())?.deleted == false
             val entry = commission.recordExpected(holding.id, period, query, Money.fromPaise(base))
             if (!existed) createdEntryId = entry.id
         }
@@ -150,8 +163,22 @@ class ReminderRepository @Inject constructor(
         val lead = db.leadDao().get(reminder.subjectId)
         lead?.let { db.leadDao().upsert(it.copy(nextFollowUp = next, updatedAt = System.currentTimeMillis())) }
         setDone(reminderId, true)
-        if (next != null) regenerate()
-        return if (lead != null) UndoAction.FollowUp(reminderId, lead.id, lead.nextFollowUp) else UndoAction.Dismissed(reminderId)
+        var created: String? = null
+        if (next != null && lead != null) {
+            val before = db.reminderDao().find(ReminderType.FOLLOW_UP, lead.id, next)
+            regenerate()
+            if (before == null) created = db.reminderDao().find(ReminderType.FOLLOW_UP, lead.id, next)?.id
+        }
+        return if (lead != null) UndoAction.FollowUp(reminderId, lead.id, lead.nextFollowUp, created) else UndoAction.Dismissed(reminderId)
+    }
+
+    /**
+     * After a policy/account was edited (dates, frequency, product): drop its open reminders and plan
+     * them again, so nothing stale (or dated before the new start) stays on Today.
+     */
+    suspend fun holdingEdited(holdingId: String) = db.withTransaction {
+        db.reminderDao().deleteOpenForSubject(holdingId)
+        regenerate()
     }
 
     /** Maturity handled. Reinvested/withdrawn closes the holding; undecided asks again in 7 days. */
@@ -187,10 +214,12 @@ class ReminderRepository @Inject constructor(
         return lead.id
     }
 
-    /** Removes a policy/account (soft delete) and its reminders; ledger entries stay. */
+    /** Removes a policy/account (soft delete, number wiped) and its reminders; ledger entries stay. */
     suspend fun deleteHolding(holdingId: String) = db.withTransaction {
         val now = System.currentTimeMillis()
-        db.holdingDao().get(holdingId)?.let { db.holdingDao().upsert(it.copy(deleted = true, updatedAt = now)) }
+        db.holdingDao().get(holdingId)?.let {
+            db.holdingDao().upsert(it.copy(deleted = true, refNumber = null, refLast4 = null, updatedAt = now))
+        }
         db.reminderDao().softDeleteForSubject(holdingId, now)
     }
 

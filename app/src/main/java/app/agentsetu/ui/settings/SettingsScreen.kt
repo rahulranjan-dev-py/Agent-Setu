@@ -47,11 +47,15 @@ import app.agentsetu.data.settings.ThemeMode
 import app.agentsetu.reminders.ReminderWorker
 import app.agentsetu.update.UpdateChecker
 import app.agentsetu.ui.common.UpdateBanner
+import app.agentsetu.ui.common.openUri
 import app.agentsetu.ui.common.UpdateDownloadDialog
 import app.agentsetu.ui.common.newVersion
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
+
+/** The privacy notice, in both languages, as published in the repository. */
+private const val PRIVACY_URL = "https://github.com/rahulranjan-dev-py/Agent-Setu/blob/main/docs/PRIVACY.md"
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(val updates: UpdateChecker, val settings: AppSettings) : ViewModel()
@@ -154,6 +158,7 @@ fun SettingsScreen(
                     Text(fingerprint, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
                     Text(stringResource(R.string.about_signing_help), style = MaterialTheme.typography.bodySmall)
                 }
+                TextButton(onClick = { context.openUri(PRIVACY_URL) }) { Text(stringResource(R.string.about_privacy)) }
                 Text(stringResource(R.string.disclaimer_title), style = MaterialTheme.typography.titleSmall)
                 Text(stringResource(R.string.disclaimer_body), style = MaterialTheme.typography.bodyMedium)
             }

@@ -54,11 +54,15 @@ class CommissionRepository @Inject constructor(
         baseAmount: BigDecimal,
     ): CommissionEntryEntity {
         // One entry per holding per month: marking the same premium twice must not double-count.
-        db.commissionEntryDao().find(holdingId, period.toString())?.let { return it }
+        // A soft-deleted entry (left by Undo) is revived under its own id: the unique index on
+        // (holdingId, period) would refuse a second row anyway.
+        val existing = db.commissionEntryDao().find(holdingId, period.toString())
+        if (existing != null && !existing.deleted) return existing
         val now = System.currentTimeMillis()
         val result = preview(query, baseAmount)
         val found = result as? CommissionResult.Expected
         val entry = CommissionEntryEntity(
+            id = existing?.id ?: UUID.randomUUID().toString(),
             holdingId = holdingId,
             period = period.toString(),
             policyYear = query.policyYear,
@@ -67,11 +71,67 @@ class CommissionRepository @Inject constructor(
             rateApplied = found?.rule?.rate?.toPlainString(),
             expectedPaise = found?.amount?.let(Money::toPaise),
             status = if (found != null) CommissionStatus.EXPECTED else CommissionStatus.NO_RULE,
-            createdAt = now,
+            createdAt = existing?.createdAt ?: now,
             updatedAt = now,
+            deleted = false,
         )
         db.commissionEntryDao().upsert(entry)
         return entry
+    }
+
+    /**
+     * Entries recorded while no rule matched get another chance after the user adds or changes a
+     * rule. The date used is the holding's due day in that month. Returns how many were resolved.
+     */
+    suspend fun recomputeNoRuleEntries(): Int = db.withTransaction {
+        val staffType = db.userProfileDao().current()?.staffType ?: return@withTransaction 0
+        val specs = liveRules()
+        var resolved = 0
+        for (entry in db.commissionEntryDao().noRule()) {
+            val holding = db.holdingDao().get(entry.holdingId) ?: continue
+            val product = db.productDao().get(holding.productId) ?: continue
+            val month = YearMonth.parse(entry.period)
+            val date = month.atDay(minOf(holding.startDate.dayOfMonth, month.lengthOfMonth()))
+            val query = CommissionQuery(
+                productCode = product.code,
+                policyCategory = if (product.productGroup == ProductGroup.PLI) holding.policyCategory else PolicyCategory.ANY,
+                staffType = staffType,
+                premiumTermYears = holding.premiumTermYears,
+                policyYear = entry.policyYear,
+                date = date,
+            )
+            val found = CommissionCalculator.expected(specs, query, Money.fromPaise(entry.baseAmountPaise)) as? CommissionResult.Expected
+                ?: continue
+            val received = entry.receivedPaise
+            val expected = Money.toPaise(found.amount)
+            db.commissionEntryDao().upsert(
+                entry.copy(
+                    ruleId = found.rule.id,
+                    rateApplied = found.rule.rate.toPlainString(),
+                    expectedPaise = expected,
+                    status = Ledger.statusAfterReceipt(expected, received ?: 0),
+                    updatedAt = System.currentTimeMillis(),
+                ),
+            )
+            resolved++
+        }
+        resolved
+    }
+
+    /**
+     * Ends a rule: it stops applying after [lastDay]. Entries already recorded keep their rate.
+     * A rule that has not started yet by then is soft-deleted instead (nothing to keep).
+     */
+    suspend fun endRule(ruleId: String, lastDay: LocalDate) {
+        val current = requireNotNull(rules.get(ruleId)) { "No rule $ruleId" }
+        require(!current.deleted) { "Rule $ruleId was deleted" }
+        val now = System.currentTimeMillis()
+        val ended = if (lastDay.isBefore(current.effectiveFrom)) {
+            current.copy(deleted = true, updatedAt = now)
+        } else {
+            current.copy(effectiveTo = lastDay, isSample = false, updatedAt = now)
+        }
+        rules.upsert(ended)
     }
 
     /**
@@ -89,7 +149,8 @@ class CommissionRepository @Inject constructor(
         require(!current.deleted) { "Rule $ruleId was deleted" }
         val outcome = RuleRevision.changeRate(current.toSpec(), newRate, from, UUID.randomUUID().toString())
         val now = System.currentTimeMillis()
-        rules.upsert(current.copy(effectiveTo = outcome.old.effectiveTo, deleted = outcome.oldDeleted, updatedAt = now))
+        // The closed row is now the user's history, not a sample: a later seed update must not revive it.
+        rules.upsert(current.copy(effectiveTo = outcome.old.effectiveTo, deleted = outcome.oldDeleted, isSample = false, updatedAt = now))
         rules.upsert(
             current.copy(
                 id = outcome.new.id,
@@ -199,7 +260,7 @@ class CommissionRepository @Inject constructor(
     suspend fun deleteReceipt(receiptId: String) = db.withTransaction {
         val now = System.currentTimeMillis()
         val receipt = db.commissionReceiptDao().get(receiptId) ?: return@withTransaction
-        db.commissionReceiptDao().upsert(receipt.copy(deleted = true, updatedAt = now))
+        db.commissionReceiptDao().upsert(receipt.copy(deleted = true, reference = "", note = "", updatedAt = now))
         refreshEntry(receipt.entryId, now)
     }
 
@@ -246,7 +307,7 @@ class CommissionRepository @Inject constructor(
 
     suspend fun deleteStatement(statementId: String) {
         val s = db.incentiveStatementDao().get(statementId) ?: return
-        db.incentiveStatementDao().upsert(s.copy(deleted = true, updatedAt = System.currentTimeMillis()))
+        db.incentiveStatementDao().upsert(s.copy(deleted = true, reference = "", note = "", updatedAt = System.currentTimeMillis()))
     }
 
     /**

@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.remember
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -86,6 +90,22 @@ class RuleEditViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 commission.changeRate(ruleId, newRate, start, orderRef.trim(), verified)
+                commission.recomputeNoRuleEntries()
+                onSaved()
+            } catch (e: IllegalArgumentException) {
+                ruleEnded = true
+            }
+        }
+    }
+
+    /** Ends the rule the day before the "applies from" date (a rule not yet started is removed). */
+    fun endRule(onSaved: () -> Unit) {
+        showErrors = true
+        ruleEnded = false
+        val start = IndianFormat.parseDate(from) ?: return
+        viewModelScope.launch {
+            try {
+                commission.endRule(ruleId, start.minusDays(1))
                 onSaved()
             } catch (e: IllegalArgumentException) {
                 ruleEnded = true
@@ -98,6 +118,7 @@ class RuleEditViewModel @Inject constructor(
 fun RuleEditScreen(onBack: () -> Unit, onSaved: () -> Unit, viewModel: RuleEditViewModel = hiltViewModel()) {
     val vm = viewModel
     val rule = vm.rule ?: return
+    var confirmEnd by remember { mutableStateOf(false) }
     AppScaffold(title = stringResource(R.string.rule_edit_title), onBack = onBack) { padding ->
         Column(
             modifier = Modifier
@@ -140,6 +161,30 @@ fun RuleEditScreen(onBack: () -> Unit, onSaved: () -> Unit, viewModel: RuleEditV
             ) {
                 Text(stringResource(R.string.action_save))
             }
+            OutlinedButton(
+                onClick = { confirmEnd = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 52.dp),
+            ) {
+                Text(stringResource(R.string.rule_end))
+            }
+            Text(stringResource(R.string.rule_end_help), style = MaterialTheme.typography.bodySmall)
         }
+    }
+
+    if (confirmEnd) {
+        AlertDialog(
+            onDismissRequest = { confirmEnd = false },
+            title = { Text(stringResource(R.string.rule_end)) },
+            text = { Text(stringResource(R.string.rule_end_confirm, vm.from)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmEnd = false
+                    vm.endRule(onSaved)
+                }) { Text(stringResource(R.string.rule_end)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmEnd = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 }

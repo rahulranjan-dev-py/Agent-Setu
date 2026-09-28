@@ -34,7 +34,7 @@ object Migrations {
         const val BACKFILL_RECEIPTS =
             "INSERT INTO commission_receipt (id, entryId, amountPaise, date, mode, reference, note, createdAt, updatedAt, deleted) " +
                 "SELECT lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-4' || substr(hex(randomblob(2)), 2) || '-' || " +
-                "substr('89ab', abs(random()) % 4 + 1, 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6))), " +
+                "substr('89ab', (random() & 3) + 1, 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6))), " +
                 "id, receivedPaise, COALESCE(receivedDate, period || '-01'), 'OTHER', '', '', updatedAt, updatedAt, 0 " +
                 "FROM commission_entry WHERE deleted = 0 AND receivedPaise IS NOT NULL AND receivedPaise > 0"
     }

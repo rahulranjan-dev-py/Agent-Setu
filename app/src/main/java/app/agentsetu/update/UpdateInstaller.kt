@@ -38,7 +38,7 @@ sealed interface DownloadState {
     data class Ready(val file: File) : DownloadState
     data class Failed(val reason: Reason) : DownloadState
 
-    enum class Reason { NETWORK, CHECKSUM }
+    enum class Reason { NETWORK, CHECKSUM, NOT_GENUINE }
 }
 
 /**
@@ -61,21 +61,30 @@ class UpdateInstaller @Inject constructor(@ApplicationContext private val contex
      * attempt at the same version is continued, not restarted; the checksum is always computed on
      * the complete file.
      */
+    @Synchronized
     fun start(info: VersionInfo) {
-        if (!UpdateCheck.canInstallInApp(info)) return
+        if (!UpdateCheck.canInstallInApp(info, BuildConfig.APK_URL_PREFIX)) return
         if (_state.value is DownloadState.Downloading || _state.value is DownloadState.Verifying) return
+        // Claimed here, on the caller's thread, so a second tap cannot start a second download.
+        _state.value = DownloadState.Downloading(null)
         job = scope.launch {
-            _state.value = DownloadState.Downloading(null)
             val name = "AgentSetu-v${info.latestVersionName}.apk"
             val file = File(directory(keep = name), name)
             try {
                 downloadWithRetries(info.apkUrl, file)
+                coroutineContext.ensureActive()
                 _state.value = DownloadState.Verifying
                 if (!sha256(file).equals(info.sha256, ignoreCase = true)) {
                     file.delete()
                     _state.value = DownloadState.Failed(DownloadState.Reason.CHECKSUM)
                     return@launch
                 }
+                if (!ApkCheck.isGenuine(context, file, info.latestVersionCode)) {
+                    file.delete()
+                    _state.value = DownloadState.Failed(DownloadState.Reason.NOT_GENUINE)
+                    return@launch
+                }
+                coroutineContext.ensureActive()
                 _state.value = DownloadState.Ready(file)
             } catch (e: kotlinx.coroutines.CancellationException) {
                 // Cancelled by the user: the partial file is kept so a later Download resumes it.
@@ -108,10 +117,9 @@ class UpdateInstaller @Inject constructor(@ApplicationContext private val contex
 
     private fun fractionOf(read: Long, total: Long?): Float? = total?.let { (read.toFloat() / it).coerceIn(0f, 1f) }
 
+    /** The running coroutine sets Idle itself when it notices the cancellation. */
     fun cancel() {
         job?.cancel()
-        job = null
-        _state.value = DownloadState.Idle
     }
 
     fun dismiss() {
@@ -162,7 +170,13 @@ class UpdateInstaller @Inject constructor(@ApplicationContext private val contex
                     resuming = false
                     total = connection.contentLengthLong.takeIf { it > 0 }
                 }
-                416 -> return // Requested range not satisfiable: the file is already complete.
+                416 -> {
+                    // Our partial file is at least as long as the server's: it is stale (a different
+                    // build under the same name) or complete. Start afresh rather than trust it.
+                    if (already == 0L) throw IllegalStateException("HTTP 416 on a fresh download")
+                    target.delete()
+                    return download(url, target)
+                }
                 else -> throw IllegalStateException("HTTP $code")
             }
             if (total != null && total > MAX_BYTES) throw IllegalStateException("File too large")

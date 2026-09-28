@@ -21,7 +21,10 @@ object RuleMatcher {
         if (candidates.isEmpty()) return RuleMatch.NoRule
         val best = candidates.maxOf { specificity(it, query) }
         val top = candidates.filter { specificity(it, query) == best }
-        return if (top.size == 1) RuleMatch.Found(top.single()) else RuleMatch.Ambiguous(top)
+        if (top.size == 1) return RuleMatch.Found(top.single())
+        // The user's own rule overrides a bundled sample of the same shape; two user rules still clash.
+        val own = top.filter { it.userDefined }
+        return if (own.size == 1) RuleMatch.Found(own.single()) else RuleMatch.Ambiguous(top)
     }
 
     fun applies(rule: RuleSpec, query: CommissionQuery): Boolean {
