@@ -6,11 +6,24 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
-## 1.0.3 (versionCode 4) - small fixes, not yet published
+## 1.1.0 (versionCode 4) - received commission, own rules, small fixes; not yet published
 
-- Edit or delete a policy/account; calendar picker on every date field; reminder time setting;
-  appearance setting (same as phone / light / dark); add-customer button on Today; Undo after acting
-  on a reminder; single-line tab labels ("Ledger"); compact search box.
+(1.0.3 was prepared with versionCode 4 but never published; its fixes ship here.)
+
+- Receipts: a ledger entry can hold several receipts (part payments), each with amount, date, mode
+  (cash / POSB account / bank / other), voucher or reference number and a note. The entry's received
+  total and status follow its receipts. Amounts marked received in 1.0.x become one receipt each.
+- Monthly incentive statement: enter the department's statement for a month, see the difference
+  against expected and received, and mark all pending entries of the month received from it.
+- Rates and rules: add your own rule for any product (+ button), and add a custom product (name in
+  both languages, type) with its commission. Custom products appear in Add business.
+- Customer page shows the customer's commission history.
+- Database schema 3 with a hand-written migration checked by a unit test against Room's exported
+  schema; backups from 1.0.x (schema 2) restore and are upgraded.
+- Small fixes from the unpublished 1.0.3: edit or delete a policy/account; calendar picker on every
+  date field; reminder time setting; appearance setting (same as phone / light / dark);
+  add-customer button on Today; Undo after acting on a reminder; single-line tab labels ("Ledger");
+  compact search box.
 
 ## 1.0.2 (versionCode 3) - new colours, published 28-09-2026
 

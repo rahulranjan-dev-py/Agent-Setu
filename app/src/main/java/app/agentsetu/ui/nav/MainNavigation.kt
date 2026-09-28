@@ -41,6 +41,7 @@ import app.agentsetu.ui.customers.CustomersScreen
 import app.agentsetu.ui.home.HomeScreen
 import app.agentsetu.ui.profile.ProfileScreen
 import app.agentsetu.ui.rates.RatesScreen
+import app.agentsetu.ui.rates.RuleAddScreen
 import app.agentsetu.ui.rates.RuleEditScreen
 import app.agentsetu.ui.lock.PinSetupScreen
 import app.agentsetu.ui.settings.ErrorReportScreen
@@ -66,6 +67,7 @@ private object Routes {
     const val PROFILE = "profile"
     const val RATES = "rates"
     const val RULE = "rule/{id}"
+    const val RULE_NEW = "rule-new"
     const val TOOLS = "tools"
     const val CALC = "calc/{kind}"
     const val SCHEMES = "schemes"
@@ -211,7 +213,14 @@ fun MainNavigation() {
                 ProfileScreen(onBack = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
             }
             composable(Routes.RATES) {
-                RatesScreen(onBack = { nav.popBackStack() }, onEdit = { nav.navigate(Routes.rule(it)) })
+                RatesScreen(
+                    onBack = { nav.popBackStack() },
+                    onEdit = { nav.navigate(Routes.rule(it)) },
+                    onAdd = { nav.navigate(Routes.RULE_NEW) },
+                )
+            }
+            composable(Routes.RULE_NEW) {
+                RuleAddScreen(onBack = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
             }
             composable(Routes.APP_LOCK) {
                 val lock = hiltViewModel<AgentSetuRootLock>().appLock

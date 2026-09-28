@@ -109,8 +109,9 @@ The app never hard-codes a rate. On first launch it loads these files into the R
 3. **Mark as verified** after entering the order number. The banner then reads *"Rates last updated
    on [date] from order [number]"*. Unverified sample rules show *"Sample rate - verify before
    relying on it"*.
-4. **Add** a rule for any product, including custom products (v1.5), and **delete** (soft delete)
-   rules that do not apply to the user.
+4. **Add** a rule for any product (1.1.0: the + button on *Rates & rules*), including a custom
+   product the user creates there (name in both languages and a type; code `CUSTOM_…`). Deleting
+   rules that do not apply is still to come (v1.5).
 5. **Reset to sample** reloads the bundled seed without touching the user's customers or ledger.
 6. **Export / import** rules as a JSON file (same format as the seed), so one person can verify
    rates and share the file with colleagues over WhatsApp. In Mode B the admin publishes it

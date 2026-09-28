@@ -26,7 +26,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 4
-        versionName = "1.0.3"
+        versionName = "1.1.0"
 
         // Only ARM phones: every Android 8+ phone this app targets is ARM. Leaving out the x86
         // copies of the encryption library (for emulators) saves about 10 MB.

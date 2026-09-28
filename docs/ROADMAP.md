@@ -58,7 +58,7 @@ The app never hard-codes a rate. See [COMMISSION_RATES.md](COMMISSION_RATES.md).
 | RPLI | Same lifecycle as PLI | MVP |
 | Small savings | TD, RD, MIS, NSC, KVP, SCSS, PPF, SSA | MVP |
 | IPPB / banking | Account opening, doorstep, DLC, insurance referrals | v1.5 |
-| Other | Aadhaar work, custom products | v1.5 |
+| Other | Custom products (built in 1.1.0); Aadhaar work | v1.5 |
 
 ## 5. Features by release
 
@@ -66,8 +66,8 @@ The app never hard-codes a rate. See [COMMISSION_RATES.md](COMMISSION_RATES.md).
 |---|---|---|---|
 | Onboarding | Staff type, designation, office, division, agent codes, language | Multiple agent codes | Login and sync |
 | Customers & leads | Add customer, lead status, next follow-up, Call/WhatsApp | Contacts import (opt-in), tags, family groups | Referral tracking |
-| Pipeline | PLI/RPLI proposal stages; savings accounts | Custom products and stages | Document checklist |
-| Commission ledger | Editable rule table, expected amount, mark received, month view | Reconciliation report | Year-wise statement |
+| Pipeline | PLI/RPLI proposal stages; savings accounts | Custom products (done in 1.1.0) and stages | Document checklist |
+| Commission ledger | Editable rule table, expected amount, mark received, month view | Receipts with mode and voucher no., incentive-statement matching, own rules (done in 1.1.0); reconciliation report | Year-wise statement |
 | Reminders | Premium, RD instalment, maturity 30/15/7, follow-ups | Daily digest | "Best customers to call today" |
 | Calculators | TD, RD, MIS (editable rates) | NSC, KVP, SCSS, PPF, SSA | Indicative PLI/RPLI premium |
 | Share | Hindi/English scheme cards as image | Card with agent's name and phone | Audio explainers |
@@ -126,6 +126,8 @@ Pages/Releases for update checks.
 | Holding | customerId, productId, refLast4, amount/sumAssured, premium/instalment, frequency, startDate, maturityDate, status |
 | CommissionRule | see [COMMISSION_RATES.md §6](COMMISSION_RATES.md#6-how-rates-stay-editable) |
 | CommissionEntry | holdingId, period, expectedAmount, receivedAmount, receivedDate, status |
+| CommissionReceipt (1.1.0) | entryId, amount, date, mode (cash / POSB / bank / other), reference, note |
+| IncentiveStatement (1.1.0) | month, amount, date, mode, reference, note |
 | Reminder | type, dueDate, holdingId or leadId, done |
 | Target | month, productGroup, targetValue, achievedValue |
 | InterestRate | scheme, rate, compounding, effectiveFrom, source |

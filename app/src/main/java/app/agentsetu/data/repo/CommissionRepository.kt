@@ -6,10 +6,21 @@ import app.agentsetu.core.commission.CommissionQuery
 import app.agentsetu.core.commission.CommissionResult
 import app.agentsetu.core.commission.RuleRevision
 import app.agentsetu.core.commission.RuleSpec
+import app.agentsetu.core.ledger.Ledger
+import app.agentsetu.core.model.CommissionBasis
 import app.agentsetu.core.model.CommissionStatus
+import app.agentsetu.core.model.Confidence
 import app.agentsetu.core.model.Money
+import app.agentsetu.core.model.PolicyCategory
+import app.agentsetu.core.model.ProductGroup
+import app.agentsetu.core.model.ReceiptMode
+import app.agentsetu.core.model.StaffType
 import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.db.CommissionEntryEntity
+import app.agentsetu.data.db.CommissionReceiptEntity
+import app.agentsetu.data.db.CommissionRuleEntity
+import app.agentsetu.data.db.IncentiveStatementEntity
+import app.agentsetu.data.db.ProductEntity
 import app.agentsetu.data.db.toSpec
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -94,5 +105,176 @@ class CommissionRepository @Inject constructor(
             ),
         )
         outcome.new.id
+    }
+
+    /**
+     * A new rule written by the user (for a bundled or custom product). It is their own: not a
+     * sample, verified only if they say so, and it stays until they change or end it.
+     */
+    suspend fun addRule(
+        product: ProductEntity,
+        policyCategory: PolicyCategory,
+        staffTypes: Set<StaffType>,
+        basis: CommissionBasis,
+        rate: BigDecimal,
+        yearOfPolicy: Int?,
+        minTermYears: Int?,
+        maxTermYears: Int?,
+        from: LocalDate,
+        orderRef: String,
+        verified: Boolean,
+        notes: String = "",
+    ): String {
+        require(staffTypes.isNotEmpty()) { "A rule needs at least one staff type" }
+        val now = System.currentTimeMillis()
+        val rule = CommissionRuleEntity(
+            productGroup = product.productGroup,
+            productCode = product.code,
+            policyCategory = if (product.productGroup == ProductGroup.PLI) policyCategory else PolicyCategory.ANY,
+            staffTypes = staffTypes.map { it.name },
+            basis = basis,
+            rate = rate.toPlainString(),
+            yearOfPolicy = yearOfPolicy,
+            minPremiumTermYears = minTermYears,
+            maxPremiumTermYears = maxTermYears,
+            effectiveFrom = from,
+            effectiveTo = null,
+            orderRef = orderRef.trim(),
+            confidence = if (verified) Confidence.HIGH else Confidence.MEDIUM,
+            notes = notes.trim(),
+            isSample = false,
+            verified = verified,
+            createdAt = now,
+            updatedAt = now,
+        )
+        rules.upsert(rule)
+        return rule.id
+    }
+
+    /**
+     * A product the user sells that is not in the bundled catalogue (e.g. a new scheme or a local
+     * incentive). Its code is unique and never collides with catalogue codes or their families.
+     */
+    suspend fun addCustomProduct(nameEn: String, nameHi: String, group: ProductGroup): ProductEntity {
+        require(nameEn.isNotBlank()) { "A product needs a name" }
+        val now = System.currentTimeMillis()
+        val product = ProductEntity(
+            code = CUSTOM_CODE_PREFIX + UUID.randomUUID().toString().substring(0, 8).uppercase(),
+            productGroup = group,
+            nameEn = nameEn.trim(),
+            nameHi = nameHi.trim().ifBlank { nameEn.trim() },
+            isCustom = true,
+            createdAt = now,
+            updatedAt = now,
+        )
+        db.productDao().upsert(product)
+        return product
+    }
+
+    /** Records one payment against an entry and refreshes the entry's received total and status. */
+    suspend fun addReceipt(
+        entryId: String,
+        amount: BigDecimal,
+        date: LocalDate,
+        mode: ReceiptMode,
+        reference: String,
+        note: String,
+    ): String = db.withTransaction {
+        val now = System.currentTimeMillis()
+        val receipt = CommissionReceiptEntity(
+            entryId = entryId,
+            amountPaise = Money.toPaise(amount),
+            date = date,
+            mode = mode,
+            reference = reference.trim(),
+            note = note.trim(),
+            createdAt = now,
+            updatedAt = now,
+        )
+        db.commissionReceiptDao().upsert(receipt)
+        refreshEntry(entryId, now)
+        receipt.id
+    }
+
+    suspend fun deleteReceipt(receiptId: String) = db.withTransaction {
+        val now = System.currentTimeMillis()
+        val receipt = db.commissionReceiptDao().get(receiptId) ?: return@withTransaction
+        db.commissionReceiptDao().upsert(receipt.copy(deleted = true, updatedAt = now))
+        refreshEntry(receipt.entryId, now)
+    }
+
+    /** receivedPaise / receivedDate / status are derived from the entry's live receipts. */
+    private suspend fun refreshEntry(entryId: String, now: Long) {
+        val entry = db.commissionEntryDao().get(entryId) ?: return
+        val receipts = db.commissionReceiptDao().forEntry(entryId)
+        val received = Ledger.receivedTotal(receipts.map { it.amountPaise })
+        db.commissionEntryDao().upsert(
+            entry.copy(
+                receivedPaise = received,
+                receivedDate = receipts.maxOfOrNull { it.date },
+                status = Ledger.statusAfterReceipt(entry.expectedPaise, received ?: 0),
+                updatedAt = now,
+            ),
+        )
+    }
+
+    suspend fun saveStatement(
+        id: String?,
+        month: YearMonth,
+        amount: BigDecimal,
+        date: LocalDate,
+        mode: ReceiptMode,
+        reference: String,
+        note: String,
+    ): String {
+        val now = System.currentTimeMillis()
+        val existing = id?.let { db.incentiveStatementDao().get(it) }
+        val statement = (existing ?: IncentiveStatementEntity(
+            month = month.toString(), amountPaise = 0, date = date, mode = mode, createdAt = now, updatedAt = now,
+        )).copy(
+            amountPaise = Money.toPaise(amount),
+            date = date,
+            mode = mode,
+            reference = reference.trim(),
+            note = note.trim(),
+            updatedAt = now,
+            deleted = false,
+        )
+        db.incentiveStatementDao().upsert(statement)
+        return statement.id
+    }
+
+    suspend fun deleteStatement(statementId: String) {
+        val s = db.incentiveStatementDao().get(statementId) ?: return
+        db.incentiveStatementDao().upsert(s.copy(deleted = true, updatedAt = System.currentTimeMillis()))
+    }
+
+    /**
+     * "Received as per this statement": every entry of the month still expecting money gets a
+     * receipt for the outstanding amount, dated and referenced like the statement.
+     * Returns how many entries were settled.
+     */
+    suspend fun settleMonthFromStatement(statementId: String): Int = db.withTransaction {
+        val statement = db.incentiveStatementDao().get(statementId) ?: return@withTransaction 0
+        val pending = db.commissionEntryDao().pendingForPeriod(statement.month)
+        var settled = 0
+        for (entry in pending) {
+            val outstanding = Ledger.outstanding(entry.expectedPaise, entry.receivedPaise)
+            if (outstanding <= 0) continue
+            addReceipt(
+                entryId = entry.id,
+                amount = Money.fromPaise(outstanding),
+                date = statement.date,
+                mode = statement.mode,
+                reference = statement.reference,
+                note = "",
+            )
+            settled++
+        }
+        settled
+    }
+
+    companion object {
+        const val CUSTOM_CODE_PREFIX = "CUSTOM_"
     }
 }

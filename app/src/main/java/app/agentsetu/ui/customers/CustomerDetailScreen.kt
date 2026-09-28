@@ -41,6 +41,12 @@ import androidx.lifecycle.viewModelScope
 import app.agentsetu.R
 import app.agentsetu.core.format.IndianFormat
 import app.agentsetu.core.input.MobileNumber
+import app.agentsetu.core.ledger.Ledger
+import app.agentsetu.core.model.CommissionStatus
+import app.agentsetu.data.db.LedgerRow
+import app.agentsetu.ui.common.currentLocale
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import app.agentsetu.data.db.AgentSetuDatabase
 import app.agentsetu.data.db.HoldingEntity
 import app.agentsetu.data.db.ProductEntity
@@ -78,6 +84,10 @@ class CustomerDetailViewModel @Inject constructor(
         holdings.map { HoldingView(it, byId[it.productId]) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Every commission entry recorded for this customer, newest month first. */
+    val ledger = db.commissionEntryDao().observeLedgerForCustomer(customerId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     /** Returns false for an unreadable date. */
     fun addFollowUp(dateText: String, note: String): Boolean {
         val date = IndianFormat.parseDate(dateText) ?: return false
@@ -96,6 +106,7 @@ fun CustomerDetailScreen(
 ) {
     val customer by viewModel.customer.collectAsStateWithLifecycle()
     val holdings by viewModel.holdings.collectAsStateWithLifecycle()
+    val ledger by viewModel.ledger.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var addingFollowUp by remember { mutableStateOf(false) }
     val c = customer ?: return
@@ -168,6 +179,19 @@ fun CustomerDetailScreen(
                 item { Text(stringResource(R.string.customer_no_holdings), style = MaterialTheme.typography.bodyLarge) }
             }
             items(holdings, key = { it.holding.id }) { view -> HoldingCard(view, onClick = { onOpenHolding(view.holding.id) }) }
+            item { Text(stringResource(R.string.customer_ledger), style = MaterialTheme.typography.titleMedium) }
+            if (ledger.isEmpty()) {
+                item { Text(stringResource(R.string.customer_ledger_empty), style = MaterialTheme.typography.bodyLarge) }
+            } else {
+                val totals = Ledger.totals(ledger.map { Ledger.Line(it.expectedPaise, it.receivedPaise, it.status) })
+                item {
+                    Text(
+                        stringResource(R.string.customer_ledger_totals, rupees(totals.expectedPaise), rupees(totals.receivedPaise)),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+            items(ledger, key = { "ledger-" + it.id }) { row -> LedgerLine(row) }
         }
     }
 
@@ -225,3 +249,29 @@ private fun HoldingCard(view: HoldingView, onClick: () -> Unit) {
     }
 }
 
+@Composable
+private fun LedgerLine(row: LedgerRow) {
+    val month = YearMonth.parse(row.period).format(DateTimeFormatter.ofPattern("MMM yyyy", currentLocale()))
+    val product = localized(row.productNameEn, row.productNameHi)
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Column(Modifier.weight(1f)) {
+            Text(month, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                row.policyYear?.let { stringResource(R.string.commission_line_detail, product, it) } ?: product,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+            Text(row.expectedPaise?.let(::rupees) ?: "-", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                stringResource(row.status.labelRes()),
+                style = MaterialTheme.typography.bodySmall,
+                color = when (row.status) {
+                    CommissionStatus.RECEIVED -> MaterialTheme.colorScheme.primary
+                    CommissionStatus.NO_RULE -> MaterialTheme.colorScheme.error
+                    else -> MaterialTheme.colorScheme.secondary
+                },
+            )
+        }
+    }
+}

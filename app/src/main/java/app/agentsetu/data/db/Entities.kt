@@ -14,6 +14,7 @@ import app.agentsetu.core.model.LeadStage
 import app.agentsetu.core.model.PaymentFrequency
 import app.agentsetu.core.model.PolicyCategory
 import app.agentsetu.core.model.ProductGroup
+import app.agentsetu.core.model.ReceiptMode
 import app.agentsetu.core.model.ReminderType
 import app.agentsetu.core.model.RefLast4
 import java.time.LocalDate
@@ -160,6 +161,47 @@ data class CommissionEntryEntity(
     val receivedPaise: Long? = null,
     val receivedDate: LocalDate? = null,
     val status: CommissionStatus,
+    override val createdAt: Long,
+    override val updatedAt: Long,
+    override val deleted: Boolean = false,
+) : SyncEntity
+
+/**
+ * One payment received against a commission entry (an entry can be paid in parts). The entry's
+ * receivedPaise / receivedDate are kept equal to the sum and latest date of its live receipts.
+ * Schema version 3.
+ */
+@Serializable
+@Entity(tableName = "commission_receipt", indices = [Index("entryId")])
+data class CommissionReceiptEntity(
+    @PrimaryKey override val id: String = newId(),
+    val entryId: String,
+    val amountPaise: Long,
+    val date: LocalDate,
+    val mode: ReceiptMode,
+    /** Voucher, statement or transaction number as written by the user. */
+    val reference: String = "",
+    val note: String = "",
+    override val createdAt: Long,
+    override val updatedAt: Long,
+    override val deleted: Boolean = false,
+) : SyncEntity
+
+/**
+ * A monthly incentive statement (the amount the department says it paid for a month), typed in by
+ * the user and compared with the ledger's expected and received totals. Schema version 3.
+ */
+@Serializable
+@Entity(tableName = "incentive_statement", indices = [Index("month")])
+data class IncentiveStatementEntity(
+    @PrimaryKey override val id: String = newId(),
+    /** yyyy-MM the statement is for. */
+    val month: String,
+    val amountPaise: Long,
+    val date: LocalDate,
+    val mode: ReceiptMode,
+    val reference: String = "",
+    val note: String = "",
     override val createdAt: Long,
     override val updatedAt: Long,
     override val deleted: Boolean = false,

@@ -13,7 +13,8 @@ developer. It is not an India Post / Department of Posts / IPPB product.
 **2. What the app stores.** Only what you type in: your profile (staff type, designation, office,
 division, agent codes), your customers (name, mobile, village, optional date of birth, notes), the
 policies and accounts you track (product, amounts, dates and at most the **last 4 digits** of a
-policy or account number), your commission records, targets and reminders. The app does **not**
+policy or account number), your commission records (including the receipts and incentive statements
+you enter), targets and reminders. The app does **not**
 ask for Aadhaar, PAN, full bank or policy numbers, or any departmental login.
 
 **3. Where it is stored.** Only on your phone, in an encrypted database. The developer never

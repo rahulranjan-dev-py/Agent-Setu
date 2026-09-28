@@ -13,6 +13,8 @@ import androidx.room.TypeConverters
         HoldingEntity::class,
         CommissionRuleEntity::class,
         CommissionEntryEntity::class,
+        CommissionReceiptEntity::class,
+        IncentiveStatementEntity::class,
         ReminderEntity::class,
         TargetEntity::class,
         InterestRateEntity::class,
@@ -29,6 +31,8 @@ abstract class AgentSetuDatabase : RoomDatabase() {
     abstract fun holdingDao(): HoldingDao
     abstract fun commissionRuleDao(): CommissionRuleDao
     abstract fun commissionEntryDao(): CommissionEntryDao
+    abstract fun commissionReceiptDao(): CommissionReceiptDao
+    abstract fun incentiveStatementDao(): IncentiveStatementDao
     abstract fun reminderDao(): ReminderDao
     abstract fun targetDao(): TargetDao
     abstract fun interestRateDao(): InterestRateDao
@@ -36,6 +40,10 @@ abstract class AgentSetuDatabase : RoomDatabase() {
 
     companion object {
         const val FILE_NAME = "agentsetu.db"
-        const val VERSION = 2
+        /** Bump together with a Migration in Migrations.kt; users' data must survive every update. */
+        const val VERSION = 3
+
+        /** Oldest schema a backup file may have and still be restored (restore upgrades it). */
+        const val OLDEST_RESTORABLE_VERSION = 2
     }
 }
