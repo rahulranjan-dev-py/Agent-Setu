@@ -50,4 +50,13 @@ class UpdateCheckTest {
         assertFalse(UpdateCheck.canInstallInApp(ok.copy(sha256 = "")))
         assertFalse(UpdateCheck.canInstallInApp(ok.copy(sha256 = "xyz")))
     }
+
+    @Test
+    fun downloadPolicy() {
+        assertEquals(2_000L, DownloadPolicy.retryDelayMs(1))
+        assertEquals(6_000L, DownloadPolicy.retryDelayMs(3))
+        assertEquals(6_000L, DownloadPolicy.retryDelayMs(9))
+        assertEquals("bytes=1024-", DownloadPolicy.rangeHeader(1024))
+        assertEquals(null, DownloadPolicy.rangeHeader(0))
+    }
 }

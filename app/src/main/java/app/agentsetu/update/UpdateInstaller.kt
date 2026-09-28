@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
 import app.agentsetu.BuildConfig
+import app.agentsetu.core.update.DownloadPolicy
 import app.agentsetu.core.update.UpdateCheck
 import app.agentsetu.core.update.VersionInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,8 +29,11 @@ import kotlin.coroutines.coroutineContext
 sealed interface DownloadState {
     data object Idle : DownloadState
 
-    /** [fraction] is null until the server says how big the file is. */
-    data class Downloading(val fraction: Float?) : DownloadState
+    /**
+     * [fraction] is null until the server says how big the file is; [retry] > 0 while reconnecting
+     * automatically after a dropped connection (attempt number, up to DownloadPolicy.MAX_RETRIES).
+     */
+    data class Downloading(val fraction: Float?, val retry: Int = 0) : DownloadState
     data object Verifying : DownloadState
     data class Ready(val file: File) : DownloadState
     data class Failed(val reason: Reason) : DownloadState
@@ -51,14 +56,20 @@ class UpdateInstaller @Inject constructor(@ApplicationContext private val contex
     private val _state = MutableStateFlow<DownloadState>(DownloadState.Idle)
     val state: StateFlow<DownloadState> = _state.asStateFlow()
 
+    /**
+     * Starts, or after a failure resumes, the download of [info]. A partial file from an earlier
+     * attempt at the same version is continued, not restarted; the checksum is always computed on
+     * the complete file.
+     */
     fun start(info: VersionInfo) {
         if (!UpdateCheck.canInstallInApp(info)) return
         if (_state.value is DownloadState.Downloading || _state.value is DownloadState.Verifying) return
         job = scope.launch {
             _state.value = DownloadState.Downloading(null)
-            val file = File(directory(), "AgentSetu-v${info.latestVersionName}.apk")
+            val name = "AgentSetu-v${info.latestVersionName}.apk"
+            val file = File(directory(keep = name), name)
             try {
-                download(info.apkUrl, file)
+                downloadWithRetries(info.apkUrl, file)
                 _state.value = DownloadState.Verifying
                 if (!sha256(file).equals(info.sha256, ignoreCase = true)) {
                     file.delete()
@@ -66,12 +77,36 @@ class UpdateInstaller @Inject constructor(@ApplicationContext private val contex
                     return@launch
                 }
                 _state.value = DownloadState.Ready(file)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // Cancelled by the user: the partial file is kept so a later Download resumes it.
+                _state.value = DownloadState.Idle
             } catch (e: Exception) {
-                file.delete()
-                _state.value = if (e is kotlinx.coroutines.CancellationException) DownloadState.Idle else DownloadState.Failed(DownloadState.Reason.NETWORK)
+                _state.value = DownloadState.Failed(DownloadState.Reason.NETWORK)
             }
         }
     }
+
+    private suspend fun downloadWithRetries(url: String, target: File) {
+        var retry = 0
+        while (true) {
+            try {
+                download(url, target)
+                return
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (retry >= DownloadPolicy.MAX_RETRIES) throw e
+                retry++
+                _state.value = DownloadState.Downloading(fractionOf(target.length(), lastTotal), retry)
+                delay(DownloadPolicy.retryDelayMs(retry))
+            }
+        }
+    }
+
+    /** Size of the whole file once any response told us; survives retries for the progress bar. */
+    @Volatile private var lastTotal: Long? = null
+
+    private fun fractionOf(read: Long, total: Long?): Float? = total?.let { (read.toFloat() / it).coerceIn(0f, 1f) }
 
     fun cancel() {
         job?.cancel()
@@ -96,26 +131,45 @@ class UpdateInstaller @Inject constructor(@ApplicationContext private val contex
         }
     }
 
-    private fun directory(): File = File(context.cacheDir, "updates").apply {
+    /** The cache folder, keeping only the partial or finished file for the version being fetched. */
+    private fun directory(keep: String): File = File(context.cacheDir, "updates").apply {
         mkdirs()
-        // Only one update file is kept at a time.
-        listFiles()?.forEach { it.delete() }
+        listFiles()?.filter { it.name != keep }?.forEach { it.delete() }
     }
 
+    /** One attempt: resumes [target] if it already has bytes and the server honours ranges. */
     private suspend fun download(url: String, target: File) {
+        val already = target.length()
         val connection = (URL(url).openConnection() as HttpURLConnection).apply {
-            connectTimeout = TIMEOUT_MS
-            readTimeout = TIMEOUT_MS
+            connectTimeout = DownloadPolicy.STALL_TIMEOUT_MS
+            readTimeout = DownloadPolicy.STALL_TIMEOUT_MS
             instanceFollowRedirects = true
             setRequestProperty("User-Agent", "AgentSetu")
+            DownloadPolicy.rangeHeader(already)?.let { setRequestProperty("Range", it) }
         }
         try {
-            if (connection.responseCode != HttpURLConnection.HTTP_OK) throw IllegalStateException("HTTP ${connection.responseCode}")
-            val total = connection.contentLengthLong.takeIf { it > 0 }
+            val code = connection.responseCode
+            val resuming: Boolean
+            val total: Long?
+            when (code) {
+                HttpURLConnection.HTTP_PARTIAL -> {
+                    resuming = true
+                    // "bytes 1000-6893661/6893662"
+                    total = connection.getHeaderField("Content-Range")?.substringAfter('/')?.trim()?.toLongOrNull()
+                        ?: connection.contentLengthLong.takeIf { it > 0 }?.plus(already)
+                }
+                HttpURLConnection.HTTP_OK -> {
+                    resuming = false
+                    total = connection.contentLengthLong.takeIf { it > 0 }
+                }
+                416 -> return // Requested range not satisfiable: the file is already complete.
+                else -> throw IllegalStateException("HTTP $code")
+            }
             if (total != null && total > MAX_BYTES) throw IllegalStateException("File too large")
-            var read = 0L
+            lastTotal = total
+            var read = if (resuming) already else 0L
             connection.inputStream.use { input ->
-                target.outputStream().use { output ->
+                java.io.FileOutputStream(target, resuming).use { output ->
                     val buffer = ByteArray(64 * 1024)
                     while (true) {
                         coroutineContext.ensureActive()
@@ -124,10 +178,11 @@ class UpdateInstaller @Inject constructor(@ApplicationContext private val contex
                         output.write(buffer, 0, n)
                         read += n
                         if (read > MAX_BYTES) throw IllegalStateException("File too large")
-                        _state.value = DownloadState.Downloading(total?.let { read.toFloat() / it })
+                        _state.value = DownloadState.Downloading(fractionOf(read, total))
                     }
                 }
             }
+            if (total != null && read < total) throw IllegalStateException("Connection closed early")
         } finally {
             connection.disconnect()
         }
@@ -147,7 +202,6 @@ class UpdateInstaller @Inject constructor(@ApplicationContext private val contex
     }
 
     private companion object {
-        const val TIMEOUT_MS = 20_000
         const val MAX_BYTES = 60L * 1024 * 1024
     }
 }
