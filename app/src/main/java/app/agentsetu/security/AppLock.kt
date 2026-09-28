@@ -123,7 +123,8 @@ class AppLock @Inject constructor(@ApplicationContext context: Context) {
 
     /**
      * Sets (or changes) the PIN and returns a fresh recovery code, formatted for writing down.
-     * The code is shown once and never stored, only its hash.
+     * The code is shown once and never stored, only its hash. During onboarding the "PIN chosen"
+     * state is set only by [recoveryNoted], so the setup screen stays until the code was seen.
      */
     suspend fun setPin(pin: String): String {
         val code = RecoveryCode.generate()
@@ -131,11 +132,15 @@ class AppLock @Inject constructor(@ApplicationContext context: Context) {
         prefs.edit()
             .putString(KEY_HASH, hash)
             .putString(KEY_RECOVERY_HASH, codeHash)
-            .putBoolean(KEY_CHOICE_MADE, true)
             .putInt(KEY_FAILURES, 0)
             .apply()
-        _choiceMade.value = true
         return RecoveryCode.format(code)
+    }
+
+    /** The user confirmed they wrote the recovery code down. */
+    fun recoveryNoted() {
+        prefs.edit().putBoolean(KEY_CHOICE_MADE, true).apply()
+        _choiceMade.value = true
     }
 
     fun removePin() {

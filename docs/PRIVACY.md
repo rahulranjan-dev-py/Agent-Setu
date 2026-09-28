@@ -43,8 +43,11 @@ the PIN and of its recovery code are kept.
 
 **7. Permissions.** Notifications (for reminders) is the only one you are asked for. The app also
 has fingerprint / face access (only if you turn on that unlock) and background-scheduling
-permissions for daily reminders; none of these reads your personal data. No SMS, call-log, contacts
-(unless you choose to import in a later version), location or storage permissions.
+permissions for daily reminders; none of these reads your personal data. When you tap **Download** on
+an update, the app fetches the new APK from the official release page, checks it against the
+published checksum and asks Android to install it; Android asks you once to allow installs from Agent
+Setu. Nothing is sent. No SMS, call-log, contacts (unless you choose to import in a later version),
+location or storage permissions.
 
 **8. Changes.** Changes to this notice will be announced in the release notes and in the app.
 

@@ -8,11 +8,16 @@
         (wake lock, boot completed, network state) so daily reminders survive restarts, and
         androidx.biometric (use biometric / fingerprint) for the optional fingerprint / face / phone-lock unlock.
         None of them gives access to personal data.
-        INTERNET (install-time, no prompt) is used for one thing only: reading the public
-        release/version.json for the update check. No user data is ever sent.
+        INTERNET (install-time, no prompt) is used for two things only: reading the public
+        release/version.json for the update check, and downloading the release APK the user asked
+        for. No user data is ever sent.
+        REQUEST_INSTALL_PACKAGES lets the app hand a downloaded, checksum-verified APK to Android's
+        installer; Android asks the user to allow "install unknown apps" for Agent Setu the first
+        time, and only an APK signed with the same release key can update the app.
     -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:name=".AgentSetuApplication"
@@ -37,7 +42,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Lets the share sheet read the backup file the user chose to share; nothing else is exposed. -->
+        <!-- Lets the share sheet read a backup or card the user chose to share, and the installer read a downloaded update. -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

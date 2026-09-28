@@ -6,5 +6,6 @@
   "minSupportedVersionCode": 0,
   "releasedOn": "28-09-2026",
   "changelogEn": "Optional full policy/account number (masked outside its own screen), Forgot PIN via recovery code or phone lock, face unlock, update pop-up. Install over 1.1.0; your data stays.",
-  "changelogHi": "पूरा पॉलिसी/खाता नंबर (वैकल्पिक, अपनी स्क्रीन के बाहर छिपा), रिकवरी कोड या फ़ोन लॉक से PIN रीसेट, चेहरे से अनलॉक, अपडेट पॉप-अप। 1.1.0 के ऊपर इंस्टॉल करें; आपका डेटा बना रहेगा।"
+  "changelogHi": "पूरा पॉलिसी/खाता नंबर (वैकल्पिक, अपनी स्क्रीन के बाहर छिपा), रिकवरी कोड या फ़ोन लॉक से PIN रीसेट, चेहरे से अनलॉक, अपडेट पॉप-अप। 1.1.0 के ऊपर इंस्टॉल करें; आपका डेटा बना रहेगा।",
+  "apkUrl": "https://github.com/rahulranjan-dev-py/Agent-Setu/releases/download/v1.1.1/AgentSetu-v1.1.1.apk"
 }

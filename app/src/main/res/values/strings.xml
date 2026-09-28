@@ -387,4 +387,14 @@
     <string name="business_ref_number">Policy / account number (optional)</string>
     <string name="business_ref_help">Shown in full only on this screen; elsewhere only the last 4 digits. Not for Aadhaar, PAN or bank account numbers.</string>
     <string name="update_later">Later</string>
+    <string name="update_download_title">Update to %1$s</string>
+    <string name="update_downloading">Downloading…</string>
+    <string name="update_downloading_percent">Downloading… %1$d percent</string>
+    <string name="update_verifying">Checking the file…</string>
+    <string name="update_ready">Downloaded and checked against the published checksum. Tap Install. The first time, Android asks you to allow installing from Agent Setu; your data stays.</string>
+    <string name="update_install">Install</string>
+    <string name="update_failed_download">Download failed. Check the internet and try again, or open the download page.</string>
+    <string name="update_failed_checksum">The downloaded file does not match the published checksum, so it was deleted. Open the download page instead.</string>
+    <string name="update_open_page">Open download page</string>
+    <string name="action_close">Close</string>
 </resources>

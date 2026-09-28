@@ -64,6 +64,8 @@ import app.agentsetu.data.settings.AppSettings
 import app.agentsetu.update.UpdateChecker
 import app.agentsetu.ui.common.UpdateBanner
 import app.agentsetu.ui.common.UpdateDialog
+import app.agentsetu.ui.common.UpdateDownloadDialog
+import app.agentsetu.ui.common.newVersion
 import app.agentsetu.core.update.UpdateStatus
 import app.agentsetu.reminders.ReminderNotifier
 import app.agentsetu.ui.common.AppScaffold
@@ -193,6 +195,8 @@ fun HomeScreen(
     val today = viewModel.today
 
     updatePopup?.let { UpdateDialog(it, onDismiss = { updatePopup = null }) }
+    // Lives at screen level so the progress dialog stays while the list scrolls.
+    update.newVersion()?.let { UpdateDownloadDialog(it) }
 
     AppScaffold(
         title = stringResource(R.string.home_title),

@@ -47,6 +47,8 @@ import app.agentsetu.data.settings.ThemeMode
 import app.agentsetu.reminders.ReminderWorker
 import app.agentsetu.update.UpdateChecker
 import app.agentsetu.ui.common.UpdateBanner
+import app.agentsetu.ui.common.UpdateDownloadDialog
+import app.agentsetu.ui.common.newVersion
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -133,6 +135,7 @@ fun SettingsScreen(
                 },
             )
             if (checkMessage == null) Column(Modifier.padding(horizontal = 16.dp)) { UpdateBanner(update) }
+            update.newVersion()?.let { UpdateDownloadDialog(it) }
             HorizontalDivider()
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_delete_all), color = MaterialTheme.colorScheme.error) },

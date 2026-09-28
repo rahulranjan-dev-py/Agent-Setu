@@ -25,8 +25,8 @@ android {
         applicationId = "in.agentsetu.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.1.1"
+        versionCode = 6
+        versionName = "1.1.2"
 
         // Only ARM phones: every Android 8+ phone this app targets is ARM. Leaving out the x86
         // copies of the encryption library (for emulators) saves about 10 MB.

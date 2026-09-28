@@ -384,4 +384,14 @@
     <string name="business_ref_number">पॉलिसी / खाता नंबर (वैकल्पिक)</string>
     <string name="business_ref_help">पूरा नंबर केवल इसी स्क्रीन पर दिखता है; बाकी जगह सिर्फ़ अंतिम 4 अंक। आधार, PAN या बैंक खाता नंबर के लिए नहीं।</string>
     <string name="update_later">बाद में</string>
+    <string name="update_download_title">%1$s पर अपडेट</string>
+    <string name="update_downloading">डाउनलोड हो रहा है…</string>
+    <string name="update_downloading_percent">डाउनलोड हो रहा है… %1$d प्रतिशत</string>
+    <string name="update_verifying">फ़ाइल जाँची जा रही है…</string>
+    <string name="update_ready">डाउनलोड पूरा और प्रकाशित चेकसम से जाँचा गया। इंस्टॉल दबाएँ। पहली बार Android एजेंट सेतु से इंस्टॉल की अनुमति माँगेगा; आपका डेटा बना रहेगा।</string>
+    <string name="update_install">इंस्टॉल</string>
+    <string name="update_failed_download">डाउनलोड नहीं हुआ। इंटरनेट जाँचकर फिर कोशिश करें, या डाउनलोड पेज खोलें।</string>
+    <string name="update_failed_checksum">डाउनलोड की गई फ़ाइल प्रकाशित चेकसम से नहीं मिली, इसलिए हटा दी गई। इसके बजाय डाउनलोड पेज खोलें।</string>
+    <string name="update_open_page">डाउनलोड पेज खोलें</string>
+    <string name="action_close">बंद करें</string>
 </resources>

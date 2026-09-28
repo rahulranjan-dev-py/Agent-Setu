@@ -35,10 +35,12 @@ customers, renewals, maturities and commission. Hindi + English. Product plan: `
   (see `docs/DECISIONS.md`).
 - No India Post / DoP / IPPB logos, emblems, red-and-yellow colours, or words like "official" or
   "authorised". The disclaimer in `docs/DISCLAIMER.md` must appear in the app.
-- Permissions: the only one users are asked for is notifications (plus "install unknown apps" only
-  if in-app APK download is built). Install-time permissions from libraries are accepted
+- Permissions: the only one users are asked for is notifications, plus "install unknown apps",
+  which Android itself asks for the first time the in-app updater (`UpdateInstaller`, since 1.1.2)
+  hands a downloaded APK to the installer. Install-time permissions from libraries are accepted
   (WorkManager: wake lock, boot completed, network state; androidx.biometric: use biometric /
-  fingerprint). INTERNET is used only by `UpdateChecker` to read the public `release/version.json`;
+  fingerprint). INTERNET is used only by `UpdateChecker` (read the public `release/version.json`)
+  and `UpdateInstaller` (download the APK named there, verified against its published SHA-256);
   no other network call may be added, and no user data may ever be sent. Never add SMS, call log,
   contacts, location or storage. Files go through the
   system file picker or share sheet, never storage permissions.
