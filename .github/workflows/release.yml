@@ -5,11 +5,18 @@ name: Release
 # (docs/RELEASE.md section 7.3):
 #  - Actions -> Release -> Run workflow on main: the tag v<versionName> is created for you;
 #  - pushing a tag like v1.0.0 that points at a commit of main.
+# The release-key secrets live in the "release" environment, which needs the owner's approval
+# (Actions -> the run -> Review deployments) before this job can start.
 on:
   push:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run: build and sign, show the fingerprint, publish nothing"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -23,12 +30,16 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment: release
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Check the tag, version and notes
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           VERSION=$(grep -m1 'versionName = ' app/build.gradle.kts | sed -E 's/.*"(.*)".*/\1/')
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
@@ -36,6 +47,7 @@ jobs:
               echo "::error::Run the Release workflow on main"; exit 1
             fi
             TAG="v$VERSION"
+            if [ "$DRY_RUN" = "true" ]; then echo "DRY_RUN=true" >> "$GITHUB_ENV"; fi
             echo "TAG_OPTION=--target $GITHUB_SHA" >> "$GITHUB_ENV"
           else
             TAG="$GITHUB_REF_NAME"
@@ -50,6 +62,9 @@ jobs:
           fi
           if [ ! -f "release/notes/$TAG.md" ]; then
             echo "::error::Missing release/notes/$TAG.md"; exit 1
+          fi
+          if [ "$DRY_RUN" != "true" ] && gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Release $TAG already exists; delete it and its tag first, or use a dry run"; exit 1
           fi
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
@@ -113,9 +128,11 @@ jobs:
             echo "SHA-256 of the file: $SHA"
             echo "Signing certificate: $CERT"
             echo '```'
+            if [ "$DRY_RUN" = "true" ]; then echo "Dry run: nothing was published."; fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish the GitHub Release
+        if: env.DRY_RUN != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
