@@ -1,11 +1,11 @@
 {
-  "latestVersionCode": 10,
-  "latestVersionName": "1.1.6",
+  "latestVersionCode": 11,
+  "latestVersionName": "1.1.7",
   "downloadUrl": "https://github.com/rahulranjan-dev-py/Agent-Setu/releases",
-  "sha256": "67427a217e913e30dfbb577019f6d67f29f5c0e6f9226c22a22a0f8dfea89472",
+  "sha256": "a0d77b515d8793ecc8182706234be14852e2b025c2a35c7b908214f621455125",
   "minSupportedVersionCode": 0,
-  "releasedOn": "28-09-2026",
-  "changelogEn": "Updated libraries. Nothing changes in use. Install over 1.1.5; your data stays.",
-  "changelogHi": "नई लाइब्रेरियाँ। इस्तेमाल में कोई बदलाव नहीं। 1.1.5 के ऊपर इंस्टॉल करें; आपका डेटा बना रहेगा।",
-  "apkUrl": "https://github.com/rahulranjan-dev-py/Agent-Setu/releases/download/v1.1.6/AgentSetu-v1.1.6.apk"
+  "releasedOn": "30-09-2026",
+  "changelogEn": "Fields no longer hide behind the keyboard; skip or delete a ledger entry that is not yours. Install over 1.1.6; your data stays.",
+  "changelogHi": "फ़ील्ड अब कीबोर्ड के पीछे नहीं छिपते; जो कमीशन आपका नहीं है उसे लेजर में छोड़ें या हटाएँ। 1.1.6 के ऊपर इंस्टॉल करें; आपका डेटा बना रहेगा।",
+  "apkUrl": "https://github.com/rahulranjan-dev-py/Agent-Setu/releases/download/v1.1.7/AgentSetu-v1.1.7.apk"
 }

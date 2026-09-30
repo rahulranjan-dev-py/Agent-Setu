@@ -6,7 +6,7 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
-## 1.1.7 (versionCode 11) - keyboard no longer hides fields; skip or delete a ledger entry; not yet published
+## 1.1.7 (versionCode 11) - keyboard no longer hides fields; skip or delete a ledger entry; published 30-09-2026
 
 - Every screen now moves up above the keyboard, so the field being typed in stays visible
   (profile setup, add business, add rule, search, PIN screens, dialogs).
