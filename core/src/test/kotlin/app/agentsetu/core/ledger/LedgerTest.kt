@@ -44,6 +44,7 @@ class LedgerTest {
                 Ledger.Line(60000, 20000, CommissionStatus.PARTLY_RECEIVED),
                 Ledger.Line(5000, null, CommissionStatus.EXPECTED),
                 Ledger.Line(null, null, CommissionStatus.NO_RULE),
+                Ledger.Line(99900, 500, CommissionStatus.SKIPPED),
             ),
         )
         assertEquals(185000, t.expectedPaise)

@@ -56,6 +56,9 @@ enum class CommissionStatus {
 
     /** No rule matched when the entry was created; the user must add or fix a rule. */
     NO_RULE,
+
+    /** The user is not eligible for this one (or it is not theirs): kept for the record, not counted. */
+    SKIPPED,
 }
 
 /** How a commission payment reached the user. */

@@ -269,6 +269,7 @@ private fun LedgerLine(row: LedgerRow) {
                 color = when (row.status) {
                     CommissionStatus.RECEIVED -> MaterialTheme.colorScheme.primary
                     CommissionStatus.NO_RULE -> MaterialTheme.colorScheme.error
+                    CommissionStatus.SKIPPED -> MaterialTheme.colorScheme.outline
                     else -> MaterialTheme.colorScheme.secondary
                 },
             )

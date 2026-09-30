@@ -6,6 +6,13 @@ Every published version of Agent Setu, newest first. The Hindi release notes for
 Version numbers: `versionName` (shown to users) follows 1.0.0 → 1.0.1 (fixes) → 1.1.0 (new
 features); `versionCode` goes up by exactly 1 with every published APK.
 
+## 1.1.7 (versionCode 11) - keyboard no longer hides fields; skip or delete a ledger entry; not yet published
+
+- Every screen now moves up above the keyboard, so the field being typed in stays visible
+  (profile setup, add business, add rule, search, PIN screens, dialogs).
+- Ledger: an entry can be marked "Skip: not eligible" (kept for the record, not counted, reversible)
+  or deleted with its receipts; a deleted entry does not come back when the premium is collected again.
+
 ## 1.1.6 (versionCode 10) - updated libraries; published 28-09-2026
 
 - Kotlin 2.4.20, Android Gradle Plugin 9.4.1, core-ktx 1.19.1, navigation-compose 2.10.2,

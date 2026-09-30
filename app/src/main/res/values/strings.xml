@@ -408,4 +408,11 @@
     <string name="rule_end_confirm">Stop applying this rule from %1$s? Add a new rule if a different rate applies from then.</string>
     <string name="about_privacy">Privacy notice</string>
     <string name="update_failed_not_genuine">The downloaded file is not a genuine Agent Setu release for this app (different package or signing key), so it was deleted. Install only from the Agent Setu users group or its GitHub page.</string>
+    <string name="status_SKIPPED">Not eligible</string>
+    <string name="entry_not_mine_help">If this commission is not yours or you are not eligible for it:</string>
+    <string name="entry_skip">Skip: not eligible</string>
+    <string name="entry_unskip">Count it again</string>
+    <string name="entry_skipped_note">Skipped: not counted in the month\'s totals.</string>
+    <string name="entry_delete">Delete this entry</string>
+    <string name="entry_delete_confirm">Remove this entry and its receipts from the ledger? Collecting the same premium again will not bring it back.</string>
 </resources>

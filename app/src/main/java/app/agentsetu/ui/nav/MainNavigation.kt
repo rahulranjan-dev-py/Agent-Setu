@@ -2,6 +2,7 @@ package app.agentsetu.ui.nav
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
@@ -107,6 +108,8 @@ fun MainNavigation() {
 
     // Screens draw their own top bars and insets; this Scaffold only adds the bottom tabs.
     Scaffold(
+        // The whole app (tabs included) moves up above the keyboard; inner screens see no IME inset.
+        modifier = Modifier.imePadding(),
         contentWindowInsets = WindowInsets(0),
         bottomBar = {
             if (showTabs) {

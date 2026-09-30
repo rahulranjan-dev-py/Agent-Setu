@@ -28,6 +28,7 @@ fun CommissionStatus.labelRes(): Int = when (this) {
     CommissionStatus.PARTLY_RECEIVED -> R.string.status_PARTLY_RECEIVED
     CommissionStatus.RECEIVED -> R.string.status_RECEIVED
     CommissionStatus.NO_RULE -> R.string.status_NO_RULE
+    CommissionStatus.SKIPPED -> R.string.status_SKIPPED
 }
 
 @StringRes
