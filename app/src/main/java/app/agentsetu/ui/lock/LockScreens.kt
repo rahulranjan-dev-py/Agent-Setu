@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -80,7 +81,7 @@ fun LockScreen(appLock: AppLock) {
     SecureWindow()
     LaunchedEffect(Unit) { if (canUseBiometric) useBiometric() }
 
-    Scaffold { padding ->
+    Scaffold(modifier = Modifier.imePadding()) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

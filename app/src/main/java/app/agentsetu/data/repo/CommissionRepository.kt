@@ -58,6 +58,8 @@ class CommissionRepository @Inject constructor(
         // (holdingId, period) would refuse a second row anyway.
         val existing = db.commissionEntryDao().find(holdingId, period.toString())
         if (existing != null && !existing.deleted) return existing
+        // Removed by the user as "not mine": stays removed even if the premium is collected again.
+        if (existing != null && existing.status == CommissionStatus.SKIPPED) return existing
         val now = System.currentTimeMillis()
         val result = preview(query, baseAmount)
         val found = result as? CommissionResult.Expected
@@ -230,6 +232,29 @@ class CommissionRepository @Inject constructor(
         )
         db.productDao().upsert(product)
         return product
+    }
+
+    /**
+     * "Not eligible / not mine": the entry stays in the ledger for the record but counts for nothing.
+     * [skipped] = false brings it back with the status its receipts imply.
+     */
+    suspend fun setSkipped(entryId: String, skipped: Boolean) {
+        val entry = db.commissionEntryDao().get(entryId) ?: return
+        val status = if (skipped) CommissionStatus.SKIPPED else Ledger.statusAfterReceipt(entry.expectedPaise, entry.receivedPaise ?: 0)
+        db.commissionEntryDao().upsert(entry.copy(status = status, updatedAt = System.currentTimeMillis()))
+    }
+
+    /**
+     * Removes an entry and its receipts from the ledger. Marked SKIPPED as well, so collecting the
+     * same premium again does not revive it (a plain Undo-delete would).
+     */
+    suspend fun deleteEntry(entryId: String) = db.withTransaction {
+        val now = System.currentTimeMillis()
+        val entry = db.commissionEntryDao().get(entryId) ?: return@withTransaction
+        db.commissionReceiptDao().forEntry(entryId).forEach {
+            db.commissionReceiptDao().upsert(it.copy(deleted = true, reference = "", note = "", updatedAt = now))
+        }
+        db.commissionEntryDao().upsert(entry.copy(status = CommissionStatus.SKIPPED, deleted = true, updatedAt = now))
     }
 
     /** Records one payment against an entry and refreshes the entry's received total and status. */

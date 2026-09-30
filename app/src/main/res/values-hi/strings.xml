@@ -405,4 +405,11 @@
     <string name="rule_end_confirm">%1$s से यह नियम लागू होना बंद करें? तब से अलग दर हो तो नया नियम जोड़ें।</string>
     <string name="about_privacy">गोपनीयता सूचना</string>
     <string name="update_failed_not_genuine">डाउनलोड की गई फ़ाइल इस ऐप की असली एजेंट सेतु रिलीज़ नहीं है (अलग पैकेज या साइनिंग कुंजी), इसलिए हटा दी गई। केवल एजेंट सेतु उपयोगकर्ता ग्रुप या उसके GitHub पेज से ही इंस्टॉल करें।</string>
+    <string name="status_SKIPPED">पात्र नहीं</string>
+    <string name="entry_not_mine_help">अगर यह कमीशन आपका नहीं है या आप इसके पात्र नहीं हैं:</string>
+    <string name="entry_skip">छोड़ें: पात्र नहीं</string>
+    <string name="entry_unskip">फिर से गिनें</string>
+    <string name="entry_skipped_note">छोड़ा गया: महीने के कुल में नहीं गिना जाता।</string>
+    <string name="entry_delete">यह प्रविष्टि हटाएँ</string>
+    <string name="entry_delete_confirm">यह प्रविष्टि और इसकी प्राप्तियाँ लेजर से हटाएँ? वही प्रीमियम फिर वसूल करने पर यह वापस नहीं आएगी।</string>
 </resources>

@@ -25,9 +25,10 @@ object Ledger {
         val shortfallPaise: Long get() = (expectedPaise - receivedPaise).coerceAtLeast(0)
     }
 
+    /** Skipped entries are shown but count for nothing. */
     fun totals(lines: List<Line>): Totals = Totals(
-        expectedPaise = lines.sumOf { it.expectedPaise ?: 0 },
-        receivedPaise = lines.sumOf { it.receivedPaise ?: 0 },
+        expectedPaise = lines.filter { it.status != CommissionStatus.SKIPPED }.sumOf { it.expectedPaise ?: 0 },
+        receivedPaise = lines.filter { it.status != CommissionStatus.SKIPPED }.sumOf { it.receivedPaise ?: 0 },
         pendingCount = lines.count { it.status == CommissionStatus.EXPECTED || it.status == CommissionStatus.PARTLY_RECEIVED },
         noRuleCount = lines.count { it.status == CommissionStatus.NO_RULE },
     )

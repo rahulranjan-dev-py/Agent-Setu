@@ -132,6 +132,15 @@ class CommissionViewModel @Inject constructor(
         viewModelScope.launch { commission.deleteReceipt(receiptId) }
     }
 
+    fun setSkipped(entryId: String, skipped: Boolean) {
+        viewModelScope.launch { commission.setSkipped(entryId, skipped) }
+    }
+
+    fun deleteEntry(entryId: String) {
+        selectedEntryId.value = null
+        viewModelScope.launch { commission.deleteEntry(entryId) }
+    }
+
     fun saveStatement(id: String?, input: PaymentInput): Boolean {
         val amount = AmountInput.parse(input.amount)?.takeIf { it.signum() > 0 } ?: return false
         val date = IndianFormat.parseDate(input.date) ?: return false
@@ -244,6 +253,8 @@ fun CommissionScreen(viewModel: CommissionViewModel = hiltViewModel()) {
             onDismiss = { viewModel.selectedEntryId.value = null },
             onAdd = { viewModel.addReceipt(selectedRow.id, it) },
             onDelete = viewModel::deleteReceipt,
+            onSkip = { viewModel.setSkipped(selectedRow.id, it) },
+            onDeleteEntry = { viewModel.deleteEntry(selectedRow.id) },
         )
     }
 
@@ -366,6 +377,7 @@ private fun LedgerItem(row: LedgerRow, onClick: () -> Unit) {
                     color = when (row.status) {
                         CommissionStatus.RECEIVED -> MaterialTheme.colorScheme.primary
                         CommissionStatus.NO_RULE -> MaterialTheme.colorScheme.error
+                        CommissionStatus.SKIPPED -> MaterialTheme.colorScheme.outline
                         else -> MaterialTheme.colorScheme.secondary
                     },
                 )
@@ -400,8 +412,12 @@ private fun ReceiptsDialog(
     onDismiss: () -> Unit,
     onAdd: (PaymentInput) -> Boolean,
     onDelete: (String) -> Unit,
+    onSkip: (Boolean) -> Unit,
+    onDeleteEntry: () -> Unit,
 ) {
     val outstanding = Ledger.outstanding(row.expectedPaise, row.receivedPaise)
+    val skipped = row.status == CommissionStatus.SKIPPED
+    var confirmDelete by remember(row.id) { mutableStateOf(false) }
     // Nothing received yet: open straight on the form. Otherwise show the receipts first.
     var adding by remember(row.id) { mutableStateOf(row.receivedPaise == null) }
     var input by remember(row.id) {
@@ -451,7 +467,11 @@ private fun ReceiptsDialog(
                         }
                     }
                 }
-                if (adding) {
+                if (skipped) {
+                    HorizontalDivider()
+                    Text(stringResource(R.string.entry_skipped_note), style = MaterialTheme.typography.bodyMedium)
+                    TextButton(onClick = { onSkip(false) }) { Text(stringResource(R.string.entry_unskip)) }
+                } else if (adding) {
                     HorizontalDivider()
                     Text(stringResource(R.string.receipt_add), style = MaterialTheme.typography.titleSmall)
                     PaymentFields(input, { input = it }, tried, stringResource(R.string.commission_received_amount))
@@ -462,11 +482,17 @@ private fun ReceiptsDialog(
                             .fillMaxWidth()
                             .heightIn(min = 48.dp),
                     ) { Text(stringResource(R.string.receipt_add)) }
+                    HorizontalDivider()
+                    Text(stringResource(R.string.entry_not_mine_help), style = MaterialTheme.typography.bodySmall)
+                    TextButton(onClick = { onSkip(true) }) { Text(stringResource(R.string.entry_skip)) }
+                    TextButton(onClick = { confirmDelete = true }) {
+                        Text(stringResource(R.string.entry_delete), color = MaterialTheme.colorScheme.error)
+                    }
                 }
             }
         },
         confirmButton = {
-            if (adding) {
+            if (adding && !skipped) {
                 TextButton(onClick = {
                     tried = true
                     if (onAdd(input)) {
@@ -480,9 +506,24 @@ private fun ReceiptsDialog(
             }
         },
         dismissButton = {
-            if (adding) TextButton(onClick = { adding = false }) { Text(stringResource(R.string.action_cancel)) }
+            if (adding && !skipped) TextButton(onClick = { adding = false }) { Text(stringResource(R.string.action_cancel)) }
         },
     )
+
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text(stringResource(R.string.entry_delete)) },
+            text = { Text(stringResource(R.string.entry_delete_confirm)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDelete = false
+                    onDeleteEntry()
+                }) { Text(stringResource(R.string.entry_delete), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
 }
 
 @Composable
