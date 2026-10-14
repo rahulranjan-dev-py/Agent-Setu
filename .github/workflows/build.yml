@@ -36,14 +36,14 @@ jobs:
         run: ./gradlew --no-daemon :app:assembleRelease
 
       # Test build for testers (installable).
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: AgentSetu-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
 
       # Unsigned: cannot be installed until signed (Release workflow, or Termux per docs/RELEASE.md).
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: AgentSetu-release-unsigned
           path: app/build/outputs/apk/release/app-release-unsigned.apk
